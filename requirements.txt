@@ -1,2 +1,6 @@
-tensorflow
-pytouch
+torch~=1.8.1
+torchvision~=0.10.0
+torchaudio
+tensorboard
+numpy~=1.19.5
+matplotlib~=3.4.2
