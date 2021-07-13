@@ -1,40 +1,44 @@
 import math
 
+import torch
 import torchvision.datasets
 from torch import optim
 
 from dataloaders.load_mnist import load_dataset
 from dataloaders.loss_functions import nll_loss_fn
-from models.a_single_linear_layer_model import SingleLinearLayerModel
+from models.b_reduce_precision_layer_model import ReducePrecisionLayerModel
 from nn.summary import summary
 from utils.data_dirs import data_dirs
 from utils.is_using_cuda import is_using_cuda
 from utils.path_functions import get_relative_path, path_join
 
-DATA_FOLDER = get_relative_path(__file__, "D:/_data")
-VERBOSE_LOG_FILE = True
 
+def main():
+    data_folder = get_relative_path(__file__, "D:/_data")
+    verbose_log_file = True
+    save_all_model = False
 
-def main(
-        epochs=10,
-        dry_run=False,
-        kwargs=None,
-):
-    if kwargs is None:
-        kwargs = {}
+    # model_class = SingleLinearLayerModel
+    model_class = ReducePrecisionLayerModel
+    dataset = torchvision.datasets.MNIST
+    epochs = 10
 
-    name, models_path, tensorboard_path = data_dirs(DATA_FOLDER, name="SingleLinearLayerModel")
+    name = model_class.__name__
+    dry_run = False
+    kwargs = {}
+
+    name_with_timestamp, models_path, tensorboard_path, dataset_path = data_dirs(data_folder, name=name)
     device, is_cuda = is_using_cuda()
-    log_file = path_join(DATA_FOLDER, f"{name}_logs.txt")
+    log_file = path_join(data_folder, f"{name_with_timestamp}_logs.txt")
 
     train_loader, test_loader, input_shape, classes = load_dataset(
-        dataset=torchvision.datasets.MNIST,
-        path=path_join(DATA_FOLDER, "datasets"),
-        batch_size=100,
+        dataset=dataset,
+        path=dataset_path,
+        batch_size=1000,
         is_cuda=is_cuda
     )
 
-    model = SingleLinearLayerModel(
+    model = model_class(
         in_features=input_shape,
         out_features=len(classes),
         device=device,
@@ -45,9 +49,10 @@ def main(
         loss_fn=nll_loss_fn
     )
 
-    if VERBOSE_LOG_FILE:
+    if verbose_log_file:
         with open(log_file, "a+") as file:
             kwargs["optimizer"] = model.optimizer
+            kwargs["loss_fn"] = model.loss_fn
             file.write(str(kwargs) + "\n\n")
             file.write(str(model) + "\n\n")
             file.write(summary(model) + "\n\n")
@@ -63,9 +68,13 @@ def main(
                     f' Testing Accuracy: {100. * test_accuracy:.0f}%\n'
 
         print(print_str)
-        if VERBOSE_LOG_FILE:
+        if verbose_log_file:
             with open(log_file, "a+") as file:
                 file.write(print_str)
+
+        if save_all_model:
+            torch.save(model.state_dict(),
+                       path_join(models_path, f"{name_with_timestamp}_{str_epoch}_{dataset.__name__}.pt"))
 
         if dry_run:
             break
@@ -74,4 +83,4 @@ def main(
 
 
 if __name__ == '__main__':
-    main(dry_run=True)
+    main()

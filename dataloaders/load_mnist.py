@@ -7,7 +7,7 @@ from torchvision.transforms import transforms
 
 def load_dataset(dataset: Type[VisionDataset], path, batch_size, is_cuda=False) -> (DataLoader, DataLoader, tuple):
     transform = transforms.Compose([
-        transforms.Grayscale(),
+        # transforms.Grayscale(),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.5], std=[0.5])
     ])
@@ -32,4 +32,4 @@ def load_dataset(dataset: Type[VisionDataset], path, batch_size, is_cuda=False) 
 
     input_shape = tuple([batch_size] + list(train_set.data.shape)[1:])
 
-    return train_loader, test_loader, input_shape, tuple(dataset.classes)
+    return train_loader, test_loader, input_shape, tuple(train_set.classes)

@@ -19,7 +19,7 @@ def arg_optimizer(optimizer: Callable, *args, **kwargs):
     return optimizer_fn
 
 
-class ModuleBase(nn.Module):
+class ModelBase(nn.Module):
     def __init__(self, in_features: tuple, log_dir: str, device: torch.device):
         super().__init__()
 

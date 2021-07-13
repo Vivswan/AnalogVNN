@@ -2,10 +2,11 @@ import numpy as np
 import torch
 import torch.nn as nn
 
+from nn.layers.reduce_precision_layer import ReducePrecision
 from nn.model_base import ModelBase
 
 
-class SingleLinearLayerModel(ModelBase):
+class ReducePrecisionLayerModel(ModelBase):
     def __init__(
             self,
             in_features: tuple,
@@ -15,6 +16,7 @@ class SingleLinearLayerModel(ModelBase):
     ):
         super().__init__(in_features, log_dir, device)
         self.flatten = nn.Flatten(start_dim=1)
+        self.reduce_precision = ReducePrecision(precision=4)
         self.fc_nn = nn.Sequential(
             nn.Linear(int(np.prod(in_features[1:])), out_features),
             nn.ReLU(inplace=True),
@@ -23,5 +25,6 @@ class SingleLinearLayerModel(ModelBase):
 
     def forward(self, x):
         x = self.flatten(x)
+        x = self.reduce_precision(x)
         x = self.fc_nn(x)
         return x
