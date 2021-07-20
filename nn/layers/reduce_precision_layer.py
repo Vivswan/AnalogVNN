@@ -4,6 +4,8 @@ from torch import nn, Tensor
 
 class ReducePrecision(nn.Module):
     __constants__ = ['precision', 'divide']
+    precision: int
+    divide: float
 
     def __init__(self, precision: int = 8, divide: float = 0.5):
         super(ReducePrecision, self).__init__()
@@ -20,7 +22,7 @@ class ReducePrecision(nn.Module):
         self.divide = divide
 
     def extra_repr(self) -> str:
-        return f'precision={self.precision}'
+        return f'precision={self.precision}, divide={self.divide}'
 
     def forward(self, input: Tensor) -> Tensor:
         if self.training:
@@ -32,8 +34,8 @@ class ReducePrecision(nn.Module):
 
 
 if __name__ == '__main__':
-    input = torch.rand(2, 2)
-    print(input)
-    print(ReducePrecision(precision=2)(input))
-    print(ReducePrecision(precision=4)(input))
-    print(ReducePrecision(precision=8)(input))
+    input = torch.Tensor([1.9])
+    print(f"input: {input}")
+    print(f"p = 2: {ReducePrecision(precision=2)(input)}")
+    print(f"p = 4: {ReducePrecision(precision=4)(input)}")
+    print(f"p = 8: {ReducePrecision(precision=8)(input)}")

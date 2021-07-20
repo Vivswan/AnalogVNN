@@ -5,20 +5,24 @@ import torch
 import torch.nn as nn
 
 
-def summary(model, batch_size=-1):
+def summary(model: nn.Module, input_size=None):
     result = ""
 
-    input_size = tuple([1] + list(model.in_features[1:]))
+    if input_size is None:
+        input_size = tuple([1] + list(model.in_features[1:]))
+        batch_size = model.in_features[0]
+    else:
+        batch_size = input_size[0]
+        input_size = tuple(input_size[1:])
 
-    device = model.device
+    device = next(model.parameters()).device
 
     def register_hook(module):
 
         def hook(module, input, output):
             class_name = str(module.__class__).split(".")[-1].split("'")[0]
-            module_idx = len(summary)
 
-            m_key = "%s-%i" % (class_name, module_idx + 1)
+            m_key = f"{class_name}-{len(summary) + 1:d}"
             summary[m_key] = OrderedDict()
             summary[m_key]["input_shape"] = list(input[0].size())
             summary[m_key]["input_shape"][0] = batch_size
@@ -66,26 +70,22 @@ def summary(model, batch_size=-1):
     for h in hooks:
         h.remove()
 
-    result += "----------------------------------------------------------------\n"
-    line_new = "{:>20}  {:>25} {:>15}".format("Layer (type)", "Output Shape", "Param #")
-    result += line_new + "\n"
-    result += "================================================================\n"
+    rows = [["Layer (type)", "Output Shape", "Param #"]]
     total_params = 0
     total_output = 0
     trainable_params = 0
     for layer in summary:
-        # input_shape, output_shape, trainable, nb_params
-        line_new = "{:>20}  {:>25} {:>15}".format(
+        rows.append([
             layer,
             str(summary[layer]["output_shape"]),
-            "{0:,}".format(summary[layer]["nb_params"]),
-        )
+            f"{summary[layer]['nb_params']:,}"
+        ])
+
         total_params += summary[layer]["nb_params"]
         total_output += np.prod(summary[layer]["output_shape"])
         if "trainable" in summary[layer]:
             if summary[layer]["trainable"] == True:
                 trainable_params += summary[layer]["nb_params"]
-        result += line_new + "\n"
 
     # assume 4 bytes/number (float on cuda).
     total_input_size = abs(np.prod(input_size) * batch_size * 4. / (1024 ** 2.))
@@ -93,14 +93,28 @@ def summary(model, batch_size=-1):
     total_params_size = abs(total_params.numpy() * 4. / (1024 ** 2.))
     total_size = total_params_size + total_output_size + total_input_size
 
-    result += "================================================================\n"
-    result += "Total params: {0:,}".format(total_params) + "\n"
-    result += "Trainable params: {0:,}".format(trainable_params) + "\n"
-    result += "Non-trainable params: {0:,}".format(total_params - trainable_params) + "\n"
-    result += "----------------------------------------------------------------\n"
-    result += "Input size (MB): %0.2f" % total_input_size + "\n"
-    result += "Forward/backward pass size (MB): %0.2f" % total_output_size + "\n"
-    result += "Params size (MB): %0.2f" % total_params_size + "\n"
-    result += "Estimated Total Size (MB): %0.2f" % total_size + "\n"
-    result += "----------------------------------------------------------------\n"
+    col_size = [0] * len(rows[0])
+    for row in rows:
+        for i, v in enumerate(row):
+            col_size[i] = max(len(v) + 4, col_size[i])
+
+    line_size = np.sum(col_size)
+    result += ("-" * line_size) + "\n"
+    for i, row in enumerate(rows):
+        for j, col in enumerate(row):
+            result += ("{:>" + str(col_size[j]) + "}").format(col)
+        result += "\n"
+        if i == 0:
+            result += ("=" * line_size) + "\n"
+
+    result += ("=" * line_size) + "\n"
+    result += f"Total params: {total_params:,}\n"
+    result += f"Trainable params: {trainable_params:,}\n"
+    result += f"Non-trainable params: {total_params - trainable_params:,}\n"
+    result += ("-" * line_size) + "\n"
+    result += f"Input size (MB): {total_input_size:0.2f}\n"
+    result += f"Forward/backward pass size (MB): {total_output_size:0.2f}\n"
+    result += f"Params size (MB): {total_params_size:0.2f}\n"
+    result += f"Estimated Total Size (MB): {total_size:0.2f}\n"
+    result += ("-" * line_size) + "\n"
     return result

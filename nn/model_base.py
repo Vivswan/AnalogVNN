@@ -20,12 +20,20 @@ def arg_optimizer(optimizer: Callable, *args, **kwargs):
 
 
 class ModelBase(nn.Module):
+    __constants__ = ['in_features', 'out_features', 'log_dir', 'device']
+
+    in_features: tuple
+    out_features: int
+    log_dir: str
+    device: torch.device
+
+    optimizer: Optimizer
+    loss_fn: Callable
+
     def __init__(self, in_features: tuple, log_dir: str, device: torch.device):
         super().__init__()
 
         self.in_features = in_features
-        self.optimizer: Optimizer = None
-        self.loss_fn = None
         self.scheduler = None
         self.tb = SummaryWriter(log_dir=log_dir)
         self.device = device

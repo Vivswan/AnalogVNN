@@ -1,64 +1,148 @@
+import json
 import math
+from typing import Type
 
 import torch
 import torchvision.datasets
 from torch import optim
+from torch.optim.optimizer import Optimizer
+from torchvision.datasets import VisionDataset
 
 from dataloaders.load_mnist import load_dataset
 from dataloaders.loss_functions import nll_loss_fn
+from models.a_single_linear_layer_model import SingleLinearLayerModel
 from models.b_reduce_precision_layer_model import ReducePrecisionLayerModel
+from models.c_gaussian_reduce_precision_layer_model import GaussianNoiseReducePrecisionLayerModel
+from nn.model_base import ModelBase
 from nn.summary import summary
 from utils.data_dirs import data_dirs
 from utils.is_using_cuda import is_using_cuda
 from utils.path_functions import get_relative_path, path_join
 
+torch.manual_seed(0)
 
-def main():
-    data_folder = get_relative_path(__file__, "D:/_data")
-    verbose_log_file = True
-    save_all_model = False
+DEFAULT_PARAMETERS = {
+    "dataset": torchvision.datasets.MNIST,
+    "batch_size": 1000,
+    "epochs": 10,
+    "optimizer": optim.Adam,
+    "loss_fn": nll_loss_fn,
+    "model_kargs": {},
+}
 
-    # model_class = SingleLinearLayerModel
-    model_class = ReducePrecisionLayerModel
-    dataset = torchvision.datasets.MNIST
-    epochs = 10
+TEST_MODELS = {
+    "SingleLinear": {
+        **DEFAULT_PARAMETERS,
+        "model": SingleLinearLayerModel
+    },
+    "ReducePrecision-2": {
+        **DEFAULT_PARAMETERS,
+        "model": ReducePrecisionLayerModel,
+        "model_kargs": dict(precision=2)
+    },
+    "ReducePrecision-4": {
+        **DEFAULT_PARAMETERS,
+        "model": ReducePrecisionLayerModel,
+        "model_kargs": dict(precision=4)
+    },
+    "ReducePrecision-8": {
+        **DEFAULT_PARAMETERS,
+        "model": ReducePrecisionLayerModel,
+        "model_kargs": dict(precision=8)
+    },
+    "ReducePrecision-2_GaussianNoise-0.1": {
+        **DEFAULT_PARAMETERS,
+        "model": GaussianNoiseReducePrecisionLayerModel,
+        "model_kargs": dict(precision=2, std=0.1)
+    },
+    "ReducePrecision-2_GaussianNoise-0.05": {
+        **DEFAULT_PARAMETERS,
+        "model": GaussianNoiseReducePrecisionLayerModel,
+        "model_kargs": dict(precision=2, std=0.05)
+    },
+    "ReducePrecision-4_GaussianNoise-0.1": {
+        **DEFAULT_PARAMETERS,
+        "model": GaussianNoiseReducePrecisionLayerModel,
+        "model_kargs": dict(precision=4, std=0.1)
+    },
+    "ReducePrecision-4_GaussianNoise-0.05": {
+        **DEFAULT_PARAMETERS,
+        "model": GaussianNoiseReducePrecisionLayerModel,
+        "model_kargs": dict(precision=4, std=0.05)
+    },
+    "ReducePrecision-8_GaussianNoise-0.1": {
+        **DEFAULT_PARAMETERS,
+        "model": GaussianNoiseReducePrecisionLayerModel,
+        "model_kargs": dict(precision=8, std=0.1)
+    },
+    "ReducePrecision-8_GaussianNoise-0.05": {
+        **DEFAULT_PARAMETERS,
+        "model": GaussianNoiseReducePrecisionLayerModel,
+        "model_kargs": dict(precision=8, std=0.05)
+    },
+    "ReducePrecision-16_GaussianNoise-0.1": {
+        **DEFAULT_PARAMETERS,
+        "model": GaussianNoiseReducePrecisionLayerModel,
+        "model_kargs": dict(precision=16, std=0.1)
+    },
+    "ReducePrecision-16_GaussianNoise-0.05": {
+        **DEFAULT_PARAMETERS,
+        "model": GaussianNoiseReducePrecisionLayerModel,
+        "model_kargs": dict(precision=16, std=0.05)
+    },
+}
 
-    name = model_class.__name__
-    dry_run = False
+DATA_FOLDER = get_relative_path(__file__, "D:/_data")
+VERBOSE_LOG_FILE = True
+SAVE_ALL_MODEL = False
+DRY_RUN = False
+
+
+def main(
+        name: str,
+        dataset: Type[VisionDataset],
+        batch_size: int,
+        epochs: int,
+        model: Type[ModelBase],
+        optimizer: Type[Optimizer],
+        loss_fn,
+        model_kargs
+):
     kwargs = {}
 
-    name_with_timestamp, models_path, tensorboard_path, dataset_path = data_dirs(data_folder, name=name)
+    name_with_timestamp, models_path, tensorboard_path, dataset_path = data_dirs(DATA_FOLDER, name=name)
     device, is_cuda = is_using_cuda()
-    log_file = path_join(data_folder, f"{name_with_timestamp}_logs.txt")
+    log_file = path_join(DATA_FOLDER, f"{name_with_timestamp}_logs.txt")
 
     train_loader, test_loader, input_shape, classes = load_dataset(
         dataset=dataset,
         path=dataset_path,
-        batch_size=1000,
+        batch_size=batch_size,
         is_cuda=is_cuda
     )
 
-    model = model_class(
+    nn = model(
         in_features=input_shape,
         out_features=len(classes),
         device=device,
         log_dir=tensorboard_path,
+        **model_kargs
     )
-    model.compile(
-        optimizer=optim.Adam,
-        loss_fn=nll_loss_fn
+    nn.compile(
+        optimizer=optimizer,
+        loss_fn=loss_fn
     )
 
-    if verbose_log_file:
+    if VERBOSE_LOG_FILE:
         with open(log_file, "a+") as file:
-            kwargs["optimizer"] = model.optimizer
-            kwargs["loss_fn"] = model.loss_fn
-            file.write(str(kwargs) + "\n\n")
-            file.write(str(model) + "\n\n")
-            file.write(summary(model) + "\n\n")
+            kwargs["optimizer"] = str(nn.optimizer)
+            kwargs["loss_fn"] = str(nn.loss_fn)
+            file.write(json.dumps(kwargs, sort_keys=True, indent=2) + "\n\n")
+            file.write(str(nn) + "\n\n")
+            file.write(summary(nn) + "\n\n")
 
     for epoch in range(epochs):
-        train_loss, train_accuracy, test_loss, test_accuracy = model.fit(train_loader, test_loader, epoch)
+        train_loss, train_accuracy, test_loss, test_accuracy = nn.fit(train_loader, test_loader, epoch)
 
         str_epoch = str(epoch).zfill(math.ceil(math.log10(epochs)))
         print_str = f'({str_epoch})' \
@@ -68,19 +152,25 @@ def main():
                     f' Testing Accuracy: {100. * test_accuracy:.0f}%\n'
 
         print(print_str)
-        if verbose_log_file:
+        if VERBOSE_LOG_FILE:
             with open(log_file, "a+") as file:
                 file.write(print_str)
 
-        if save_all_model:
-            torch.save(model.state_dict(),
+        if SAVE_ALL_MODEL:
+            torch.save(nn.state_dict(),
                        path_join(models_path, f"{name_with_timestamp}_{str_epoch}_{dataset.__name__}.pt"))
 
-        if dry_run:
+        if DRY_RUN:
             break
 
-    model.close()
+    nn.close()
 
 
 if __name__ == '__main__':
-    main()
+    for i in TEST_MODELS:
+        print(i)
+        parameters = {
+            **TEST_MODELS[i],
+            "name": i,
+        }
+        main(**parameters)
