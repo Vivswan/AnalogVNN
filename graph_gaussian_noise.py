@@ -6,13 +6,15 @@ from nn.layers.gaussian_noise_layer import GaussianNoise, TensorFunctions
 from nn.layers.reduce_precision_layer import ReducePrecision
 
 if __name__ == '__main__':
-    precision = 4
-    std = 0.05
+    precision = 8
+    std = 0.1
 
     input = torch.Tensor(np.linspace(-1, 1, 100))
     x = input.tolist()
 
-    reduce_precision = ReducePrecision(precision=precision)(input)
+    rp_layer = ReducePrecision(precision=precision)
+    rp_layer.eval()
+    reduce_precision = rp_layer(input)
     plt.scatter(x, reduce_precision.tolist(), label="reduce_precision", color="#ff0000ff", s=2)
     for i in range(10):
         gaussian_noise = GaussianNoise(std=TensorFunctions.constant(std))(reduce_precision)

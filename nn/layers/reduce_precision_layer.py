@@ -6,8 +6,9 @@ class ReducePrecision(nn.Module):
     __constants__ = ['precision', 'divide']
     precision: int
     divide: float
+    shift: float
 
-    def __init__(self, precision: int = 8, divide: float = 0.5):
+    def __init__(self, precision: int = 8, divide: float = 0.5, shift: float = 0):
         super(ReducePrecision, self).__init__()
         if precision < 1:
             raise ValueError("precision has to be more than 0, but got {}".format(precision))
@@ -18,23 +19,27 @@ class ReducePrecision(nn.Module):
         if not (0 <= divide <= 1):
             raise ValueError("divide must be between 0 and 1, but got {}".format(divide))
 
+        if not (-1 <= shift <= 1):
+            raise ValueError("shift must be between -1 and 1, but got {}".format(shift))
+
         self.precision = precision
         self.divide = divide
+        self.shift = shift
 
     def extra_repr(self) -> str:
         return f'precision={self.precision}, divide={self.divide}'
 
     def forward(self, input: Tensor) -> Tensor:
         if self.training:
-            return torch.sign(input) * torch.max(
-                torch.floor(torch.abs(input) * self.precision),
-                torch.ceil(torch.abs(input) * self.precision - self.divide),
-            ) * 1 / self.precision
+            g = input * self.precision - self.shift * self.divide
+            return torch.sign(g) * \
+                   torch.max(torch.floor(torch.abs(g)), torch.ceil(torch.abs(g) - self.divide)) * \
+                   1 / self.precision
         return input
 
 
 if __name__ == '__main__':
-    input = torch.Tensor([1.9])
+    input = torch.rand((2, 2))
     print(f"input: {input}")
     print(f"p = 2: {ReducePrecision(precision=2)(input)}")
     print(f"p = 4: {ReducePrecision(precision=4)(input)}")

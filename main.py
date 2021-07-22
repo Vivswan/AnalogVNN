@@ -8,7 +8,7 @@ from torch import optim
 from torch.optim.optimizer import Optimizer
 from torchvision.datasets import VisionDataset
 
-from dataloaders.load_mnist import load_dataset
+from dataloaders.load_vision_dataset import load_vision_dataset
 from dataloaders.loss_functions import nll_loss_fn
 from models.a_single_linear_layer_model import SingleLinearLayerModel
 from models.b_reduce_precision_layer_model import ReducePrecisionLayerModel
@@ -23,7 +23,7 @@ torch.manual_seed(0)
 
 DEFAULT_PARAMETERS = {
     "dataset": torchvision.datasets.MNIST,
-    "batch_size": 1000,
+    "batch_size": 10,
     "epochs": 10,
     "optimizer": optim.Adam,
     "loss_fn": nll_loss_fn,
@@ -114,7 +114,7 @@ def main(
     device, is_cuda = is_using_cuda()
     log_file = path_join(DATA_FOLDER, f"{name_with_timestamp}_logs.txt")
 
-    train_loader, test_loader, input_shape, classes = load_dataset(
+    train_loader, test_loader, input_shape, classes = load_vision_dataset(
         dataset=dataset,
         path=dataset_path,
         batch_size=batch_size,
@@ -133,10 +133,12 @@ def main(
         loss_fn=loss_fn
     )
 
+    nn.tb.add_text("dataset", str(dataset))
     if VERBOSE_LOG_FILE:
         with open(log_file, "a+") as file:
             kwargs["optimizer"] = str(nn.optimizer)
             kwargs["loss_fn"] = str(nn.loss_fn)
+            kwargs["dataset"] = str(dataset)
             file.write(json.dumps(kwargs, sort_keys=True, indent=2) + "\n\n")
             file.write(str(nn) + "\n\n")
             file.write(summary(nn) + "\n\n")
