@@ -1,4 +1,5 @@
 import os
+import shutil
 import time
 
 from utils.path_functions import path_join
@@ -24,3 +25,11 @@ def data_dirs(path, name=None):
     os.mkdir(models_path)
     os.mkdir(tensorboard_path)
     return name, models_path, tensorboard_path, dataset_path
+
+
+def erase_data_dirs(path):
+    if os.path.exists(path):
+        if os.path.exists(path_join(path, "models")):
+            shutil.rmtree(path_join(path, "models"))
+        if os.path.exists(path_join(path, "tensorboard")):
+            shutil.rmtree(path_join(path, "tensorboard"))

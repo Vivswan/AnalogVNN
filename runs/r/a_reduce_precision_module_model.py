@@ -2,9 +2,9 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from nn.layers.reduce_precision_module import ReducePrecisionModule
 from nn.model_base import ModelBase
 from nn.summary import summary
+from test import TestLayer
 from utils.is_using_cuda import is_using_cuda
 
 
@@ -19,7 +19,7 @@ class ReducePrecisionModuleModel(ModelBase):
         super().__init__(in_features, log_dir, device)
         self.flatten = nn.Flatten(start_dim=1)
         self.fc_nn = nn.Sequential(
-            ReducePrecisionModule(nn.Linear(int(np.prod(in_features[1:])), out_features)),
+            TestLayer(nn.Linear(int(np.prod(in_features[1:])), out_features)),
             nn.ReLU(),
             nn.LogSoftmax(dim=1)
         )

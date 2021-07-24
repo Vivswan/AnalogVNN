@@ -1,5 +1,19 @@
 import torch
 from torch import nn, Tensor
+from torch.autograd import Function
+
+
+class ReducePrecisionFunction(Function):
+    @staticmethod
+    def forward(ctx, x, precision, divide, shift):
+        g = x * precision - shift * divide
+        return torch.sign(g) * \
+               torch.max(torch.floor(torch.abs(g)), torch.ceil(torch.abs(g) - divide)) * \
+               1 / precision
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        return grad_output, None, None, None
 
 
 class ReducePrecision(nn.Module):
@@ -26,16 +40,18 @@ class ReducePrecision(nn.Module):
         self.divide = divide
         self.shift = shift
 
+    @property
+    def step_size(self) -> float:
+        return 1 / self.precision
+
     def extra_repr(self) -> str:
         return f'precision={self.precision}, divide={self.divide}'
 
-    def forward(self, input: Tensor) -> Tensor:
+    def forward(self, x: Tensor) -> Tensor:
         if self.training:
-            g = input * self.precision - self.shift * self.divide
-            return torch.sign(g) * \
-                   torch.max(torch.floor(torch.abs(g)), torch.ceil(torch.abs(g) - self.divide)) * \
-                   1 / self.precision
-        return input
+            return ReducePrecisionFunction.apply(x, self.precision, self.divide, self.shift)
+        else:
+            return x
 
 
 if __name__ == '__main__':

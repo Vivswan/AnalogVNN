@@ -5,15 +5,15 @@ import torch
 import torch.nn as nn
 
 
-def summary(model: nn.Module, input_size=None):
+def summary(model: nn.Module, input_size=None, include_self=False):
     result = ""
 
-    if input_size is None:
-        input_size = tuple([1] + list(model.in_features[1:]))
-        batch_size = model.in_features[0]
-    else:
+    if input_size is not None:
         batch_size = input_size[0]
         input_size = tuple(input_size[1:])
+    else:
+        input_size = tuple([1] + list(model.in_features[1:]))
+        batch_size = model.in_features[0]
 
     device = next(model.parameters()).device
 
@@ -34,18 +34,18 @@ def summary(model: nn.Module, input_size=None):
                 summary[m_key]["output_shape"] = list(output.size())
                 summary[m_key]["output_shape"][0] = batch_size
 
-            params = 0
-            if hasattr(module, "weight") and hasattr(module.weight, "size"):
-                params += torch.prod(torch.LongTensor(list(module.weight.size())))
-                summary[m_key]["trainable"] = module.weight.requires_grad
-            if hasattr(module, "bias") and hasattr(module.bias, "size"):
-                params += torch.prod(torch.LongTensor(list(module.bias.size())))
-            summary[m_key]["nb_params"] = params
+            summary[m_key]["nb_params"] = 0
+            summary[m_key]["nb_params_trainable"] = 0
+            for parameter in module.parameters():
+                params = torch.prod(torch.LongTensor(list(parameter.size())))
+                summary[m_key]["nb_params"] += params
+                if parameter.requires_grad:
+                    summary[m_key]["nb_params_trainable"] += params
 
         if (
                 not isinstance(module, nn.Sequential)
                 and not isinstance(module, nn.ModuleList)
-                and not (module == model)
+                and (module != model or include_self)
         ):
             hooks.append(module.register_forward_hook(hook))
 
@@ -70,7 +70,7 @@ def summary(model: nn.Module, input_size=None):
     for h in hooks:
         h.remove()
 
-    rows = [["Layer (type)", "Output Shape", "Param #"]]
+    rows = [["Layer (type)", "Output Shape", "Trainable Param #", "Param #"]]
     total_params = 0
     total_output = 0
     trainable_params = 0
@@ -78,19 +78,18 @@ def summary(model: nn.Module, input_size=None):
         rows.append([
             layer,
             str(summary[layer]["output_shape"]),
+            f"{summary[layer]['nb_params_trainable']:,}",
             f"{summary[layer]['nb_params']:,}"
         ])
 
         total_params += summary[layer]["nb_params"]
         total_output += np.prod(summary[layer]["output_shape"])
-        if "trainable" in summary[layer]:
-            if summary[layer]["trainable"] == True:
-                trainable_params += summary[layer]["nb_params"]
+        trainable_params += summary[layer]["nb_params_trainable"]
 
     # assume 4 bytes/number (float on cuda).
     total_input_size = abs(np.prod(input_size) * batch_size * 4. / (1024 ** 2.))
     total_output_size = abs(2. * total_output * 4. / (1024 ** 2.))  # x2 for gradients
-    total_params_size = abs(total_params.numpy() * 4. / (1024 ** 2.))
+    total_params_size = abs(total_params * 4. / (1024 ** 2.))
     total_size = total_params_size + total_output_size + total_input_size
 
     col_size = [0] * len(rows[0])

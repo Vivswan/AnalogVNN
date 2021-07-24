@@ -1,3 +1,4 @@
+import inspect
 from typing import Type
 
 from torch.utils.data import DataLoader
@@ -18,12 +19,15 @@ DataLoader, DataLoader, tuple):
         'shuffle': True
     }
 
-    if not is_cuda:
+    if is_cuda:
         cuda_kwargs = {
             'num_workers': 1,
             'pin_memory': True,
         }
         dataset_kwargs.update(cuda_kwargs)
+
+    if "train" not in inspect.getfullargspec(dataset.__init__).args:
+        raise Exception(f"{dataset} does have a pre split of training data.")
 
     train_set = dataset(root=path, train=True, download=True, transform=transform)
     train_loader = DataLoader(train_set, **dataset_kwargs)

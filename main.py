@@ -3,96 +3,20 @@ import math
 from typing import Type
 
 import torch
-import torchvision.datasets
-from torch import optim
 from torch.optim.optimizer import Optimizer
 from torchvision.datasets import VisionDataset
 
 from dataloaders.load_vision_dataset import load_vision_dataset
-from dataloaders.loss_functions import nll_loss_fn
-from models.a_single_linear_layer_model import SingleLinearLayerModel
-from models.b_reduce_precision_layer_model import ReducePrecisionLayerModel
-from models.c_gaussian_reduce_precision_layer_model import GaussianNoiseReducePrecisionLayerModel
 from nn.model_base import ModelBase
 from nn.summary import summary
-from utils.data_dirs import data_dirs
+from runs.r_2021_07_20.run import RUN_MODELS_20210720
+from utils.data_dirs import data_dirs, erase_data_dirs
 from utils.is_using_cuda import is_using_cuda
 from utils.path_functions import get_relative_path, path_join
 
 torch.manual_seed(0)
 
-DEFAULT_PARAMETERS = {
-    "dataset": torchvision.datasets.MNIST,
-    "batch_size": 10,
-    "epochs": 10,
-    "optimizer": optim.Adam,
-    "loss_fn": nll_loss_fn,
-    "model_kargs": {},
-}
-
-TEST_MODELS = {
-    "SingleLinear": {
-        **DEFAULT_PARAMETERS,
-        "model": SingleLinearLayerModel
-    },
-    "ReducePrecision-2": {
-        **DEFAULT_PARAMETERS,
-        "model": ReducePrecisionLayerModel,
-        "model_kargs": dict(precision=2)
-    },
-    "ReducePrecision-4": {
-        **DEFAULT_PARAMETERS,
-        "model": ReducePrecisionLayerModel,
-        "model_kargs": dict(precision=4)
-    },
-    "ReducePrecision-8": {
-        **DEFAULT_PARAMETERS,
-        "model": ReducePrecisionLayerModel,
-        "model_kargs": dict(precision=8)
-    },
-    "ReducePrecision-2_GaussianNoise-0.1": {
-        **DEFAULT_PARAMETERS,
-        "model": GaussianNoiseReducePrecisionLayerModel,
-        "model_kargs": dict(precision=2, std=0.1)
-    },
-    "ReducePrecision-2_GaussianNoise-0.05": {
-        **DEFAULT_PARAMETERS,
-        "model": GaussianNoiseReducePrecisionLayerModel,
-        "model_kargs": dict(precision=2, std=0.05)
-    },
-    "ReducePrecision-4_GaussianNoise-0.1": {
-        **DEFAULT_PARAMETERS,
-        "model": GaussianNoiseReducePrecisionLayerModel,
-        "model_kargs": dict(precision=4, std=0.1)
-    },
-    "ReducePrecision-4_GaussianNoise-0.05": {
-        **DEFAULT_PARAMETERS,
-        "model": GaussianNoiseReducePrecisionLayerModel,
-        "model_kargs": dict(precision=4, std=0.05)
-    },
-    "ReducePrecision-8_GaussianNoise-0.1": {
-        **DEFAULT_PARAMETERS,
-        "model": GaussianNoiseReducePrecisionLayerModel,
-        "model_kargs": dict(precision=8, std=0.1)
-    },
-    "ReducePrecision-8_GaussianNoise-0.05": {
-        **DEFAULT_PARAMETERS,
-        "model": GaussianNoiseReducePrecisionLayerModel,
-        "model_kargs": dict(precision=8, std=0.05)
-    },
-    "ReducePrecision-16_GaussianNoise-0.1": {
-        **DEFAULT_PARAMETERS,
-        "model": GaussianNoiseReducePrecisionLayerModel,
-        "model_kargs": dict(precision=16, std=0.1)
-    },
-    "ReducePrecision-16_GaussianNoise-0.05": {
-        **DEFAULT_PARAMETERS,
-        "model": GaussianNoiseReducePrecisionLayerModel,
-        "model_kargs": dict(precision=16, std=0.05)
-    },
-}
-
-DATA_FOLDER = get_relative_path(__file__, "D:/_data")
+DATA_FOLDER = get_relative_path(__file__, "data")
 VERBOSE_LOG_FILE = True
 SAVE_ALL_MODEL = False
 DRY_RUN = False
@@ -132,6 +56,7 @@ def main(
         optimizer=optimizer,
         loss_fn=loss_fn
     )
+    print(device)
 
     nn.tb.add_text("dataset", str(dataset))
     if VERBOSE_LOG_FILE:
@@ -169,10 +94,12 @@ def main(
 
 
 if __name__ == '__main__':
-    for i in TEST_MODELS:
+    erase_data_dirs(DATA_FOLDER)
+    for i in RUN_MODELS_20210720:
+        # i = "ReducePrecision-16_GaussianNoise-0.05"
         print(i)
         parameters = {
-            **TEST_MODELS[i],
+            **RUN_MODELS_20210720[i],
             "name": i,
         }
         main(**parameters)
