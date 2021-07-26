@@ -2,18 +2,17 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from nn.model_base import ModelBase
+from nn.model_base import BaseModel
 
 
-class SingleLinearLayerModel(ModelBase):
+class SingleLinearLayerModel(BaseModel):
     def __init__(
             self,
             in_features: tuple,
             out_features: int,
             device: torch.device,
-            log_dir: str,
     ):
-        super().__init__(in_features, log_dir, device)
+        super().__init__(in_features, device)
         self.flatten = nn.Flatten(start_dim=1)
         self.fc_nn = nn.Sequential(
             nn.Linear(int(np.prod(in_features[1:])), out_features),

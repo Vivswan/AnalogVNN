@@ -1,34 +1,35 @@
+from enum import Enum
+
 from torch import nn
-from torch.autograd import Function
 
+class BackwardPass(Enum):
+    BACKPROPAGATION = "backpropagation"
+    BP = "backpropagation"
 
-class BaseFunction(Function):
-    backward_pass = ["backpropagation", "feedback_alignment", "direct_feedback_alignment"]
+    FEEDBACK_ALIGNMENT = "feedback_alignment"
+    FA = "feedback_alignment"
 
-    @staticmethod
-    def forward(ctx, x, weight, bias=None):
-        ctx.save_for_backward(x, weight, bias)
-        y = x @ weight.t()
-        if bias is not None:
-            y += bias
-        return y
-
-    @staticmethod
-    def backward_bp(ctx, grad_output):
-        pass
-
-    @staticmethod
-    def feedback_alignment(ctx, grad_output):
-        pass
-
-    @staticmethod
-    def direct_feedback_alignment(ctx, grad_output):
-        pass
-
-    @staticmethod
-    def backward(ctx, grad_output):
-        pass
-
+    DIRECT_FEEDBACK_ALIGNMENT = "direct_feedback_alignment"
+    DFA = "direct_feedback_alignment"
 
 class BaseLayer(nn.Module):
-    pass
+    def __init__(self):
+        super(BaseLayer, self).__init__()
+
+    def backward_pass_from(self, layer: nn.Module, pass_type: BackwardPass = BackwardPass.BP):
+        pass
+
+    def forward(self, x):
+        pass
+
+    def backward_backpropagation(self, grad_output):
+        pass
+
+    def backward_feedback_alignment(self, grad_output):
+        pass
+
+    def backward_direct_feedback_alignment(self, grad_output):
+        pass
+
+    def backward(self):
+        pass

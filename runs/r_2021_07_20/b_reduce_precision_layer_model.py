@@ -3,19 +3,18 @@ import torch
 import torch.nn as nn
 
 from nn.layers.reduce_precision_layer import ReducePrecision
-from nn.model_base import ModelBase
+from nn.model_base import BaseModel
 
 
-class ReducePrecisionLayerModel(ModelBase):
+class ReducePrecisionLayerModel(BaseModel):
     def __init__(
             self,
             in_features: tuple,
             out_features: int,
             precision: int,
             device: torch.device,
-            log_dir: str,
     ):
-        super().__init__(in_features, log_dir, device)
+        super().__init__(in_features, device)
         self.flatten = nn.Flatten(start_dim=1)
         self.reduce_precision = ReducePrecision(precision=precision)
         self.fc_nn = nn.Sequential(

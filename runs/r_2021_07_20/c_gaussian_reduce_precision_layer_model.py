@@ -4,10 +4,10 @@ import torch.nn as nn
 
 from nn.layers.gaussian_noise_layer import GaussianNoise, TensorFunctions
 from nn.layers.reduce_precision_layer import ReducePrecision
-from nn.model_base import ModelBase
+from nn.model_base import BaseModel
 
 
-class GaussianNoiseReducePrecisionLayerModel(ModelBase):
+class GaussianNoiseReducePrecisionLayerModel(BaseModel):
     def __init__(
             self,
             in_features: tuple,
@@ -15,9 +15,8 @@ class GaussianNoiseReducePrecisionLayerModel(ModelBase):
             precision: int,
             std: int,
             device: torch.device,
-            log_dir: str,
     ):
-        super().__init__(in_features, log_dir, device)
+        super().__init__(in_features, device)
         self.flatten = nn.Flatten(start_dim=1)
         self.reduce_precision = ReducePrecision(precision=precision)
         self.gaussian_noise = GaussianNoise(std=TensorFunctions.constant(std))

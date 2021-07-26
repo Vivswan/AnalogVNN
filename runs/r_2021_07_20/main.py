@@ -3,11 +3,11 @@ import math
 from typing import Type
 
 import torch
-import torchvision
 from torch.optim.optimizer import Optimizer
 from torchvision.datasets import VisionDataset
 
 from dataloaders.load_vision_dataset import load_vision_dataset
+from nn.TensorboardModelLog import TensorboardModelLog
 from nn.model_base import BaseModel
 from nn.utils.summary import summary
 from runs.r_2021_07_20.run import RUN_MODELS_20210720
@@ -16,17 +16,28 @@ from nn.utils.is_using_cuda import is_using_cuda
 from utils.path_functions import get_relative_path, path_join
 
 torch.manual_seed(0)
+
 DATA_FOLDER = get_relative_path(__file__, "D:/_data")
+VERBOSE_LOG_FILE = True
+SAVE_ALL_MODEL = False
+DRY_RUN = False
 
-def main():
-    name = "test"
-    dataset = torchvision.datasets.MNIST,
-    batch_size = 50,
-    epochs = 10,
 
-    name_with_timestamp, models_path, tensorboard_path, dataset_path = data_dirs("D:?data", name=name)
+def main(
+        name: str,
+        dataset: Type[VisionDataset],
+        batch_size: int,
+        epochs: int,
+        model: Type[BaseModel],
+        optimizer: Type[Optimizer],
+        loss_fn,
+        model_kargs
+):
+    kwargs = {}
+
+    name_with_timestamp, models_path, tensorboard_path, dataset_path = data_dirs(DATA_FOLDER, name=name)
     device, is_cuda = is_using_cuda()
-    log_file = path_join("data", f"{name_with_timestamp}_logs.txt")
+    log_file = path_join(DATA_FOLDER, f"{name_with_timestamp}_logs.txt")
 
     train_loader, test_loader, input_shape, classes = load_vision_dataset(
         dataset=dataset,
@@ -36,19 +47,20 @@ def main():
     )
 
     nn = model(
-        in_features=input_shape,
+        in_features=input_shape[1:],
         out_features=len(classes),
         device=device,
-        log_dir=tensorboard_path,
         **model_kargs
     )
+    TensorboardModelLog(nn, log_dir=tensorboard_path)
+
     nn.compile(
         optimizer=optimizer,
         loss_fn=loss_fn
     )
     print(device)
 
-    nn.tensorboard.add_text("dataset", str(dataset))
+    # nn.tb.add_text("dataset", str(dataset))
     if VERBOSE_LOG_FILE:
         with open(log_file, "a+") as file:
             kwargs["optimizer"] = str(nn.optimizer)
@@ -85,11 +97,11 @@ def main():
 
 if __name__ == '__main__':
     erase_data_dirs(DATA_FOLDER)
-    for i in RUN_MODELS_20210720:
-        # i = "ReducePrecision-16_GaussianNoise-0.05"
-        print(i)
-        parameters = {
-            **RUN_MODELS_20210720[i],
-            "name": i,
-        }
-        main(**parameters)
+    # for i in RUN_MODELS_20210720:
+    i = "ReducePrecision-16_GaussianNoise-0.05"
+    print(i)
+    parameters = {
+        **RUN_MODELS_20210720[i],
+        "name": i,
+    }
+    main(**parameters)

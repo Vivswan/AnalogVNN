@@ -7,11 +7,11 @@ from torch.optim.optimizer import Optimizer
 from torchvision.datasets import VisionDataset
 
 from dataloaders.load_vision_dataset import load_vision_dataset
-from nn.model_base import ModelBase
-from nn.summary import summary
+from nn.model_base import BaseModel
+from nn.utils.summary import summary
 from runs.r_2021_07_20.run import RUN_MODELS_20210720
 from utils.data_dirs import data_dirs, erase_data_dirs
-from utils.is_using_cuda import is_using_cuda
+from nn.utils.is_using_cuda import is_using_cuda
 from utils.path_functions import get_relative_path, path_join
 
 torch.manual_seed(0)
@@ -27,7 +27,7 @@ def main(
         dataset: Type[VisionDataset],
         batch_size: int,
         epochs: int,
-        model: Type[ModelBase],
+        model: Type[BaseModel],
         optimizer: Type[Optimizer],
         loss_fn,
         model_kargs
@@ -49,7 +49,6 @@ def main(
         in_features=input_shape,
         out_features=len(classes),
         device=device,
-        log_dir=tensorboard_path,
         **model_kargs
     )
     nn.compile(

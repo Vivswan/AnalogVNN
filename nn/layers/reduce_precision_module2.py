@@ -2,7 +2,7 @@ import torch
 from torch import nn, autograd, Tensor
 
 from nn.layers.reduce_precision_layer import ReducePrecision
-from nn.summary import summary
+from nn.utils.summary import summary
 
 
 class ReducePrecisionModuleFunction(autograd.Function):

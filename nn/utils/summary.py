@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from typing import Type
 
 import numpy as np
 import torch
@@ -8,12 +9,8 @@ import torch.nn as nn
 def summary(model: nn.Module, input_size=None, include_self=False):
     result = ""
 
-    if input_size is not None:
-        batch_size = input_size[0]
-        input_size = tuple(input_size[1:])
-    else:
-        input_size = tuple([1] + list(model.in_features[1:]))
-        batch_size = model.in_features[0]
+    if input_size is None:
+        input_size = tuple(model.in_features)
 
     device = next(model.parameters()).device
 
@@ -25,14 +22,14 @@ def summary(model: nn.Module, input_size=None, include_self=False):
             m_key = f"{class_name}-{len(summary) + 1:d}"
             summary[m_key] = OrderedDict()
             summary[m_key]["input_shape"] = list(input[0].size())
-            summary[m_key]["input_shape"][0] = batch_size
+            summary[m_key]["input_shape"][0] = -1
             if isinstance(output, (list, tuple)):
                 summary[m_key]["output_shape"] = [
                     [-1] + list(o.size())[1:] for o in output
                 ]
             else:
                 summary[m_key]["output_shape"] = list(output.size())
-                summary[m_key]["output_shape"][0] = batch_size
+                summary[m_key]["output_shape"][0] = -1
 
             summary[m_key]["nb_params"] = 0
             summary[m_key]["nb_params_trainable"] = 0
@@ -70,13 +67,14 @@ def summary(model: nn.Module, input_size=None, include_self=False):
     for h in hooks:
         h.remove()
 
-    rows = [["Layer (type)", "Output Shape", "Trainable Param #", "Param #"]]
+    rows = [["Layer (type)", "Input Shape", "Output Shape", "Trainable Param #", "Param #"]]
     total_params = 0
     total_output = 0
     trainable_params = 0
     for layer in summary:
         rows.append([
             layer,
+            str(summary[layer]["input_shape"]),
             str(summary[layer]["output_shape"]),
             f"{summary[layer]['nb_params_trainable']:,}",
             f"{summary[layer]['nb_params']:,}"
@@ -87,9 +85,9 @@ def summary(model: nn.Module, input_size=None, include_self=False):
         trainable_params += summary[layer]["nb_params_trainable"]
 
     # assume 4 bytes/number (float on cuda).
-    total_input_size = abs(np.prod(input_size) * batch_size * 4. / (1024 ** 2.))
-    total_output_size = abs(2. * total_output * 4. / (1024 ** 2.))  # x2 for gradients
-    total_params_size = abs(total_params * 4. / (1024 ** 2.))
+    total_input_size = abs(np.prod(input_size) * 4. / 1024.)
+    total_output_size = abs(2. * total_output * 4. / 1024.)  # x2 for gradients
+    total_params_size = abs(total_params * 4. / 1024.)
     total_size = total_params_size + total_output_size + total_input_size
 
     col_size = [0] * len(rows[0])
@@ -111,9 +109,9 @@ def summary(model: nn.Module, input_size=None, include_self=False):
     result += f"Trainable params: {trainable_params:,}\n"
     result += f"Non-trainable params: {total_params - trainable_params:,}\n"
     result += ("-" * line_size) + "\n"
-    result += f"Input size (MB): {total_input_size:0.2f}\n"
-    result += f"Forward/backward pass size (MB): {total_output_size:0.2f}\n"
-    result += f"Params size (MB): {total_params_size:0.2f}\n"
-    result += f"Estimated Total Size (MB): {total_size:0.2f}\n"
+    result += f"Input size (KB): {total_input_size:0.2f}\n"
+    result += f"Forward/backward pass size (KB): {total_output_size:0.2f}\n"
+    result += f"Params size (KB): {total_params_size:0.2f}\n"
+    result += f"Estimated Total Size (KB): {total_size:0.2f}\n"
     result += ("-" * line_size) + "\n"
     return result
