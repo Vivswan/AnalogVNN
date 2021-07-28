@@ -40,20 +40,6 @@ class TensorboardModelLog:
                 self.tensorboard.add_histogram(f"{idx}-{module}.weight", module.random_weight, epoch)
 
     def on_compile(self):
-        compile_parameters = {
-            "device": str(self.model.device),
-            "optimizer": str(self.model.optimizer),
-            "loss_fn": self.model.loss_fn.__name__,
-            "scheduler": str(self.model.scheduler),
-        }
-
-        if self.model.optimizer is not None:
-            for var_name in self.model.optimizer.state_dict():
-                compile_parameters[f"optimizer_{var_name}"] = self.model.optimizer.state_dict()[var_name]
-
-        self.tensorboard.add_text("compile_parameters",
-                                  re.sub("\n", "\n    ", "    " + json.dumps(compile_parameters, sort_keys=True, indent=2)))
-
         self.tensorboard.add_text("summary", re.sub("\n", "\n    ", "    " + summary(self.model)))
         self.tensorboard.add_text("str", re.sub("\n", "\n    ", "    " + str(self.model)))
         self.tensorboard.add_graph(self.model, torch.zeros(tuple([1] + list(self.model.in_features))).to(self.model.device))

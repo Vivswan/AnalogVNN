@@ -1,6 +1,7 @@
 pytorch
-torchvision
+torchvision~=0.3.0
 torchaudio
 tensorboard
-numpy
-matplotlib
+numpy~=1.19.5
+matplotlib~=3.4.2
+torchviz~=0.0.2
