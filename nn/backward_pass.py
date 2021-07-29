@@ -1,12 +1,37 @@
-from typing import Union, Callable, Set
+from typing import Union, Callable, Dict, Set
 
 import torch
 from torch import Tensor
 
-from nn.layers.base_layer import BaseLayer
+from utils.helper_functions import to_matrix
 
-_backward_fn_type = Union[None, BaseLayer, Callable[[Union[None, Tensor]], Union[None, Tensor]]]
 
+class BackwardFunction:
+    __constants__ = ['main_layer']
+
+    def __init__(self, layer):
+        self.main_layer = layer
+
+    def get_tensor(self, name: str) -> Union[None, Tensor]:
+        if hasattr(self.main_layer, name):
+            tensor = getattr(self.main_layer, name)
+            if tensor is None or isinstance(tensor, Tensor):
+                return tensor
+            else:
+                raise TypeError(f'"{name}" is not a tensor')
+        else:
+            raise Exception(f'"{name}" is not found')
+
+    def get_matrix(self, name: str) -> Union[None, Tensor]:
+        return to_matrix(self.get_tensor(name))
+
+    def set_grad(self, name, grad):
+        self.get_tensor(name).grad = grad
+
+    def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
+        raise NotImplementedError
+
+_backward_fn_type = Union[None, BackwardFunction, Callable[[Union[None, Tensor]], Union[None, Tensor]]]
 
 class BackwardPass:
     OUTPUT = "output"
@@ -16,7 +41,7 @@ class BackwardPass:
         self._loss: Union[None, Tensor] = None
 
         self._output_hook = None
-        self.relation_dict = {}
+        self.relation_dict: Dict[BackwardFunction, Set[BackwardFunction]] = {}
 
     def __call__(self, *args, **kwargs):
         if self._loss is None:
@@ -27,29 +52,23 @@ class BackwardPass:
 
         self._loss.backward()
 
-    def set_output(self, output: Tensor):
+    def set_output(self, output: Tensor, use_default_graph=False):
         if self._output_hook is not None:
             self._output_hook.remove()
 
-        self._output = output.detach_()
-        self._output.requires_grad = True
-        self._output_hook = output.register_hook(self._backward_pass_hook)
+        if use_default_graph:
+            self._output = output
+            self._output_hook = output.register_hook(self._backward_pass_hook)
+        else:
+            self._output = output.detach_()
+            self._output.requires_grad = True
+            self._output_hook = output.register_hook(self._backward_pass_hook)
         return output
 
     def set_loss(self, loss: Tensor):
         self._loss = loss
 
-    def add_relation(self, from_fn: Union[str, _backward_fn_type], to_fn: _backward_fn_type):
-        if isinstance(from_fn, BaseLayer):
-            from_fn = from_fn.get_default_backward()
-            if from_fn is None:
-                raise Exception(f'no default backward function set for "{from_fn}"')
-
-        if isinstance(to_fn, BaseLayer):
-            to_fn = to_fn.get_default_backward()
-            if to_fn is None:
-                raise Exception(f'no default backward function set for "{to_fn}"')
-
+    def add_relation(self, from_fn: Union[str, BackwardFunction], to_fn: BackwardFunction):
         if from_fn not in self.relation_dict:
             self.relation_dict[from_fn] = set()
 
@@ -67,7 +86,7 @@ class BackwardPass:
                     continue
 
                 for func in self.relation_dict[function_id]:
-                    new_pair = (func, func(function_grad_output))
+                    new_pair = (func, func.backward(function_grad_output))
                     to_visit_with.add(new_pair)
 
     def compile(self):

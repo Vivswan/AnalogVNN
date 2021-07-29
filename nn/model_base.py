@@ -35,9 +35,9 @@ class BaseModel(nn.Module):
             self.tensorboard.on_compile()
         return self
 
-    def output(self, x):
+    def output(self, x, use_default_graph=False):
         result = self(x)
-        self.backward.set_output(result)
+        self.backward.set_output(result, use_default_graph=use_default_graph)
         return result
 
     def fit(self, train_loader: DataLoader, test_loader: DataLoader, epoch: int = None):
