@@ -44,11 +44,11 @@ class GaussianNoise(nn.Module):
     def extra_repr(self) -> str:
         return f'mean={self.mean.__name__}, std={self.std.__name__}'
 
-    def forward(self, input: Tensor) -> Tensor:
+    def forward(self, x: Tensor) -> Tensor:
         if self.training:
-            distribution = torch.distributions.normal.Normal(loc=self.mean(input), scale=self.std(input))
+            distribution = torch.distributions.normal.Normal(loc=self.mean(x), scale=self.std(x))
             return distribution.sample()
-        return input
+        return x
 
 
 if __name__ == '__main__':

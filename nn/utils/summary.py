@@ -5,12 +5,8 @@ import torch
 import torch.nn as nn
 
 
-def summary(model: nn.Module, input_size=None, include_self=False):
+def summary(model: nn.Module, input_size, include_self=False):
     result = ""
-
-    if input_size is None:
-        input_size = tuple(model.in_features)
-
     device = next(model.parameters()).device
 
     def register_hook(module):

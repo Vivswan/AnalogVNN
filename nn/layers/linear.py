@@ -3,7 +3,6 @@ from typing import Union
 import torch
 from torch import nn, Tensor
 
-from nn.Sequential import Sequential
 from nn.layers.base_layer import BaseLayer
 from utils.helper_functions import to_matrix
 
@@ -16,7 +15,7 @@ class Linear(BaseLayer):
     _x: Union[None, Tensor]
     weight: nn.Parameter
     bias: Union[None, nn.Parameter]
-    fixed_FA_weight: nn.Parameter
+    _fixed_fa_weight: nn.Parameter
 
     def __init__(self, in_features, out_features, bias=True):
         super(Linear, self).__init__()
@@ -26,7 +25,13 @@ class Linear(BaseLayer):
         self._x: Union[None, Tensor] = None
 
         self.weight = nn.Parameter(torch.Tensor(out_features, in_features))
-        self.fixed_FA_weight = nn.Parameter(torch.FloatTensor(out_features, in_features), requires_grad=False)
+        nn.init.kaiming_normal_(self.weight)
+
+        self._fixed_fa_weight = nn.Parameter(torch.FloatTensor(out_features, in_features), requires_grad=False)
+        self._fa_mean: float = 0
+        self._fa_std: float = 1.
+        self._fa_fixed: bool = True
+        self.set_feedforward_alignment_params(self._fa_mean, self._fa_std, self._fa_fixed)
 
         if bias:
             self.bias = nn.Parameter(torch.Tensor(out_features))
@@ -34,8 +39,7 @@ class Linear(BaseLayer):
         else:
             self.bias = None
 
-        nn.init.kaiming_uniform_(self.weight)
-        nn.init.kaiming_uniform_(self.fixed_FA_weight)
+        self.set_default_backward(self.backpropagation)
 
     def forward(self, x: Tensor):
         self._x = x.clone()
@@ -44,9 +48,21 @@ class Linear(BaseLayer):
             y += self.bias
         return y
 
-    def backpropagation(self, grad_output):
+    def set_feedforward_alignment_params(self, mean: Union[None, float] = None, std: Union[None, float] = None, is_fixed: Union[None, bool] = None):
+        if mean is not None:
+            self._fa_mean = mean
+        if std is not None:
+            self._fa_std = std
+        if is_fixed is not None:
+            self._fa_fixed = is_fixed
+
+        nn.init.normal_(self._fixed_fa_weight, mean=self._fa_mean, std=self._fa_std)
+
+    def backpropagation(self, grad_output, weight=None):
+        if weight is None:
+            weight = self.weight
+        weight = to_matrix(weight)
         grad_output = to_matrix(grad_output)
-        weight = to_matrix(self.weight)
         grad_input = grad_output @ weight
 
         if self.weight.requires_grad:
@@ -56,6 +72,16 @@ class Linear(BaseLayer):
 
         self._x = None
         return grad_input
+
+    def feedforward_alignment(self, grad_output):
+        if self._fa_fixed:
+            weight = self._fixed_fa_weight
+        else:
+            weight = torch.ones_like(self._fixed_fa_weight)
+            weight.normal_(self._fa_mean, self._fa_std)
+
+        return self.backpropagation(grad_output, weight)
+
 
     def extra_repr(self) -> str:
         return f'in_features={self.in_features}, out_features={self.out_features}'

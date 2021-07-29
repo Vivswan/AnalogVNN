@@ -39,9 +39,9 @@ class TensorboardModelLog:
                 self.tensorboard.add_histogram(f"{idx}-{module}.weight", module.random_weight, epoch)
 
     def on_compile(self):
-        self.tensorboard.add_text("summary", re.sub("\n", "\n    ", "    " + summary(self.model)))
+        # self.tensorboard.add_text("summary", re.sub("\n", "\n    ", "    " + summary(self.model, )))
         self.tensorboard.add_text("str", re.sub("\n", "\n    ", "    " + str(self.model)))
-        self.tensorboard.add_graph(self.model, torch.zeros(tuple([1] + list(self.model.in_features))).to(self.model.device))
+        # self.tensorboard.add_graph(self.model, torch.zeros(tuple([1] + list(self.model.in_features))).to(self.model.device))
 
         self._add_layer_data(epoch=-1)
         return self

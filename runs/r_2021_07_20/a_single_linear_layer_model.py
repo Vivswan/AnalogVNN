@@ -12,7 +12,7 @@ class SingleLinearLayerModel(BaseModel):
             out_features: int,
             device: torch.device,
     ):
-        super().__init__(in_features, device)
+        super().__init__(device)
         self.flatten = nn.Flatten(start_dim=1)
         self.fc_nn = nn.Sequential(
             nn.Linear(int(np.prod(in_features[1:])), out_features),

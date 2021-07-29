@@ -3,7 +3,9 @@ from typing import Union, Callable, Set
 import torch
 from torch import Tensor
 
-_backward_fn_type = Union[None, Callable[[Union[None, Tensor]], Union[None, Tensor]]]
+from nn.layers.base_layer import BaseLayer
+
+_backward_fn_type = Union[None, BaseLayer, Callable[[Union[None, Tensor]], Union[None, Tensor]]]
 
 
 class BackwardPass:
@@ -38,6 +40,16 @@ class BackwardPass:
         self._loss = loss
 
     def add_relation(self, from_fn: Union[str, _backward_fn_type], to_fn: _backward_fn_type):
+        if isinstance(from_fn, BaseLayer):
+            from_fn = from_fn.get_default_backward()
+            if from_fn is None:
+                raise Exception(f'no default backward function set for "{from_fn}"')
+
+        if isinstance(to_fn, BaseLayer):
+            to_fn = to_fn.get_default_backward()
+            if to_fn is None:
+                raise Exception(f'no default backward function set for "{to_fn}"')
+
         if from_fn not in self.relation_dict:
             self.relation_dict[from_fn] = set()
 

@@ -16,7 +16,7 @@ class GaussianNoiseReducePrecisionLayerModel(BaseModel):
             std: int,
             device: torch.device,
     ):
-        super().__init__(in_features, device)
+        super().__init__(device)
         self.flatten = nn.Flatten(start_dim=1)
         self.reduce_precision = ReducePrecision(precision=precision)
         self.gaussian_noise = GaussianNoise(std=TensorFunctions.constant(std))

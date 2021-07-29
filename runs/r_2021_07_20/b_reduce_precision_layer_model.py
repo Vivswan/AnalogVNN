@@ -14,7 +14,7 @@ class ReducePrecisionLayerModel(BaseModel):
             precision: int,
             device: torch.device,
     ):
-        super().__init__(in_features, device)
+        super().__init__(device)
         self.flatten = nn.Flatten(start_dim=1)
         self.reduce_precision = ReducePrecision(precision=precision)
         self.fc_nn = nn.Sequential(

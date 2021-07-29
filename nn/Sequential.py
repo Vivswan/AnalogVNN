@@ -11,12 +11,11 @@ T = TypeVar('T', bound=nn.Module)
 
 class Sequential(BaseModel):
     def __init__(self, *args):
+        super(Sequential, self).__init__()
         if len(args) == 1 and isinstance(args[0], OrderedDict):
-            super(Sequential, self).__init__(in_features=args[0][1].in_features)
             for key, module in args[0].items():
                 self.add_module(key, module)
         else:
-            super(Sequential, self).__init__(in_features=args[0].in_features)
             for idx, module in enumerate(args):
                 self.add_module(str(idx), module)
 
