@@ -36,7 +36,6 @@ class Linear(BaseLayer):
 
         nn.init.kaiming_uniform_(self.weight)
         nn.init.kaiming_uniform_(self.fixed_FA_weight)
-        self.backward.set_backward(self.backward_backpropagation)
 
     def forward(self, x: Tensor):
         self._x = x.clone()
@@ -45,8 +44,7 @@ class Linear(BaseLayer):
             y += self.bias
         return y
 
-    def backward_backpropagation(self, grad_output):
-        # print(f"grad_output: {grad_output}")
+    def backpropagation(self, grad_output):
         grad_output = to_matrix(grad_output)
         weight = to_matrix(self.weight)
         grad_input = grad_output @ weight

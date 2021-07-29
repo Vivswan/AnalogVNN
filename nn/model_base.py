@@ -28,9 +28,11 @@ class BaseModel(nn.Module):
         self.device = device
         self.tensorboard = None
         self._output_hook = None
-        self.backward = BackwardPass(self)
+        self.backward = BackwardPass()
 
     def compile(self):
+        self.backward.compile()
+
         self._compiled = True
         if self.tensorboard is not None:
             self.tensorboard.on_compile()

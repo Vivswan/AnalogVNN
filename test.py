@@ -10,7 +10,7 @@ def save_graph(filename, output, named_parameters):
 
 def main1():
     torch.manual_seed(0)
-    layer_1 = Linear(in_features=1, out_features=1)
+    layer_1 = Linear(in_features=2, out_features=1)
     layer_2 = Linear(in_features=1, out_features=1)
 
     model = Sequential(
@@ -18,11 +18,8 @@ def main1():
         layer_2,
     )
 
-
-    data = torch.ones((1,))
+    data = torch.ones((2,))
     target = torch.ones((1,))
-
-
     for i in range(5):
         model.train()
         model.zero_grad()
@@ -46,19 +43,18 @@ def main1():
 
 def main2():
     torch.manual_seed(0)
-    layer_1 = Linear(in_features=1, out_features=1)
+    layer_1 = Linear(in_features=2, out_features=1)
     layer_2 = Linear(in_features=1, out_features=1)
 
     model = Sequential(
         layer_1,
         layer_2,
     )
+    model.backward.add_relation(model.backward.OUTPUT, layer_2.backpropagation)
+    model.backward.add_relation(layer_2.backpropagation, layer_1.backpropagation)
     model.compile()
 
-    model.backward.to(layer_2)
-    layer_2.backward.to(layer_1)
-
-    data = torch.ones((1,))
+    data = torch.ones((2,))
     target = torch.ones((1,))
 
     for i in range(5):
@@ -76,7 +72,7 @@ def main2():
         model.backward()
         with torch.no_grad():
             for p in model.parameters():
-                if p.requires_grad:
+                if p.requires_grad and p.grad is not None:
                     p.copy_(p - 0.1 * p.grad)
 
 

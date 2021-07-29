@@ -5,14 +5,16 @@ from torch import Tensor
 
 _backward_fn_type = Union[None, Callable[[Union[None, Tensor]], Union[None, Tensor]]]
 
+
 class BackwardPass:
-    def __init__(self, cls):
-        self.cls = cls
-        self._to = set()
-        self._output_hook = None
+    OUTPUT = "output"
+
+    def __init__(self):
         self._output: Union[None, Tensor] = None
         self._loss: Union[None, Tensor] = None
-        self._backward_fn: _backward_fn_type = None
+
+        self._output_hook = None
+        self.relation_dict = {}
 
     def __call__(self, *args, **kwargs):
         if self._loss is None:
@@ -27,7 +29,7 @@ class BackwardPass:
         if self._output_hook is not None:
             self._output_hook.remove()
 
-        self._output =  output.detach_()
+        self._output = output.detach_()
         self._output.requires_grad = True
         self._output_hook = output.register_hook(self._backward_pass_hook)
         return output
@@ -35,21 +37,40 @@ class BackwardPass:
     def set_loss(self, loss: Tensor):
         self._loss = loss
 
-    def set_backward(self, backward_fn: _backward_fn_type):
-        self._backward_fn = backward_fn
+    def add_relation(self, from_fn: Union[str, _backward_fn_type], to_fn: _backward_fn_type):
+        if from_fn not in self.relation_dict:
+            self.relation_dict[from_fn] = set()
 
-    def to(self, module):
-        if hasattr(module, "backward") and isinstance(module.backward, BackwardPass):
-            self._to.add(module.backward)
-
-        if isinstance(module, BackwardPass):
-            self._to.add(module)
+        self.relation_dict[from_fn].add(to_fn)
 
     def _backward_pass_hook(self, grad_output: Tensor):
         with torch.no_grad():
-            if self._backward_fn is not None:
-                grad_output = self._backward_fn(grad_output)
+            to_visit_with = set()
+            to_visit_with.add((self.OUTPUT, grad_output))
 
-            # print(f"{self.cls.__class__.__name__}: {grad_output}")
-            for i in self._to:
-                i._backward_pass_hook(grad_output)
+            while len(to_visit_with) > 0:
+                function_id, function_grad_output = to_visit_with.pop()
+
+                if function_id not in self.relation_dict:
+                    continue
+
+                for func in self.relation_dict[function_id]:
+                    new_pair = (func, func(function_grad_output))
+                    to_visit_with.add(new_pair)
+
+    def compile(self):
+        visited = set()
+        to_visit = set()
+
+        to_visit.add(self.OUTPUT)
+        while len(to_visit) > 0:
+            node = to_visit.pop()
+
+            if node in visited:
+                raise Exception("loop detected in backward pass.")
+
+            visited.add(node)
+            if node not in self.relation_dict:
+                continue
+            for i in self.relation_dict[node]:
+                to_visit.add(i)
