@@ -3,8 +3,6 @@ from typing import Union, Callable, Dict, Set
 import torch
 from torch import Tensor
 
-from utils.helper_functions import to_matrix
-
 
 class BackwardFunction:
     __constants__ = ['main_layer']
@@ -22,21 +20,19 @@ class BackwardFunction:
         else:
             raise Exception(f'"{name}" is not found')
 
-    def get_matrix(self, name: str) -> Union[None, Tensor]:
-        return to_matrix(self.get_tensor(name))
-
-    def set_grad(self, name, grad):
-        self.get_tensor(name).grad = grad
-
     def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
         raise NotImplementedError
 
+
 _backward_fn_type = Union[None, BackwardFunction, Callable[[Union[None, Tensor]], Union[None, Tensor]]]
+
 
 class BackwardPass:
     OUTPUT = "output"
 
     def __init__(self):
+        self.use_default_graph: bool = False
+
         self._output: Union[None, Tensor] = None
         self._loss: Union[None, Tensor] = None
 
@@ -52,13 +48,13 @@ class BackwardPass:
 
         self._loss.backward()
 
-    def set_output(self, output: Tensor, use_default_graph=False):
+    def set_output(self, output: Tensor):
         if self._output_hook is not None:
             self._output_hook.remove()
 
-        if use_default_graph:
+        if self.use_default_graph:
             self._output = output
-            self._output_hook = output.register_hook(self._backward_pass_hook)
+            # self._output_hook = output.register_hook(self._backward_pass_hook)
         else:
             self._output = output.detach_()
             self._output.requires_grad = True
@@ -68,11 +64,12 @@ class BackwardPass:
     def set_loss(self, loss: Tensor):
         self._loss = loss
 
-    def add_relation(self, from_fn: Union[str, BackwardFunction], to_fn: BackwardFunction):
-        if from_fn not in self.relation_dict:
-            self.relation_dict[from_fn] = set()
+    def add_relation(self, *args: Union[str, BackwardFunction]):
+        for i, from_fn in enumerate(args[:-1]):
+            if from_fn not in self.relation_dict:
+                self.relation_dict[from_fn] = set()
 
-        self.relation_dict[from_fn].add(to_fn)
+            self.relation_dict[from_fn].add(args[i + 1])
 
     def _backward_pass_hook(self, grad_output: Tensor):
         with torch.no_grad():

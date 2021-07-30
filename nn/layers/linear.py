@@ -4,22 +4,34 @@ import torch
 from torch import nn, Tensor
 
 from nn.backward_pass import BackwardFunction
-from nn.layers.base_layer import BaseLayer
+from nn.base_layer import BaseLayer
 from utils.helper_functions import to_matrix
 
-class LinearBackpropagation(BackwardFunction):
-    def backward(self, grad_output: Union[None, Tensor], weight: Union[None, Tensor] = None) -> Union[None, Tensor]:
-        x = self.get_matrix("_x")
-        weight = self.get_matrix("weight") if weight is None else weight
-        bias = self.get_matrix("bias")
 
+class LinearBackpropagation(BackwardFunction):
+    @property
+    def x(self):
+        return self.get_tensor("_x")
+
+    @property
+    def weight(self):
+        return self.get_tensor("weight")
+
+    @property
+    def bias(self):
+        return self.get_tensor("bias")
+
+    def backward(self, grad_output: Union[None, Tensor], weight: Union[None, Tensor] = None) -> Union[None, Tensor]:
+        x = to_matrix(self.x)
         grad_output = to_matrix(grad_output)
+        weight = to_matrix(self.weight if weight is None else weight)
+
         grad_input = grad_output @ weight
 
-        if weight.requires_grad:
-            self.set_grad("weight", grad_output.t() @ x)
-        if bias is not None and bias.requires_grad:
-            self.set_grad("bias", grad_output.sum(0))
+        if self.weight.requires_grad:
+            self.weight.grad = grad_output.t() @ x
+        if self.bias is not None and self.bias.requires_grad:
+            self.bias.grad = grad_output.sum(0)
 
         return grad_input
 
@@ -32,8 +44,8 @@ class LinearFeedforwardAlignment(LinearBackpropagation):
         self.is_fixed: bool = True
         self._fixed_weight = None
 
-    def generate_random_weight(self):
-        tensor = torch.rand_like(self.get_matrix("weight"))
+    def generate_random_weight(self, size = None):
+        tensor = torch.rand(size if size is not None else self.weight.size())
         tensor.requires_grad = False
         tensor.normal_(mean=self.mean, std=self.std)
         return tensor
@@ -50,9 +62,34 @@ class LinearFeedforwardAlignment(LinearBackpropagation):
 
         return super(LinearFeedforwardAlignment, self).backward(grad_output, weight)
 
+
 class LinearDirectFeedforwardAlignment(LinearFeedforwardAlignment):
-    def backward(self, grad_output: Union[None, Tensor], **kwargs) -> Union[None, Tensor]:
-        pass
+    def backward(self, grad_output: Union[None, Tensor], weight: Union[None, Tensor] = None) -> Union[None, Tensor]:
+        grad_output = to_matrix(grad_output)
+        x = to_matrix(self.x)
+
+        size = (grad_output.size()[1], self.weight.size()[0])
+
+        if self._fixed_weight is None:
+            self._fixed_weight = self.generate_random_weight(size)
+
+        if weight is None:
+            if self.is_fixed:
+                weight = self._fixed_weight
+            else:
+                weight = self.generate_random_weight(size)
+
+        weight = self.weight if weight is None else weight
+
+        grad_output = grad_output @ weight
+
+        if self.weight.requires_grad:
+            self.weight.grad = grad_output.t() @ x
+        if self.bias is not None and self.bias.requires_grad:
+            self.bias.grad = grad_output.sum(0)
+
+        return grad_output
+
 
 class Linear(BaseLayer):
     __constants__ = ['in_features', 'out_features']
@@ -62,7 +99,6 @@ class Linear(BaseLayer):
     _x: Union[None, Tensor]
     weight: nn.Parameter
     bias: Union[None, nn.Parameter]
-    _fixed_fa_weight: nn.Parameter
 
     def __init__(self, in_features, out_features, bias=True):
         super(Linear, self).__init__()
@@ -86,6 +122,8 @@ class Linear(BaseLayer):
 
     def forward(self, x: Tensor):
         self._x = x.clone()
+        self._x.detach_()
+        self._x.requires_grad = False
         y = x @ self.weight.t()
         if self.bias is not None:
             y += self.bias

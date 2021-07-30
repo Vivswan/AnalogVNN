@@ -5,3 +5,4 @@ tensorboard
 numpy~=1.19.5
 matplotlib~=3.4.2
 torchviz~=0.0.2
+graphviz~=2.38

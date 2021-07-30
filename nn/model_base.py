@@ -35,9 +35,9 @@ class BaseModel(nn.Module):
             self.tensorboard.on_compile()
         return self
 
-    def output(self, x, use_default_graph=False):
+    def output(self, x):
         result = self(x)
-        self.backward.set_output(result, use_default_graph=use_default_graph)
+        self.backward.set_output(result)
         return result
 
     def fit(self, train_loader: DataLoader, test_loader: DataLoader, epoch: int = None):
@@ -53,6 +53,10 @@ class BaseModel(nn.Module):
 
         return train_loss, train_accuracy, test_loss, test_accuracy
 
+
+    def create_tensorboard(self, log_dir: str):
+        self.tensorboard = TensorboardModelLog(self, log_dir=log_dir)
+        self.subscribe_tensorboard(self.tensorboard)
 
     def subscribe_tensorboard(self, tensorboard: TensorboardModelLog):
         self.tensorboard = tensorboard

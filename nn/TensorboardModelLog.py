@@ -1,11 +1,8 @@
 import os
 import re
 
-import torch
 from torch import nn
 from torch.utils.tensorboard import SummaryWriter
-
-from nn.utils.summary import summary
 
 
 class TensorboardModelLog:
@@ -15,6 +12,10 @@ class TensorboardModelLog:
     def __init__(self, model, log_dir: str):
         self.model = model
         self.tensorboard = None
+
+        if not os.path.exists(log_dir):
+            os.mkdir(log_dir)
+
         self.set_log_dir(log_dir)
         model.subscribe_tensorboard(tensorboard=self)
 
@@ -35,8 +36,6 @@ class TensorboardModelLog:
                 self.tensorboard.add_histogram(f"{idx}-{module}.bias", module.bias, epoch)
             if hasattr(module, "weight") and hasattr(module.weight, "size"):
                 self.tensorboard.add_histogram(f"{idx}-{module}.weight", module.weight, epoch)
-            if hasattr(module, "random_weight") and hasattr(module.random_weight, "size"):
-                self.tensorboard.add_histogram(f"{idx}-{module}.weight", module.random_weight, epoch)
 
     def on_compile(self):
         # self.tensorboard.add_text("summary", re.sub("\n", "\n    ", "    " + summary(self.model, )))
@@ -61,4 +60,3 @@ class TensorboardModelLog:
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
-

@@ -11,10 +11,11 @@ def train(model, device: torch.device, train_loader: DataLoader, optimizer: Opti
         data, target = data.to(device), target.to(device)
 
         # zero the parameter gradients
+        model.zero_grad()
         optimizer.zero_grad()
 
         # forward + backward + optimize
-        output = model(data)
+        output = model.output(data)
         loss, item_loss, item_correct = loss_fn(output, target)
         loss.backward()
         optimizer.step()
