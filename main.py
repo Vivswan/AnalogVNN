@@ -61,7 +61,7 @@ def main(
     if VERBOSE_LOG_FILE:
         with open(log_file, "a+") as file:
             kwargs["optimizer"] = str(nn.optimizer)
-            kwargs["loss_fn"] = str(nn.loss_fn)
+            kwargs["loss_fn"] = str(nn.loss)
             kwargs["dataset"] = str(dataset)
             file.write(json.dumps(kwargs, sort_keys=True, indent=2) + "\n\n")
             file.write(str(nn) + "\n\n")

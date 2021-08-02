@@ -14,21 +14,16 @@ class GaussianNoiseReducePrecisionLayerModel(BaseModel):
             out_features: int,
             precision: int,
             std: int,
-            device: torch.device,
     ):
-        super().__init__(device)
-        self.flatten = nn.Flatten(start_dim=1)
-        self.reduce_precision = ReducePrecision(precision=precision)
-        self.gaussian_noise = GaussianNoise(std=TensorFunctions.constant(std))
-        self.fc_nn = nn.Sequential(
+        super().__init__()
+        self.nn = nn.Sequential(
+            nn.Flatten(start_dim=1),
+            ReducePrecision(precision=precision),
+            GaussianNoise(std=TensorFunctions.constant(std)),
             nn.Linear(int(np.prod(in_features[1:])), out_features),
             nn.ReLU(inplace=True),
             nn.LogSoftmax(dim=1)
         )
 
     def forward(self, x):
-        x = self.flatten(x)
-        x = self.reduce_precision(x)
-        x = self.gaussian_noise(x)
-        x = self.fc_nn(x)
-        return x
+        return self.nn(x)

@@ -6,6 +6,8 @@ from torch import Tensor
 from nn.backward_pass import BackwardFunction
 from nn.base_layer import BaseLayer
 
+ZERO_TENSOR = torch.tensor(0)
+
 
 class PReLU(BaseLayer, BackwardFunction):
     __constants__ = ['alpha']
@@ -13,19 +15,16 @@ class PReLU(BaseLayer, BackwardFunction):
 
     def __init__(self, alpha: float):
         super(PReLU, self).__init__()
-        self.alpha = alpha
+        self.alpha = torch.tensor(alpha)
 
     def forward(self, x: Tensor) -> Tensor:
-        return (
-            (x < 0).type(torch.float) * self.alpha * x +
-            (x >= 0).type(torch.float) * x
-        )
+        self.save_tensor("input", x)
+        return torch.minimum(ZERO_TENSOR, x) * self.alpha + torch.maximum(ZERO_TENSOR, x)
 
     def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
-        return grad_output * (
-            (grad_output < 0).type(torch.float) * self.alpha +
-            (grad_output >= 0).type(torch.float)
-        )
+        x = self.get_tensor("input")
+        grad = (x < 0).type(torch.float) * self.alpha + (x >= 0).type(torch.float)
+        return grad_output * grad
 
 
 class ReLU(PReLU):

@@ -17,7 +17,8 @@ def train(model, device: torch.device, train_loader: DataLoader, optimizer: Opti
         # forward + backward + optimize
         output = model.output(data)
         loss, item_loss, item_correct = loss_fn(output, target)
-        loss.backward()
+        model.backward.set_loss(loss)
+        model.backward()
         optimizer.step()
 
         # print statistics

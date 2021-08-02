@@ -2,7 +2,7 @@ from collections import namedtuple
 from distutils.version import LooseVersion
 from graphviz import Digraph
 import torch
-from torch.autograd import Variable
+from torch import Tensor
 import warnings
 
 Node = namedtuple('Node', ('name', 'inputs', 'attr', 'op'))
@@ -70,7 +70,7 @@ def make_dot(var, params=None, show_attrs=True, show_saved=True, max_attr_chars=
             " saved tensors saved by custom autograd functions.)")
 
     if params is not None:
-        assert all(isinstance(p, Variable) for p in params.values())
+        assert all(isinstance(p, Tensor) for p in params.values())
         param_map = {id(v): k for k, v in params.items()}
     else:
         param_map = {}

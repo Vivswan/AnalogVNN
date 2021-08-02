@@ -15,8 +15,6 @@ from utils.data_dirs import data_dirs, erase_data_dirs
 from nn.utils.is_using_cuda import is_using_cuda
 from utils.path_functions import get_relative_path, path_join
 
-torch.manual_seed(0)
-
 DATA_FOLDER = get_relative_path(__file__, "D:/_data")
 VERBOSE_LOG_FILE = True
 SAVE_ALL_MODEL = False
@@ -33,6 +31,7 @@ def main(
         loss_fn,
         model_kargs
 ):
+    torch.manual_seed(0)
     kwargs = {}
 
     name_with_timestamp, models_path, tensorboard_path, dataset_path = data_dirs(DATA_FOLDER, name=name)
@@ -54,21 +53,20 @@ def main(
     )
     TensorboardModelLog(nn, log_dir=tensorboard_path)
 
-    nn.compile(
-        optimizer=optimizer,
-        loss_fn=loss_fn
-    )
+    nn.optimizer = optimizer(nn.parameters())
+    nn.loss = loss_fn
+    nn.compile()
     print(device)
 
     # nn.tb.add_text("dataset", str(dataset))
     if VERBOSE_LOG_FILE:
         with open(log_file, "a+") as file:
             kwargs["optimizer"] = str(nn.optimizer)
-            kwargs["loss_fn"] = str(nn.loss_fn)
+            kwargs["loss_fn"] = str(nn.loss)
             kwargs["dataset"] = str(dataset)
             file.write(json.dumps(kwargs, sort_keys=True, indent=2) + "\n\n")
             file.write(str(nn) + "\n\n")
-            file.write(summary(nn) + "\n\n")
+            file.write(summary(nn, input_size=tuple(input_shape[1:])) + "\n\n")
 
     for epoch in range(epochs):
         train_loss, train_accuracy, test_loss, test_accuracy = nn.fit(train_loader, test_loader, epoch)
@@ -97,11 +95,10 @@ def main(
 
 if __name__ == '__main__':
     erase_data_dirs(DATA_FOLDER)
-    # for i in RUN_MODELS_20210720:
-    i = "ReducePrecision-16_GaussianNoise-0.05"
-    print(i)
-    parameters = {
-        **RUN_MODELS_20210720[i],
-        "name": i,
-    }
-    main(**parameters)
+    for i in RUN_MODELS_20210720:
+        print(i)
+        parameters = {
+            **RUN_MODELS_20210720[i],
+            "name": i,
+        }
+        main(**parameters)

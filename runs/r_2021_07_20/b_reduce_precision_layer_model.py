@@ -12,19 +12,15 @@ class ReducePrecisionLayerModel(BaseModel):
             in_features: tuple,
             out_features: int,
             precision: int,
-            device: torch.device,
     ):
-        super().__init__(device)
-        self.flatten = nn.Flatten(start_dim=1)
-        self.reduce_precision = ReducePrecision(precision=precision)
-        self.fc_nn = nn.Sequential(
+        super().__init__()
+        self.nn = nn.Sequential(
+            nn.Flatten(start_dim=1),
+            ReducePrecision(precision=precision),
             nn.Linear(int(np.prod(in_features[1:])), out_features),
             nn.ReLU(inplace=True),
             nn.LogSoftmax(dim=1)
         )
 
     def forward(self, x):
-        x = self.flatten(x)
-        x = self.reduce_precision(x)
-        x = self.fc_nn(x)
-        return x
+        return self.nn(x)

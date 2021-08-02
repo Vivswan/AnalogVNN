@@ -12,23 +12,29 @@ from nn.utils.is_using_cuda import get_device
 
 _grad_t = Union[Tuple[Tensor, ...], Tensor]
 
+
 class BaseModel(nn.Module):
     __constants__ = ['in_features', 'device']
 
     device: torch.device
     tensorboard: Union[None, TensorboardModelLog]
 
-    def __init__(self, device: torch.device = get_device()):
+    def __init__(self):
         super(BaseModel, self).__init__()
 
         self._compiled = False
-        self.device = device
         self.tensorboard = None
         self._output_hook = None
         self.backward = BackwardPass()
+        self.optimizer = None
+        self.loss = None
+        self.accuracy = None
+        self.device = get_device()
 
-    def compile(self):
+    def compile(self, device=get_device()):
         self.backward.compile()
+        self.to(device=device)
+        self.device = device
 
         self._compiled = True
         if self.tensorboard is not None:
@@ -44,15 +50,14 @@ class BaseModel(nn.Module):
         if self._compiled is False:
             raise Exception("model is not complied yet")
 
-        train_loss, train_accuracy = train(self, self.device, train_loader, self.optimizer, self.loss_fn, epoch)
-        test_loss, test_accuracy = test(self, self.device, test_loader, self.loss_fn)
+        train_loss, train_accuracy = train(self, self.device, train_loader, self.optimizer, self.loss, epoch)
+        test_loss, test_accuracy = test(self, self.device, test_loader, self.loss)
 
         if self.tensorboard is not None:
             self.tensorboard.register_training(epoch, train_loss, train_accuracy)
-            self.tensorboard.register_testing(epoch, test_loss, test_accuracy )
+            self.tensorboard.register_testing(epoch, test_loss, test_accuracy)
 
         return train_loss, train_accuracy, test_loss, test_accuracy
-
 
     def create_tensorboard(self, log_dir: str):
         self.tensorboard = TensorboardModelLog(self, log_dir=log_dir)
@@ -62,3 +67,9 @@ class BaseModel(nn.Module):
         self.tensorboard = tensorboard
         if self._compiled is True:
             self.tensorboard.on_compile()
+
+    def normalize(self):
+        with torch.no_grad():
+            for p in self.parameters():
+                if p.requires_grad:
+                    p.data /= p.norm()

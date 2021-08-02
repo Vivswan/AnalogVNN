@@ -17,7 +17,8 @@ class TensorboardModelLog:
             os.mkdir(log_dir)
 
         self.set_log_dir(log_dir)
-        model.subscribe_tensorboard(tensorboard=self)
+        if hasattr(model, "subscribe_tensorboard"):
+            model.subscribe_tensorboard(tensorboard=self)
 
     def set_log_dir(self, log_dir: str):
         if os.path.isdir(log_dir):
@@ -42,13 +43,13 @@ class TensorboardModelLog:
         self.tensorboard.add_text("str", re.sub("\n", "\n    ", "    " + str(self.model)))
         # self.tensorboard.add_graph(self.model, torch.zeros(tuple([1] + list(self.model.in_features))).to(self.model.device))
 
-        self._add_layer_data(epoch=-1)
+        # self._add_layer_data(epoch=-1)
         return self
 
     def register_training(self, epoch, train_loss, train_accuracy):
         self.tensorboard.add_scalar('Loss/train', train_loss, epoch)
         self.tensorboard.add_scalar("Accuracy/train", train_accuracy, epoch)
-        self._add_layer_data(epoch=epoch)
+        # self._add_layer_data(epoch=epoch)
 
     def register_testing(self, epoch, test_loss, test_accuracy):
         self.tensorboard.add_scalar('Loss/test', test_loss, epoch)
