@@ -31,6 +31,9 @@ class BackwardFunction:
         else:
             return None
 
+    def reset_parameters(self):
+        pass
+
     def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
         raise NotImplementedError
 
@@ -82,21 +85,6 @@ class BackwardPass:
 
             self.relation_dict[from_fn].add(args[i + 1])
 
-    def _backward_pass_hook(self, grad_output: Tensor):
-        with torch.no_grad():
-            to_visit_with = set()
-            to_visit_with.add((self.OUTPUT, grad_output))
-
-            while len(to_visit_with) > 0:
-                function_id, function_grad_output = to_visit_with.pop()
-
-                if function_id not in self.relation_dict:
-                    continue
-
-                for func in self.relation_dict[function_id]:
-                    new_pair = (func, func.backward(function_grad_output))
-                    to_visit_with.add(new_pair)
-
     def compile(self):
         visited = set()
         to_visit = set()
@@ -113,3 +101,16 @@ class BackwardPass:
                 continue
             for i in self.relation_dict[node]:
                 to_visit.add(i)
+
+    def _backward_pass_hook(self, grad_output: Tensor):
+        with torch.no_grad():
+            to_visit_with = set()
+            to_visit_with.add((self.OUTPUT, grad_output))
+
+            while len(to_visit_with) > 0:
+                function_id, function_grad_output = to_visit_with.pop()
+
+                if function_id in self.relation_dict:
+                    for func in self.relation_dict[function_id]:
+                        new_pair = (func, func.backward(function_grad_output))
+                        to_visit_with.add(new_pair)

@@ -1,28 +1,18 @@
 import torch
 from torch import nn, Tensor
-from torch.autograd import Function
+
+from nn.backward_pass import BackwardFunction
+from nn.base_layer import BaseLayer
 
 
-class ReducePrecisionFunction(Function):
-    @staticmethod
-    def forward(ctx, x, precision, divide, shift):
-        g = x * precision - shift * divide
-        return torch.sign(g) * \
-               torch.max(torch.floor(torch.abs(g)), torch.ceil(torch.abs(g) - divide)) * \
-               1 / precision
-
-    @staticmethod
-    def backward(ctx, grad_output):
-        return grad_output, None, None, None
-
-
-class ReducePrecision(nn.Module):
+class ReducePrecision(BaseLayer, BackwardFunction):
     __constants__ = ['precision', 'divide']
-    precision: int
-    divide: float
-    shift: float
+    precision: nn.Parameter
+    divide: nn.Parameter
+    shift: nn.Parameter
 
-    def __init__(self, precision: int = 8, divide: float = 0.5, shift: float = 0):
+    def __init__(self, precision: int = 8, divide: float = 0.5, shift: float = 0, stochastic=False):
+        # TODO: stochastic
         super(ReducePrecision, self).__init__()
         if precision < 1:
             raise ValueError("precision has to be more than 0, but got {}".format(precision))
@@ -36,9 +26,9 @@ class ReducePrecision(nn.Module):
         if not (-1 <= shift <= 1):
             raise ValueError("shift must be between -1 and 1, but got {}".format(shift))
 
-        self.precision = precision
-        self.divide = divide
-        self.shift = shift
+        self.precision = nn.Parameter(torch.tensor(precision), requires_grad=False)
+        self.divide = nn.Parameter(torch.tensor(divide), requires_grad=False)
+        self.shift = nn.Parameter(torch.tensor(shift), requires_grad=False)
 
     @property
     def step_size(self) -> float:
@@ -47,16 +37,30 @@ class ReducePrecision(nn.Module):
     def extra_repr(self) -> str:
         return f'precision={self.precision}, divide={self.divide}'
 
-    def forward(self, x: Tensor) -> Tensor:
+    def forward(self, x: Tensor):
         if self.training:
-            return ReducePrecisionFunction.apply(x, self.precision, self.divide, self.shift)
+            x = x * self.precision - self.shift * self.divide
+
+            raise NotImplemented
         else:
             return x
 
+    def backward(self, grad_output: Tensor):
+        return grad_output
+
 
 if __name__ == '__main__':
-    input = torch.rand((2, 2))
-    print(f"input: {input}")
-    print(f"p = 2: {ReducePrecision(precision=2)(input)}")
-    print(f"p = 4: {ReducePrecision(precision=4)(input)}")
-    print(f"p = 8: {ReducePrecision(precision=8)(input)}")
+    for i in range(-10, 10):
+        c = torch.tensor(i / 10)
+        p = 1
+        d = 0.2
+        s = 0
+        ct = c * p - s * d
+        floor_ct_d = torch.sign(c) * torch.floor(torch.abs(ct) + d)
+        floor_ct = torch.sign(c) * torch.floor(torch.abs(ct))
+        floor_ct_nd = torch.sign(c) * torch.floor(torch.abs(ct) - d)
+
+        ceil_ct_d = torch.sign(c) * torch.ceil(torch.abs(ct) + d)
+        ceil_ct = torch.sign(c) * torch.ceil(torch.abs(ct))
+        ceil_ct_nd = torch.sign(c) * torch.ceil(torch.abs(ct) - d)
+        print(f"{c:.2f} : {floor_ct_d:.2f}, {floor_ct:.2f}, {floor_ct_nd:.2f}, {ceil_ct_d:.2f}, {ceil_ct:.2f}, {ceil_ct_nd:.2f}")

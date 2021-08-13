@@ -1,3 +1,5 @@
+from typing import Union
+
 from torch import nn, Tensor
 
 
@@ -15,13 +17,13 @@ class BaseLayer(nn.Module):
         else:
             raise TypeError(f'expected: Tensor, found: {tensor}')
 
-    def get_tensor(self, name: str):
+    def get_tensor(self, name: str) -> Union[None, Tensor]:
         if name in self._saved_tensor:
             return self._saved_tensor[name]
         else:
             return None
 
-    def has_tensor(self, name: str):
+    def has_tensor(self, name: str) -> bool:
         return name in self._saved_tensor
 
     def clear_tensors(self):

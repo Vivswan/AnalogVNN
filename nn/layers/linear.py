@@ -4,6 +4,7 @@ from typing import Union
 import torch
 from torch import nn, Tensor
 
+from nn.activations.init_implementation import InitImplement
 from nn.activations.relu import ReLU, LeakyReLU
 from nn.backward_pass import BackwardFunction
 from nn.base_layer import BaseLayer
@@ -49,10 +50,19 @@ class LinearFeedforwardAlignment(LinearBackpropagation):
         self.is_fixed: bool = True
         self._fixed_weight = None
 
+    def reset_parameters(self):
+        super(LinearFeedforwardAlignment, self).reset_parameters()
+        self._fixed_weight = None
+
     def generate_random_weight(self, size=None, device=get_device()):
-        tensor = torch.rand(size if size is not None else self.weight.size(), device=device)
+        tensor = None
+        while tensor is None:
+            try:
+                tensor = torch.normal(mean=self.mean, std=self.std, size=size if size is not None else self.weight.size(), device=device)
+                torch.linalg.pinv(tensor)
+            except:
+                pass
         tensor.requires_grad = False
-        tensor.normal_(mean=self.mean, std=self.std)
         return tensor
 
     def backward(self, grad_output: Union[None, Tensor], weight: Union[None, Tensor] = None) -> Union[None, Tensor]:
@@ -72,23 +82,23 @@ class LinearDirectFeedforwardAlignment(LinearFeedforwardAlignment):
     def backward(self, grad_output: Union[None, Tensor], weight: Union[None, Tensor] = None) -> Union[None, Tensor]:
         grad_output = to_matrix(grad_output)
 
-        x = to_matrix(self.x)
         size = (grad_output.size()[1], self.weight.size()[0])
 
         if self._fixed_weight is None:
             self._fixed_weight = self.generate_random_weight(size, device=grad_output.device)
 
-        if self.is_fixed:
-            dfa_weight = self._fixed_weight
-        else:
-            dfa_weight = self.generate_random_weight(size)
+        if weight is None:
+            if self.is_fixed:
+                weight = self._fixed_weight
+            else:
+                weight = self.generate_random_weight(size, device=grad_output.device)
 
-        grad_output = grad_output @ dfa_weight
+        grad_output = grad_output @ weight
         if self.activation is not None:
             grad_output = self.activation.backward(grad_output)
 
         if self.weight.requires_grad:
-            self.weight.grad = grad_output.t() @ x
+            self.weight.grad = grad_output.t() @ to_matrix(self.x)
         if self.bias is not None and self.bias.requires_grad:
             self.bias.grad = grad_output.sum(0)
 
@@ -100,7 +110,6 @@ class Linear(BaseLayer):
     in_features: int
     out_features: int
 
-    _x: Union[None, Tensor]
     weight: nn.Parameter
     bias: Union[None, nn.Parameter]
 
@@ -115,24 +124,30 @@ class Linear(BaseLayer):
             self.bias = nn.Parameter(torch.Tensor(out_features))
         else:
             self.register_parameter('bias', None)
-        self.reset_parameters()
 
         self.backpropagation = LinearBackpropagation(self)
         self.feedforward_alignment = LinearFeedforwardAlignment(self)
         self.direct_feedforward_alignment = LinearDirectFeedforwardAlignment(self)
+        self.reset_parameters()
 
     def reset_parameters(self) -> None:
-        if isinstance(self.activation, nn.ReLU) or isinstance(self.activation, ReLU):
-            nn.init.kaiming_uniform_(self.weight, a=math.sqrt(5), nonlinearity="relu")
-        elif isinstance(self.activation, nn.LeakyReLU) or isinstance(self.activation, LeakyReLU):
+        if isinstance(self.activation, InitImplement):
+            self.activation.initialise_(self.weight)
+        elif isinstance(self.activation, nn.ReLU):
+            nn.init.kaiming_uniform_(self.weight, nonlinearity="relu")
+        elif isinstance(self.activation, nn.LeakyReLU):
             nn.init.kaiming_uniform_(self.weight, a=math.sqrt(5), nonlinearity="leaky_relu")
         else:
-            nn.init.kaiming_uniform_(self.weight, a=math.sqrt(5))
+            nn.init.xavier_uniform_(self.weight)
 
         if self.bias is not None:
             fan_in, _ = nn.init._calculate_fan_in_and_fan_out(self.weight)
             bound = 1 / math.sqrt(fan_in) if fan_in > 0 else 0
             nn.init.uniform_(self.bias, -bound, bound)
+
+        self.backpropagation.reset_parameters()
+        self.feedforward_alignment.reset_parameters()
+        self.direct_feedforward_alignment.reset_parameters()
 
     def forward(self, x: Tensor):
         y = x @ self.weight.t()

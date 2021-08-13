@@ -1,4 +1,5 @@
 import inspect
+from time import sleep
 from typing import Type
 
 from torch.utils.data import DataLoader
@@ -35,9 +36,6 @@ DataLoader, DataLoader, tuple):
     test_set = dataset(root=path, train=False, download=True, transform=transform)
     test_loader = DataLoader(test_set, **dataset_kwargs)
 
-    input_shape = None
-    for data, target in test_loader:
-        if input_shape is None:
-            input_shape = list(data.shape)
+    input_shape = list(next(iter(test_loader))[0].shape)
 
     return train_loader, test_loader, input_shape, tuple(train_set.classes)

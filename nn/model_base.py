@@ -31,14 +31,14 @@ class BaseModel(nn.Module):
         self.accuracy = None
         self.device = get_device()
 
-    def compile(self, device=get_device()):
+    def compile(self, device=get_device(), layer_data=True):
         self.backward.compile()
         self.to(device=device)
         self.device = device
 
         self._compiled = True
         if self.tensorboard is not None:
-            self.tensorboard.on_compile()
+            self.tensorboard.on_compile(layer_data=layer_data)
         return self
 
     def output(self, x):
@@ -54,6 +54,7 @@ class BaseModel(nn.Module):
         test_loss, test_accuracy = test(self, self.device, test_loader, self.loss)
 
         if self.tensorboard is not None:
+            self.tensorboard.add_graph(train_loader)
             self.tensorboard.register_training(epoch, train_loss, train_accuracy)
             self.tensorboard.register_testing(epoch, test_loss, test_accuracy)
 
