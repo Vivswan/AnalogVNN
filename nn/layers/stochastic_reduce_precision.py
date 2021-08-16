@@ -5,44 +5,44 @@ from nn.backward_pass import BackwardFunction
 from nn.base_layer import BaseLayer
 
 
-class ReducePrecision(BaseLayer, BackwardFunction):
-    __constants__ = ['precision', 'divide', 'shift']
+class StochasticReducePrecision(BaseLayer, BackwardFunction):
+    __constants__ = ['precision', 'divide']
     precision: nn.Parameter
     divide: nn.Parameter
-    shift: nn.Parameter
 
-    def __init__(self, precision: int = 8, divide: float = 0.5, shift: float = 0):
-        super(ReducePrecision, self).__init__()
+    def __init__(self, precision: int = 8, divide: float = 0.5):
+        super(StochasticReducePrecision, self).__init__()
         if precision < 1:
             raise ValueError("precision has to be more than 0, but got {}".format(precision))
 
         if precision != int(precision):
             raise ValueError("precision must be int, but got {}".format(precision))
 
-        if not (0 <= divide <= 1):
-            raise ValueError("divide must be between 0 and 1, but got {}".format(divide))
-
-        if not (-1 <= shift <= 1):
-            raise ValueError("shift must be between -1 and 1, but got {}".format(shift))
-
         self.precision = nn.Parameter(torch.tensor(precision), requires_grad=False)
         self.divide = nn.Parameter(torch.tensor(divide), requires_grad=False)
-        self.shift = nn.Parameter(torch.tensor(shift), requires_grad=False)
 
     @property
     def step_size(self) -> float:
         return 1 / self.precision
 
     def extra_repr(self) -> str:
-        return f'precision={self.precision}, divide={self.divide}, shift={self.shift}'
+        return f'precision={self.precision}, divide={self.divide}'
 
     def forward(self, x: Tensor):
         if self.training:
             g: Tensor = x * self.precision
-            f = torch.sign(g) * torch.maximum(
-                torch.floor(torch.abs(g)),
-                torch.ceil(torch.abs(g) - self.divide)
-            ) * (1 / self.precision)
+            rand_x = torch.rand_like(g, requires_grad=False)
+
+            g_abs = torch.abs(g)
+            g_floor = torch.floor(g_abs)
+            g_ceil = torch.ceil(g_abs)
+
+            prob_floor = 1 - torch.abs(g_floor - g_abs)
+            bool_floor = rand_x <= prob_floor
+            do_floor = bool_floor.type(torch.float)
+            do_ceil = torch.logical_not(bool_floor).type(torch.float)
+
+            f = torch.sign(g) * (do_floor * g_floor + do_ceil * g_ceil) * (1 / self.precision)
             return f
         else:
             return x

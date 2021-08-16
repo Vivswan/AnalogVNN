@@ -3,19 +3,21 @@ from typing import Union
 import torch
 from torch import Tensor
 
-from nn.backward_pass import BackwardFunction
-from nn.base_layer import BaseLayer
+from nn.layers.activations.activation import Activation
 
 
-class Identity(BaseLayer, BackwardFunction):
+class Identity(Activation):
     def forward(self, x: Tensor) -> Tensor:
         return x
 
     def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
+
+        if bool(torch.any(torch.isnan(grad_output))):
+            raise ValueError
         return grad_output
 
 
-class BinaryStep(BaseLayer, BackwardFunction):
+class BinaryStep(Activation):
     def forward(self, x: Tensor) -> Tensor:
         return (x >= 0).type(torch.float)
 

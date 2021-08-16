@@ -4,15 +4,11 @@ from typing import Union
 import torch
 from torch import Tensor, nn
 
-from nn.activations.init_implementation import InitImplement
-from nn.backward_pass import BackwardFunction
-from nn.base_layer import BaseLayer
+from nn.layers.activations.activation import Activation
 from nn.utils.is_using_cuda import get_device
 
-ZERO_TENSOR = torch.tensor(0, device=get_device())
 
-
-class PReLU(BaseLayer, BackwardFunction, InitImplement):
+class PReLU(Activation):
     __constants__ = ['alpha']
     alpha: nn.Parameter
 
@@ -22,7 +18,8 @@ class PReLU(BaseLayer, BackwardFunction, InitImplement):
 
     def forward(self, x: Tensor) -> Tensor:
         self.save_tensor("input", x)
-        return torch.minimum(ZERO_TENSOR, x) * self.alpha + torch.maximum(ZERO_TENSOR, x)
+        zero = torch.tensor(0, device=get_device())
+        return torch.minimum(zero, x) * self.alpha + torch.maximum(zero, x)
 
     def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
         x = self.get_tensor("input")

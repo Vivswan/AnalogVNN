@@ -10,6 +10,7 @@ Node = namedtuple('Node', ('name', 'inputs', 'attr', 'op'))
 # Saved attrs for grad_fn (incl. saved variables) begin with `._saved_*`
 SAVED_PREFIX = "_saved_"
 
+
 def get_fn_name(fn, show_attrs, max_attr_chars):
     name = str(type(fn).__name__)
     if not show_attrs:
@@ -32,7 +33,7 @@ def get_fn_name(fn, show_attrs, max_attr_chars):
     col1width = max(len(k) for k in attrs.keys())
     col2width = min(max(len(str(v)) for v in attrs.values()), max_attr_chars)
     sep = "-" * max(col1width + col2width + 2, len(name))
-    attrstr = '%-' + str(col1width) + 's: %' + str(col2width)+ 's'
+    attrstr = '%-' + str(col1width) + 's: %' + str(col2width) + 's'
     truncate = lambda s: s[:col2width - 3] + "..." if len(s) > col2width else s
     params = '\n'.join(attrstr % (k, truncate(str(v))) for (k, v) in attrs.items())
     return name + '\n' + sep + '\n' + params
@@ -63,7 +64,7 @@ def make_dot(var, params=None, show_attrs=True, show_saved=True, max_attr_chars=
             to display for any given attribute.
     """
     if LooseVersion(torch.__version__) < LooseVersion("1.9") and \
-        (show_attrs or show_saved):
+            (show_attrs or show_saved):
         warnings.warn(
             "make_dot: showing grad_fn attributes and saved variables"
             " requires PyTorch version >= 1.9. (This does NOT apply to"
@@ -148,7 +149,6 @@ def make_dot(var, params=None, show_attrs=True, show_saved=True, max_attr_chars=
                 dot.edge(str(id(t)), str(id(fn)))
                 dot.node(str(id(t)), get_var_name(t), fillcolor='orange')
 
-
     def add_base_tensor(var, color='darkolivegreen1'):
         if var in seen:
             return
@@ -160,7 +160,6 @@ def make_dot(var, params=None, show_attrs=True, show_saved=True, max_attr_chars=
         if var._is_view():
             add_base_tensor(var._base, color='darkolivegreen3')
             dot.edge(str(id(var._base)), str(id(var)), style="dotted")
-
 
     # handle multiple outputs
     if isinstance(var, tuple):

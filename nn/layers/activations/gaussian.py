@@ -4,11 +4,10 @@ from typing import Union
 import torch
 from torch import Tensor
 
-from nn.backward_pass import BackwardFunction
-from nn.base_layer import BaseLayer
+from nn.layers.activations.activation import Activation
 
 
-class Gaussian(BaseLayer, BackwardFunction):
+class Gaussian(Activation):
     def forward(self, x: Tensor) -> Tensor:
         self.save_tensor("input", x)
         return torch.exp(-torch.pow(x, 2))
@@ -19,7 +18,7 @@ class Gaussian(BaseLayer, BackwardFunction):
         return grad_output * grad
 
 
-class GeLU(BaseLayer, BackwardFunction):
+class GeLU(Activation):
     def forward(self, x: Tensor) -> Tensor:
         self.save_tensor("input", x)
         return (1 / 2) * x * (1 + torch.erf(x / math.sqrt(2)))

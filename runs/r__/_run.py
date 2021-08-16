@@ -5,8 +5,8 @@ import torchvision
 from torch import optim
 
 from dataloaders.loss_functions import nll_loss_fn
-from nn.activations.relu import ReLU, LeakyReLU
-from nn.activations.sigmoid import Tanh
+from nn.layers.activations.relu import ReLU, LeakyReLU
+from nn.layers.activations import Tanh
 from nn.utils.normalize import normalize_model, normalize_cutoff_model
 from runs.r__.double_linear_layer_model import DoubleLinearLayerModel
 from runs.r__.single_linear_layer_model import SingleLinearLayerModel
@@ -21,7 +21,6 @@ DEFAULT_PARAMETERS = {
     "normalizer_fn": None,
     "model_kargs": {},
 }
-# python _main.py -p TripleLinear-
 RUN_MODELS = {
     "SingleLinear": {
         **DEFAULT_PARAMETERS,

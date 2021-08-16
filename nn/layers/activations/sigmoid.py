@@ -3,12 +3,10 @@ from typing import Union
 import torch
 from torch import Tensor, nn
 
-from nn.activations.init_implementation import InitImplement
-from nn.backward_pass import BackwardFunction
-from nn.base_layer import BaseLayer
+from nn.layers.activations.activation import Activation
 
 
-class Logistic(BaseLayer, BackwardFunction, InitImplement):
+class Logistic(Activation):
     def forward(self, x: Tensor) -> Tensor:
         self.save_tensor("input", x)
         return 1 / (1 + torch.exp(-x))
@@ -29,7 +27,7 @@ class Sigmoid(Logistic):
     pass
 
 
-class SiLU(BaseLayer, BackwardFunction):
+class SiLU(Activation):
     def forward(self, x: Tensor) -> Tensor:
         self.save_tensor("input", x)
         return x / (1 + torch.exp(-x))
@@ -41,7 +39,7 @@ class SiLU(BaseLayer, BackwardFunction):
         return grad_output * grad
 
 
-class Tanh(BaseLayer, BackwardFunction, InitImplement):
+class Tanh(Activation):
     def forward(self, x: Tensor) -> Tensor:
         self.save_tensor("input", x)
         return torch.tanh(x)

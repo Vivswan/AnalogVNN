@@ -6,6 +6,7 @@ from torch.utils.data import DataLoader
 
 from nn.TensorboardModelLog import TensorboardModelLog
 from nn.backward_pass import BackwardPass
+from nn.base_layer import BaseLayer
 from nn.test import test
 from nn.train import train
 from nn.utils.is_using_cuda import get_device
@@ -69,8 +70,10 @@ class BaseModel(nn.Module):
         if self._compiled is True:
             self.tensorboard.on_compile()
 
-    def normalize(self):
+    def apply_to_parameters(self: nn.Module, layer: BaseLayer, requires_grad=True):
         with torch.no_grad():
+            layer.train()
             for p in self.parameters():
-                if p.requires_grad:
-                    p.data /= p.norm()
+                if requires_grad and not p.requires_grad:
+                    continue
+                p.data = layer.forward(p.data)

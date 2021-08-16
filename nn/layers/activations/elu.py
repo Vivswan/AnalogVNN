@@ -3,12 +3,10 @@ from typing import Union
 import torch
 from torch import Tensor, nn
 
-from nn.activations.init_implementation import InitImplement
-from nn.backward_pass import BackwardFunction
-from nn.base_layer import BaseLayer
+from nn.layers.activations.activation import Activation
 
 
-class SELU(BaseLayer, BackwardFunction, InitImplement):
+class SELU(Activation):
     __constants__ = ['alpha', 'scale_factor']
     alpha: nn.Parameter
     scale_factor: nn.Parameter

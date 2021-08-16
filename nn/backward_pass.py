@@ -1,3 +1,4 @@
+import inspect
 from typing import Union, Callable, Dict, Set
 
 import torch
@@ -112,5 +113,11 @@ class BackwardPass:
 
                 if function_id in self.relation_dict:
                     for func in self.relation_dict[function_id]:
-                        new_pair = (func, func.backward(function_grad_output))
+                        if isinstance(func, BackwardFunction):
+                            new_pair = (func, func.backward(function_grad_output))
+                        elif inspect.ismethod(func) or inspect.isfunction(func):
+                            new_pair = (func, func(function_grad_output))
+                        else:
+                            raise NotImplementedError
+
                         to_visit_with.add(new_pair)
