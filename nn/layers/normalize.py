@@ -3,8 +3,8 @@ from abc import ABC
 import torch
 from torch import Tensor
 
-from nn.backward_pass import BackwardFunction
-from nn.base_layer import BaseLayer
+from nn.BackwardFunction import BackwardFunction
+from nn.BaseLayer import BaseLayer
 from nn.utils.is_using_cuda import get_device
 
 

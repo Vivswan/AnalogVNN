@@ -1,8 +1,8 @@
 import numpy as np
 import torch.nn as nn
 
+from nn.BaseModel import BaseModel
 from nn.layers.linear import Linear
-from nn.model_base import BaseModel
 from runs.r__._apporaches import BackPassTypes
 
 
@@ -19,8 +19,10 @@ class DoubleLinearLayerModel(BaseModel):
         in_size = int(np.prod(in_features[1:]))
 
         self.flatten = nn.Flatten(start_dim=1)
-        self.linear1 = Linear(in_size, int(in_size / 2), activation=None if activation_class is None else activation_class())
-        self.linear2 = Linear(int(in_size / 2), out_features, activation=None if activation_class is None else activation_class())
+        self.linear1 = Linear(in_size, int(in_size / 2),
+                              activation=None if activation_class is None else activation_class())
+        self.linear2 = Linear(int(in_size / 2), out_features,
+                              activation=None if activation_class is None else activation_class())
         self.log_softmax = nn.LogSoftmax(dim=1)
 
         if approach == BackPassTypes.default:
@@ -30,7 +32,8 @@ class DoubleLinearLayerModel(BaseModel):
             self.backward.add_relation(self.backward.OUTPUT, self.linear2.backpropagation, self.linear1.backpropagation)
 
         if approach == BackPassTypes.FA or approach == BackPassTypes.RFA:
-            self.backward.add_relation(self.backward.OUTPUT, self.linear2.feedforward_alignment, self.linear1.feedforward_alignment)
+            self.backward.add_relation(self.backward.OUTPUT, self.linear2.feedforward_alignment,
+                                       self.linear1.feedforward_alignment)
 
         if approach == BackPassTypes.DFA or approach == BackPassTypes.RDFA:
             self.backward.add_relation(self.backward.OUTPUT, self.linear2.direct_feedforward_alignment)

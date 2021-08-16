@@ -8,16 +8,16 @@ from math import exp
 import torch
 from torch import nn, optim
 
+from nn.BaseModel import BaseModel
 from nn.TensorboardModelLog import TensorboardModelLog
-from nn.layers.activations.activation import InitImplement
-from nn.layers.activations.elu import ELU
-from nn.layers.activations.gaussian import GeLU
-from nn.layers.activations.identity import Identity
-from nn.layers.activations.relu import ReLU, LeakyReLU
-from nn.layers.activations.sigmoid import Tanh, SiLU
+from nn.activations.activation import InitImplement
+from nn.activations.elu import ELU
+from nn.activations.gaussian import GeLU
+from nn.activations.identity import Identity
+from nn.activations.relu import LeakyReLU, ReLU
+from nn.activations.sigmoid import Tanh, SiLU
 from nn.layers.linear import Linear
 from nn.layers.normalize import Norm, Clamp
-from nn.model_base import BaseModel
 from nn.utils.is_using_cuda import get_device, set_device
 from nn.utils.make_dot import make_dot
 
@@ -254,7 +254,8 @@ def main_nn(name, activation_class, parameter_normalize_class, output_normalize_
         BaseModel.apply_to_parameters(model, parameter_normalize_class())
 
         if i % int(epochs / 5) == 0:
-            print(f"{name.rjust(50)}: {accuracy_fn(output, target):.4f}% - loss: {loss:.4f} - output: {model(data)} ({i})")
+            print(
+                f"{name.rjust(50)}: {accuracy_fn(output, target):.4f}% - loss: {loss:.4f} - output: {model(data)} ({i})")
     if TENSORBOARD:
         tensorboard.tensorboard.add_hparams(
             hparam_dict={
@@ -296,7 +297,6 @@ def main(name, approach, std, activation_class, parameter_normalize_class, outpu
 
         if i % int(epochs / 5) == 0:
             print(f"{name.rjust(50)}: {accuracy:.4f}% - loss: {loss:.4f} - output: {model.output(data)} ({i})")
-
 
     if TENSORBOARD:
         model.tensorboard.tensorboard.add_hparams(
@@ -374,4 +374,6 @@ if __name__ == '__main__':
                             0.001,
                         ]:
                             torch.manual_seed(seed)
-                            main(f"{timestamp}_{app.value}_{s}_{ac.__name__}_{nfn.__name__}_{onl.__name__}", approach=app, std=s, activation_class=ac, parameter_normalize_class=nfn, output_normalize_class=onl)
+                            main(f"{timestamp}_{app.value}_{s}_{ac.__name__}_{nfn.__name__}_{onl.__name__}",
+                                 approach=app, std=s, activation_class=ac, parameter_normalize_class=nfn,
+                                 output_normalize_class=onl)

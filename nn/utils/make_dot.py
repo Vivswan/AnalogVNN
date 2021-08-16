@@ -1,9 +1,10 @@
+import warnings
 from collections import namedtuple
 from distutils.version import LooseVersion
-from graphviz import Digraph
+
 import torch
+from graphviz import Digraph
 from torch import Tensor
-import warnings
 
 Node = namedtuple('Node', ('name', 'inputs', 'attr', 'op'))
 

@@ -2,8 +2,8 @@ from abc import ABC
 
 from torch import Tensor, nn
 
-from nn.backward_pass import BackwardFunction
-from nn.base_layer import BaseLayer
+from nn.BackwardFunction import BackwardFunction
+from nn.BaseLayer import BaseLayer
 
 
 class InitImplement:

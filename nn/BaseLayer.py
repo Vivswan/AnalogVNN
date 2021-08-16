@@ -28,4 +28,3 @@ class BaseLayer(nn.Module):
 
     def clear_tensors(self):
         self._saved_tensor = {}
-

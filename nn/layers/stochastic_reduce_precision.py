@@ -1,8 +1,8 @@
 import torch
 from torch import nn, Tensor
 
-from nn.backward_pass import BackwardFunction
-from nn.base_layer import BaseLayer
+from nn.BackwardFunction import BackwardFunction
+from nn.BaseLayer import BaseLayer
 
 
 class StochasticReducePrecision(BaseLayer, BackwardFunction):

@@ -4,7 +4,7 @@ from typing import Union
 import torch
 from torch import Tensor
 
-from nn.layers.activations.activation import Activation
+from nn.activations.activation import Activation
 
 
 class Gaussian(Activation):
@@ -25,5 +25,6 @@ class GeLU(Activation):
 
     def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
         x = self.get_tensor("input")
-        grad = (1 / 2) * ((1 + torch.erf(x / math.sqrt(2))) + x * ((2 / math.sqrt(math.pi)) * torch.exp(-torch.pow(x, 2))))
+        grad = (1 / 2) * (
+                (1 + torch.erf(x / math.sqrt(2))) + x * ((2 / math.sqrt(math.pi)) * torch.exp(-torch.pow(x, 2))))
         return grad_output * grad

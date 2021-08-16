@@ -4,8 +4,8 @@ from typing import Union
 import torch
 from torch import nn, Tensor
 
-from nn.backward_pass import BackwardFunction
-from nn.base_layer import BaseLayer
+from nn.BackwardFunction import BackwardFunction
+from nn.BaseLayer import BaseLayer
 from nn.utils.is_using_cuda import get_device
 from utils.helper_functions import to_matrix
 
@@ -53,7 +53,8 @@ class LinearFeedforwardAlignment(LinearBackpropagation):
         tensor = None
         while tensor is None:
             try:
-                tensor = torch.normal(mean=self.mean, std=self.std, size=size if size is not None else self.weight.size(), device=device)
+                tensor = torch.normal(mean=self.mean, std=self.std,
+                                      size=size if size is not None else self.weight.size(), device=device)
                 torch.linalg.pinv(tensor)
             except:
                 pass

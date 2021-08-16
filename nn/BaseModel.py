@@ -4,9 +4,9 @@ import torch
 from torch import nn, Tensor
 from torch.utils.data import DataLoader
 
+from nn.BackwardPass import BackwardPass
+from nn.BaseLayer import BaseLayer
 from nn.TensorboardModelLog import TensorboardModelLog
-from nn.backward_pass import BackwardPass
-from nn.base_layer import BaseLayer
 from nn.test import test
 from nn.train import train
 from nn.utils.is_using_cuda import get_device

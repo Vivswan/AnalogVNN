@@ -53,8 +53,10 @@ class TensorboardModelLog:
             for batch_idx, (data, target) in enumerate(train_loader):
                 input_size = tuple(list(data.shape)[1:])
                 batch_size = data.shape[1]
-                self.tensorboard.add_text("summary", re.sub("\n", "\n    ", "    " + summary(self.model, input_size=input_size)))
-                self.tensorboard.add_graph(self.model, torch.zeros(tuple([batch_size] + list(input_size))).to(self.model.device))
+                self.tensorboard.add_text("summary",
+                                          re.sub("\n", "\n    ", "    " + summary(self.model, input_size=input_size)))
+                self.tensorboard.add_graph(self.model,
+                                           torch.zeros(tuple([batch_size] + list(input_size))).to(self.model.device))
                 break
         self._added_graph = True
 

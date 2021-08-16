@@ -7,12 +7,12 @@ from torch.optim.optimizer import Optimizer
 from torchvision.datasets import VisionDataset
 
 from dataloaders.load_vision_dataset import load_vision_dataset
+from nn.BaseModel import BaseModel
 from nn.TensorboardModelLog import TensorboardModelLog
-from nn.model_base import BaseModel
+from nn.utils.is_using_cuda import is_using_cuda
 from nn.utils.summary import summary
 from runs.r_2021_07_20.run import RUN_MODELS_20210720
 from utils.data_dirs import data_dirs, erase_data_dirs
-from nn.utils.is_using_cuda import is_using_cuda
 from utils.path_functions import get_relative_path, path_join
 
 DATA_FOLDER = get_relative_path(__file__, "D:/_data")

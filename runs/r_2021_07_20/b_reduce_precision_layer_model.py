@@ -1,9 +1,8 @@
 import numpy as np
-import torch
 import torch.nn as nn
 
+from nn.BaseModel import BaseModel
 from nn.layers.reduce_precision_layer import ReducePrecision
-from nn.model_base import BaseModel
 
 
 class ReducePrecisionLayerModel(BaseModel):

@@ -1,5 +1,4 @@
 import inspect
-from time import sleep
 from typing import Type
 
 from torch.utils.data import DataLoader
@@ -8,7 +7,7 @@ from torchvision.transforms import transforms
 
 
 def load_vision_dataset(dataset: Type[VisionDataset], path, batch_size, is_cuda=False) -> (
-DataLoader, DataLoader, tuple):
+        DataLoader, DataLoader, tuple):
     transform = transforms.Compose([
         transforms.Grayscale(),
         transforms.ToTensor(),

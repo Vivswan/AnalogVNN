@@ -8,4 +8,3 @@ class BackPassTypes(Enum):
     DFA = "DFA"
     RFA = "RFA"
     RDFA = "RDFA"
-

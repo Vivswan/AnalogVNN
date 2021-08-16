@@ -1,7 +1,7 @@
 import numpy as np
 import torch.nn as nn
 
-from nn.model_base import BaseModel
+from nn.BaseModel import BaseModel
 
 
 class SingleLinearLayerModel(BaseModel):

@@ -10,18 +10,17 @@ from math import exp
 import torch
 from torch import nn, optim
 
-from nn.TensorboardModelLog import TensorboardModelLog
-from nn.layers.activations.activation import InitImplement
-from nn.layers.activations.elu import ELU
-from nn.layers.activations.gaussian import GeLU
-from nn.layers.activations.identity import Identity
-from nn.layers.activations.relu import ReLU, LeakyReLU
-from nn.layers.activations.sigmoid import Tanh, SiLU
+from nn.BaseModel import BaseModel
+from nn.activations.activation import InitImplement
+from nn.activations.elu import ELU
+from nn.activations.gaussian import GeLU
+from nn.activations.identity import Identity
+from nn.activations.relu import LeakyReLU, ReLU
+from nn.activations.sigmoid import Tanh, SiLU
 from nn.layers.linear import Linear
 from nn.layers.normalize import Norm, Clamp
 from nn.layers.reduce_precision_layer import ReducePrecision
 from nn.layers.stochastic_reduce_precision import StochasticReducePrecision
-from nn.model_base import BaseModel
 from nn.utils.is_using_cuda import get_device, set_device
 from nn.utils.make_dot import make_dot
 
@@ -322,15 +321,20 @@ def run_approach(approaches):
     parameters = combination_parameters(parameters, "std", [1, 0.1, 0.01], sufix="_" + BackPassTypes.DFA.value)
     parameters = combination_parameters(parameters, "std", [1, 0.1, 0.01], sufix="_" + BackPassTypes.RFA.value)
     parameters = combination_parameters(parameters, "std", [1, 0.1, 0.01], sufix="_" + BackPassTypes.RDFA.value)
-    parameters = combination_parameters(parameters, "activation_class", [Identity, LeakyReLU, ReLU, Tanh, ELU, SiLU, GeLU])
+    parameters = combination_parameters(parameters, "activation_class",
+                                        [Identity, LeakyReLU, ReLU, Tanh, ELU, SiLU, GeLU])
     parameters = combination_parameters(parameters, "output_normalize_class", [Clamp, Norm])
     parameters = combination_parameters(parameters, "parameter_normalize_class", [Clamp, Norm])
-    parameters = combination_parameters(parameters, "output_reduce_precision", [Identity, ReducePrecision, StochasticReducePrecision])
+    parameters = combination_parameters(parameters, "output_reduce_precision",
+                                        [Identity, ReducePrecision, StochasticReducePrecision])
     parameters = combination_parameters(parameters, "output_reduce_precision_p", [2, 4, 8], sufix="_ReducePrecision")
-    parameters = combination_parameters(parameters, "output_reduce_precision_p", [2, 4, 8], sufix="_StochasticReducePrecision")
-    parameters = combination_parameters(parameters, "parameter_reduce_precision", [Identity, ReducePrecision, StochasticReducePrecision])
+    parameters = combination_parameters(parameters, "output_reduce_precision_p", [2, 4, 8],
+                                        sufix="_StochasticReducePrecision")
+    parameters = combination_parameters(parameters, "parameter_reduce_precision",
+                                        [Identity, ReducePrecision, StochasticReducePrecision])
     parameters = combination_parameters(parameters, "parameter_reduce_precision_p", [2, 4, 8], sufix="_ReducePrecision")
-    parameters = combination_parameters(parameters, "parameter_reduce_precision_p", [2, 4, 8], sufix="_StochasticReducePrecision")
+    parameters = combination_parameters(parameters, "parameter_reduce_precision_p", [2, 4, 8],
+                                        sufix="_StochasticReducePrecision")
     # for k in parameters.keys():
     #     print(k)
     # print()

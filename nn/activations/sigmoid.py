@@ -3,7 +3,7 @@ from typing import Union
 import torch
 from torch import Tensor, nn
 
-from nn.layers.activations.activation import Activation
+from nn.activations.activation import Activation
 
 
 class Logistic(Activation):

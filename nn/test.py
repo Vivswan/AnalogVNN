@@ -1,6 +1,7 @@
 import torch
 from torch.utils.data import DataLoader
 
+
 def test(model, device: torch.device, test_loader: DataLoader, loss_fn):
     model.eval()
     total_loss = 0

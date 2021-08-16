@@ -5,9 +5,10 @@ from typing import Iterator, TypeVar, Union
 
 from torch import nn
 
-from nn.model_base import BaseModel
+from nn.BaseModel import BaseModel
 
 T = TypeVar('T', bound=nn.Module)
+
 
 class Sequential(BaseModel):
     def __init__(self, *args):
@@ -18,7 +19,6 @@ class Sequential(BaseModel):
         else:
             for idx, module in enumerate(args):
                 self.add_module(str(idx), module)
-
 
     def _get_item_by_idx(self, iterator, idx) -> T:
         """Get the idx-th item of the iterator"""

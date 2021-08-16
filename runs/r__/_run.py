@@ -5,9 +5,9 @@ import torchvision
 from torch import optim
 
 from dataloaders.loss_functions import nll_loss_fn
-from nn.layers.activations.relu import ReLU, LeakyReLU
-from nn.layers.activations import Tanh
-from nn.utils.normalize import normalize_model, normalize_cutoff_model
+from nn.activations.relu import ReLU, LeakyReLU
+from nn.activations.sigmoid import Tanh
+from nn.layers.normalize import Clamp, Norm
 from runs.r__.double_linear_layer_model import DoubleLinearLayerModel
 from runs.r__.single_linear_layer_model import SingleLinearLayerModel
 from runs.r__.triple_linear_layer_model import TripleLinearLayerModel
@@ -80,20 +80,9 @@ RUN_MODELS = temp_models
 
 temp_models = {}
 for i in RUN_MODELS:
-    for nfn in [
-        # None,
-        normalize_cutoff_model,
-        normalize_model,
-    ]:
-        if nfn == normalize_model:
-            suffix = "n"
-        elif nfn == normalize_cutoff_model:
-            suffix = "c"
-        else:
-            suffix = ""
-
-        temp_models[f"{i}{suffix}"] = copy.deepcopy(RUN_MODELS[i])
-        temp_models[f"{i}{suffix}"]["normalizer_fn"] = nfn
+    for nfn in [Clamp, Norm]:
+        temp_models[f"{i}{nfn.__name__}"] = copy.deepcopy(RUN_MODELS[i])
+        temp_models[f"{i}{nfn.__name__}"]["normalizer_fn"] = nfn
 RUN_MODELS = temp_models
 
 del temp_models
