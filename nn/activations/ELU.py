@@ -3,7 +3,7 @@ from typing import Union
 import torch
 from torch import Tensor, nn
 
-from nn.activations.activation import Activation
+from nn.activations.Activation import Activation
 
 
 class SELU(Activation):

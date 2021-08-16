@@ -5,9 +5,9 @@ import torchvision
 from torch import optim
 
 from dataloaders.loss_functions import nll_loss_fn
-from nn.activations.relu import ReLU, LeakyReLU
-from nn.activations.sigmoid import Tanh
-from nn.layers.normalize import Clamp, Norm
+from nn.activations.ReLU import ReLU, LeakyReLU
+from nn.activations.Tanh import Tanh
+from nn.layers.Normalize import Clamp, Norm
 from runs.r__.double_linear_layer_model import DoubleLinearLayerModel
 from runs.r__.single_linear_layer_model import SingleLinearLayerModel
 from runs.r__.triple_linear_layer_model import TripleLinearLayerModel

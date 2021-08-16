@@ -2,8 +2,8 @@ import numpy as np
 import torch.nn as nn
 
 from nn.BaseModel import BaseModel
-from nn.layers.gaussian_noise_layer import GaussianNoise, TensorFunctions
-from nn.layers.reduce_precision_layer import ReducePrecision
+from nn.layers.GaussianNoise import GaussianNoise, TensorFunctions
+from nn.layers.ReducePrecision import ReducePrecision
 
 
 class GaussianNoiseReducePrecisionLayerModel(BaseModel):

@@ -2,7 +2,7 @@ import numpy as np
 import torch.nn as nn
 
 from nn.BaseModel import BaseModel
-from nn.layers.reduce_precision_layer import ReducePrecision
+from nn.layers.ReducePrecision import ReducePrecision
 
 
 class ReducePrecisionLayerModel(BaseModel):

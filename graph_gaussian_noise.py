@@ -2,8 +2,8 @@ import numpy as np
 import torch
 from matplotlib import pyplot as plt
 
-from nn.layers.gaussian_noise_layer import GaussianNoise, TensorFunctions
-from nn.layers.reduce_precision_layer import ReducePrecision
+from nn.layers.GaussianNoise import GaussianNoise, TensorFunctions
+from nn.layers.ReducePrecision import ReducePrecision
 
 if __name__ == '__main__':
     precision = 8

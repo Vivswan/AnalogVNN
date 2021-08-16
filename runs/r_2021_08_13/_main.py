@@ -10,14 +10,15 @@ from torch import nn, optim
 
 from nn.BaseModel import BaseModel
 from nn.TensorboardModelLog import TensorboardModelLog
-from nn.activations.activation import InitImplement
-from nn.activations.elu import ELU
-from nn.activations.gaussian import GeLU
-from nn.activations.identity import Identity
-from nn.activations.relu import LeakyReLU, ReLU
-from nn.activations.sigmoid import Tanh, SiLU
-from nn.layers.linear import Linear
-from nn.layers.normalize import Norm, Clamp
+from nn.activations.Activation import InitImplement
+from nn.activations.ELU import ELU
+from nn.activations.Gaussian import GeLU
+from nn.activations.Identity import Identity
+from nn.activations.ReLU import LeakyReLU, ReLU
+from nn.activations.SiLU import SiLU
+from nn.activations.Tanh import Tanh
+from nn.layers.Linear import Linear
+from nn.layers.Normalize import Norm, Clamp
 from nn.utils.is_using_cuda import get_device, set_device
 from nn.utils.make_dot import make_dot
 

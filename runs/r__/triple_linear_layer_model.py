@@ -2,7 +2,7 @@ import numpy as np
 import torch.nn as nn
 
 from nn.BaseModel import BaseModel
-from nn.layers.linear import Linear
+from nn.layers.Linear import Linear
 from runs.r__._apporaches import BackPassTypes
 
 
