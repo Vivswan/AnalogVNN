@@ -10,6 +10,7 @@ class BackwardFunction:
 
     def __init__(self, layer):
         self._layer = layer
+        self.reset_parameters()
 
     def get_tensor(self, name: str) -> Union[None, Tensor]:
         if hasattr(self._layer, name):
@@ -22,13 +23,6 @@ class BackwardFunction:
             return self._layer.get_tensor(name)
         else:
             raise Exception(f'"{name}" is not found')
-
-    @property
-    def activation(self):
-        if hasattr(self._layer, "activation"):
-            return getattr(self._layer, "activation")
-        else:
-            return None
 
     def reset_parameters(self):
         pass

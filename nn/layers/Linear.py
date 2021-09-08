@@ -4,10 +4,22 @@ from typing import Union
 import torch
 from torch import nn, Tensor
 
-from nn.BackwardFunction import BackwardFunction
 from nn.BaseLayer import BaseLayer
+from nn.backward_pass.BackwardFunction import BackwardFunction
 from nn.utils.is_using_cuda import get_device
 from utils.helper_functions import to_matrix
+
+
+def generate_random_weight(mean, std, size, device=get_device()):
+    tensor = None
+    while tensor is None:
+        try:
+            tensor = torch.normal(mean=mean, std=std, size=size, device=device)
+            torch.linalg.pinv(tensor)
+        except:
+            pass
+    tensor.requires_grad = False
+    return tensor
 
 
 class LinearBackpropagation(BackwardFunction):
@@ -49,33 +61,40 @@ class LinearFeedforwardAlignment(LinearBackpropagation):
         super(LinearFeedforwardAlignment, self).reset_parameters()
         self._fixed_weight = None
 
-    def generate_random_weight(self, size=None, device=get_device()):
-        tensor = None
-        while tensor is None:
-            try:
-                tensor = torch.normal(mean=self.mean, std=self.std,
-                                      size=size if size is not None else self.weight.size(), device=device)
-                torch.linalg.pinv(tensor)
-            except:
-                pass
-        tensor.requires_grad = False
-        return tensor
-
     def backward(self, grad_output: Union[None, Tensor], weight: Union[None, Tensor] = None) -> Union[None, Tensor]:
-        if self._fixed_weight is None:
-            self._fixed_weight = self.generate_random_weight(device=grad_output.device)
-
         if weight is None:
-            if self.is_fixed:
-                weight = self._fixed_weight
-            else:
-                weight = self.generate_random_weight(device=grad_output.device)
+            if not self.is_fixed or self._fixed_weight is None:
+                self._fixed_weight = generate_random_weight(mean=self.mean, std=self.std, size=self.weight.size(), device=grad_output.device)
+            weight = self._fixed_weight
 
         return super(LinearFeedforwardAlignment, self).backward(grad_output, weight)
 
 
 class LinearDirectFeedforwardAlignment(LinearFeedforwardAlignment):
     def pre_backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
+        grad_output = to_matrix(grad_output)
+
+        size = (grad_output.size()[1], self.weight.size()[0])
+
+        if not self.is_fixed or self._fixed_weight is None:
+            self._fixed_weight = generate_random_weight(mean=self.mean, std=self.std, size=size, device=grad_output.device)
+
+        grad_output = grad_output @ self._fixed_weight
+        return grad_output
+
+    def backward(self, grad_output: Union[None, Tensor], weight: Union[None, Tensor] = None) -> Union[None, Tensor]:
+        grad_output = to_matrix(grad_output)
+
+        if self.weight.requires_grad:
+            self.weight.grad = grad_output.t() @ to_matrix(self.x)
+        if self.bias is not None and self.bias.requires_grad:
+            self.bias.grad = grad_output.sum(0)
+
+        return grad_output
+
+
+class LinearWeightFeedforwardAlignment(LinearFeedforwardAlignment):
+    def previous_layer(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
         grad_output = to_matrix(grad_output)
 
         size = (grad_output.size()[1], self.weight.size()[0])
@@ -129,6 +148,7 @@ class Linear(BaseLayer):
         self.backpropagation = LinearBackpropagation(self)
         self.feedforward_alignment = LinearFeedforwardAlignment(self)
         self.direct_feedforward_alignment = LinearDirectFeedforwardAlignment(self)
+        self.weight_feedforward_alignment = LinearWeightFeedforwardAlignment(self)
         self.reset_parameters()
 
     def reset_parameters(self) -> None:
@@ -137,10 +157,6 @@ class Linear(BaseLayer):
             fan_in, _ = nn.init._calculate_fan_in_and_fan_out(self.weight)
             bound = 1 / math.sqrt(fan_in) if fan_in > 0 else 0
             nn.init.uniform_(self.bias, -bound, bound)
-
-        self.backpropagation.reset_parameters()
-        self.feedforward_alignment.reset_parameters()
-        self.direct_feedforward_alignment.reset_parameters()
 
     def forward(self, x: Tensor):
         y = x @ self.weight.t()

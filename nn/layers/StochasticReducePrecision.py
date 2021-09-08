@@ -1,8 +1,8 @@
 import torch
 from torch import nn, Tensor
 
-from nn.BackwardFunction import BackwardFunction
 from nn.BaseLayer import BaseLayer
+from nn.backward_pass.BackwardFunction import BackwardFunction
 
 
 class StochasticReducePrecision(BaseLayer, BackwardFunction):
@@ -28,8 +28,8 @@ class StochasticReducePrecision(BaseLayer, BackwardFunction):
     def extra_repr(self) -> str:
         return f'precision={self.precision}, divide={self.divide}'
 
-    def forward(self, x: Tensor):
-        if self.training:
+    def forward(self, x: Tensor, force=False):
+        if self.training or force:
             g: Tensor = x * self.precision
             rand_x = torch.rand_like(g, requires_grad=False)
 
@@ -48,4 +48,4 @@ class StochasticReducePrecision(BaseLayer, BackwardFunction):
             return x
 
     def backward(self, grad_output: Tensor):
-        return grad_output
+        return self.forward(grad_output, force=True)

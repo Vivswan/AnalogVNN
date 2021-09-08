@@ -2,8 +2,8 @@ from abc import ABC
 
 from torch import Tensor, nn
 
-from nn.BackwardFunction import BackwardFunction
 from nn.BaseLayer import BaseLayer
+from nn.backward_pass.BackwardFunction import BackwardFunction
 
 
 class InitImplement:
@@ -15,5 +15,4 @@ class InitImplement:
 
 
 class Activation(BaseLayer, BackwardFunction, InitImplement, ABC):
-    def activation(self):
-        pass
+    pass

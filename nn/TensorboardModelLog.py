@@ -15,6 +15,7 @@ class TensorboardModelLog:
     def __init__(self, model, log_dir: str):
         self.model = model
         self.tensorboard = None
+        self.layer_data = True
         self._added_graph = False
 
         if not os.path.exists(log_dir):
@@ -44,7 +45,9 @@ class TensorboardModelLog:
 
     def on_compile(self, layer_data=True):
         self.tensorboard.add_text("str", re.sub("\n", "\n    ", "    " + str(self.model)))
-        if layer_data:
+        if self.layer_data:
+            self.layer_data = layer_data
+        if self.layer_data:
             self._add_layer_data(epoch=-1)
         return self
 
@@ -60,10 +63,10 @@ class TensorboardModelLog:
                 break
         self._added_graph = True
 
-    def register_training(self, epoch, train_loss, train_accuracy, layer_data=True):
+    def register_training(self, epoch, train_loss, train_accuracy):
         self.tensorboard.add_scalar('Loss/train', train_loss, epoch)
         self.tensorboard.add_scalar("Accuracy/train", train_accuracy, epoch)
-        if layer_data:
+        if self.layer_data:
             self._add_layer_data(epoch=epoch)
 
     def register_testing(self, epoch, test_loss, test_accuracy):
