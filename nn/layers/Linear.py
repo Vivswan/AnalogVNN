@@ -100,12 +100,12 @@ class LinearWeightFeedforwardAlignment(LinearFeedforwardAlignment):
         size = (grad_output.size()[1], self.weight.size()[0])
 
         if self._fixed_weight is None:
-            self._fixed_weight = self.generate_random_weight(size, device=grad_output.device)
+            self._fixed_weight = generate_random_weight(size, device=grad_output.device)
 
         if self.is_fixed:
             weight = self._fixed_weight
         else:
-            weight = self.generate_random_weight(size, device=grad_output.device)
+            weight = generate_random_weight(size, device=grad_output.device)
 
         grad_output = grad_output @ weight
         return grad_output

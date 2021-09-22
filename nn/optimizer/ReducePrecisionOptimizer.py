@@ -1,39 +1,55 @@
-import inspect
+from enum import Enum
 from typing import Type
 
 import torch
 from torch.optim import Optimizer
 
+from nn.optimizer.BasePrecisionOptimizer import BasePrecisionOptimizer
+from nn.parameters.BasePrecisionParameter import BasePrecisionParameter
+from nn.parameters.ReducePrecisionParameter import ReducePrecisionParameter
 
-class ReducePrecisionOptimizer(Optimizer):
 
-    def __init__(self, optimizer_cls: Type[Optimizer], params, **kwargs):
-        self.optimizer_cls = optimizer_cls
+class PrecisionUpdateTypes(Enum):
+    WEIGHT_UPDATE = "WEIGHT_UPDATE"
+    FULL_WEIGHT_UPDATE = "FULL_WEIGHT_UPDATE"
+    THRESHOLD_WEIGHT_UPDATE = "THRESHOLD_WEIGHT_UPDATE"
+    THRESHOLD_FULL_WEIGHT_UPDATE = "THRESHOLD_FULL_WEIGHT_UPDATE"
 
+
+class ReducePrecisionOptimizer(BasePrecisionOptimizer):
+    def __init__(self, optimizer_cls: Type[Optimizer], params, weight_update_type: PrecisionUpdateTypes, **kwargs):
         defaults = dict()
-        optimizer_signature = inspect.signature(optimizer_cls)
-        for parameter, value in optimizer_signature.parameters.items():
-            defaults[parameter] = None if value.default == optimizer_signature.empty else value.default
-        for parameter, value in kwargs.items():
-            defaults[parameter] = value
-        defaults["optimizer_cls"] = optimizer_cls
+        if weight_update_type not in PrecisionUpdateTypes:
+            raise Exception(f"invalid value for 'weight_update_type': {weight_update_type}")
 
-        super(ReducePrecisionOptimizer, self).__init__(params, defaults)
+        defaults["weight_update_type"] = weight_update_type
+
+        super().__init__(
+            optimizer_cls=optimizer_cls,
+            parameter_class=ReducePrecisionParameter,
+            params=params,
+            defaults=defaults,
+            **kwargs
+        )
 
     @torch.no_grad()
-    def step(self, closure=None):
-        loss = None
-        if closure is not None:
-            with torch.enable_grad():
-                loss = closure()
+    def step_precision_parameter(self, parameter, group) -> Type[BasePrecisionParameter]:
+        if group["weight_update_type"] == PrecisionUpdateTypes.WEIGHT_UPDATE:
+            parameter.set_tensor(parameter.pseudo_tensor)
+            return parameter
 
-        for group in self.param_groups:
-            params_with_grad = []
-            d_p_list = []
+        if group["weight_update_type"] == PrecisionUpdateTypes.FULL_WEIGHT_UPDATE:
+            parameter.set_tensor(parameter + (torch.sign(parameter.pseudo_tensor) * (1 / parameter.precision)))
+            parameter.pseudo_tensor.zero_()
+            return parameter
 
-            for p in group['params']:
-                if p.grad is not None:
-                    params_with_grad.append(p)
-                    d_p_list.append(p.grad)
+        if torch.any(torch.abs(parameter.pseudo_tensor) > 1 / parameter.precision):  # TODO
+            if group["weight_update_type"] == PrecisionUpdateTypes.THRESHOLD_WEIGHT_UPDATE:
+                parameter.set_tensor(parameter + parameter.pseudo_tensor)
+                parameter.pseudo_tensor.zero_()
+                return parameter
 
-        return loss
+            if group["weight_update_type"] == PrecisionUpdateTypes.THRESHOLD_FULL_WEIGHT_UPDATE:
+                parameter.set_tensor(parameter + (torch.sign(parameter.pseudo_tensor) * (1 / parameter.precision)))
+                parameter.pseudo_tensor.zero_()
+                return parameter

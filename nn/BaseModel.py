@@ -1,7 +1,7 @@
 from typing import Union, Type
 
 import torch
-from torch import nn
+from torch import nn, Tensor
 from torch.utils.data import DataLoader
 
 from nn.BaseLayer import BaseLayer
@@ -48,7 +48,7 @@ class BaseModel(nn.Module):
             self.tensorboard.on_compile(layer_data=layer_data)
         return self
 
-    def output(self, x):
+    def output(self, x) -> Tensor:
         result = self(x)
         if self.training:
             self.backward.set_output(result)

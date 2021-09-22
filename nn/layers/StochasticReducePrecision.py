@@ -5,12 +5,28 @@ from nn.BaseLayer import BaseLayer
 from nn.backward_pass.BackwardFunction import BackwardFunction
 
 
-class StochasticReducePrecision(BaseLayer, BackwardFunction):
-    __constants__ = ['precision', 'divide']
-    precision: nn.Parameter
-    divide: nn.Parameter
+def stochastic_reduce_precision(x: Tensor, precision: int) -> Tensor:
+    g: Tensor = x * precision
+    rand_x = torch.rand_like(g, requires_grad=False)
 
-    def __init__(self, precision: int = 8, divide: float = 0.5):
+    g_abs = torch.abs(g)
+    g_floor = torch.floor(g_abs)
+    g_ceil = torch.ceil(g_abs)
+
+    prob_floor = 1 - torch.abs(g_floor - g_abs)
+    bool_floor = rand_x <= prob_floor
+    do_floor = bool_floor.type(torch.float)
+    do_ceil = torch.logical_not(bool_floor).type(torch.float)
+
+    f = torch.sign(g) * (do_floor * g_floor + do_ceil * g_ceil) * (1 / precision)
+    return f
+
+
+class StochasticReducePrecision(BaseLayer, BackwardFunction):
+    __constants__ = ['precision']
+    precision: nn.Parameter
+
+    def __init__(self, precision: int = 8):
         super(StochasticReducePrecision, self).__init__()
         if precision < 1:
             raise ValueError("precision has to be more than 0, but got {}".format(precision))
@@ -19,7 +35,6 @@ class StochasticReducePrecision(BaseLayer, BackwardFunction):
             raise ValueError("precision must be int, but got {}".format(precision))
 
         self.precision = nn.Parameter(torch.tensor(precision), requires_grad=False)
-        self.divide = nn.Parameter(torch.tensor(divide), requires_grad=False)
 
     @property
     def step_size(self) -> float:
@@ -30,22 +45,10 @@ class StochasticReducePrecision(BaseLayer, BackwardFunction):
 
     def forward(self, x: Tensor, force=False):
         if self.training or force:
-            g: Tensor = x * self.precision
-            rand_x = torch.rand_like(g, requires_grad=False)
-
-            g_abs = torch.abs(g)
-            g_floor = torch.floor(g_abs)
-            g_ceil = torch.ceil(g_abs)
-
-            prob_floor = 1 - torch.abs(g_floor - g_abs)
-            bool_floor = rand_x <= prob_floor
-            do_floor = bool_floor.type(torch.float)
-            do_ceil = torch.logical_not(bool_floor).type(torch.float)
-
-            f = torch.sign(g) * (do_floor * g_floor + do_ceil * g_ceil) * (1 / self.precision)
-            return f
+            return stochastic_reduce_precision(x, self.precision)
         else:
             return x
 
     def backward(self, grad_output: Tensor):
+        # return grad_output
         return self.forward(grad_output, force=True)

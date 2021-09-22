@@ -26,7 +26,7 @@ def train(model, train_loader: DataLoader, epoch=None):
         correct += accuracy
 
         print_mod = int(dataset_size / (len(data) * 5))
-        if batch_idx % print_mod == 0 and batch_idx > 0:
+        if print_mod > 0 and batch_idx % print_mod == 0 and batch_idx > 0:
             print(
                 f'Train Epoch:'
                 f' {((epoch + 1) if epoch is not None else "")}'
