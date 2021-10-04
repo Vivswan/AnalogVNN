@@ -9,8 +9,9 @@ from nn.utils.is_using_cuda import get_device
 
 
 class Normalize(BaseLayer, BackwardFunction, ABC):
-    def activation(self):
-        pass
+    pass
+    # def activation(self):
+    #     pass
 
 
 class Norm(Normalize):
@@ -25,10 +26,6 @@ class Norm(Normalize):
         else:
             return x
 
-    def backward(self, grad_output):
-        x = self.get_tensor("input")
-        return grad_output * x.norm()
-
 
 class Clamp(Normalize):
     def forward(self, x: Tensor):
@@ -39,8 +36,3 @@ class Clamp(Normalize):
             return y
         else:
             return x
-
-    def backward(self, grad_output):
-        x = self.get_tensor("input")
-        y = self.get_tensor("output")
-        return grad_output * torch.nan_to_num(x / y, nan=1)

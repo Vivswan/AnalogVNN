@@ -2,10 +2,14 @@ from typing import Union
 
 from torch import nn, Tensor
 
+from nn.backward_pass.BackwardFunction import BackwardUsingForward, BackwardIdentity
+
 
 class BaseLayer(nn.Module):
     def __init__(self):
         super(BaseLayer, self).__init__()
+        self.backward_with_forward = BackwardUsingForward(self)
+        self.backward_identity = BackwardIdentity(self)
         self._saved_tensor = {}
 
     def save_tensor(self, name: str, tensor: Tensor):

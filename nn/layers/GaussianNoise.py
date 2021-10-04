@@ -1,7 +1,10 @@
-from typing import Callable
+from typing import Callable, Union
 
 import torch
-from torch import nn, Tensor
+from torch import Tensor
+
+from nn.BaseLayer import BaseLayer
+from nn.backward_pass.BackwardFunction import BackwardFunction
 
 
 class TensorFunctions:
@@ -14,7 +17,7 @@ class TensorFunctions:
         return lambda x: torch.mul(torch.ones(x.size()), constant)
 
 
-class GaussianNoise(nn.Module):
+class GaussianNoise(BaseLayer, BackwardFunction):
     __constants__ = ['mean', 'std']
     mean: Callable[[Tensor], Tensor]
     std: Callable[[Tensor], Tensor]
@@ -44,11 +47,14 @@ class GaussianNoise(nn.Module):
     def extra_repr(self) -> str:
         return f'mean={self.mean.__name__}, std={self.std.__name__}'
 
-    def forward(self, x: Tensor) -> Tensor:
-        if self.training:
+    def forward(self, x: Tensor, force: bool = False) -> Tensor:
+        if self.training or force:
             distribution = torch.distributions.normal.Normal(loc=self.mean(x), scale=self.std(x))
             return distribution.sample()
         return x
+
+    def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
+        return self.forward(grad_output, force=True)
 
 
 if __name__ == '__main__':

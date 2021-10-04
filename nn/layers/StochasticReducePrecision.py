@@ -45,10 +45,6 @@ class StochasticReducePrecision(BaseLayer, BackwardFunction):
 
     def forward(self, x: Tensor, force=False):
         if self.training or force:
-            return stochastic_reduce_precision(x, self.precision)
+            return stochastic_reduce_precision(x, self.precision.data)
         else:
             return x
-
-    def backward(self, grad_output: Tensor):
-        # return grad_output
-        return self.forward(grad_output, force=True)

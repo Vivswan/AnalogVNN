@@ -1,5 +1,3 @@
-import os
-import shutil
 import time
 from enum import Enum
 from math import exp
@@ -10,8 +8,8 @@ from torch import nn, optim
 from nn.BaseModel import BaseModel
 from nn.activations.ReLU import LeakyReLU
 from nn.layers.Linear import Linear
-from nn.optimizer.StochasticReducePrecisionOptimizer import StochasticReducePrecisionOptimizer
-from nn.parameters.StochasticReducePrecisionParameter import StochasticReducePrecisionParameter
+from nn.optimizer.ReducePrecisionOptimizer import PrecisionUpdateTypes, ReducePrecisionOptimizer
+from nn.parameters.ReducePrecisionParameter import ReducePrecisionParameter
 from nn.utils.is_using_cuda import get_device, set_device
 from nn.utils.make_dot import make_dot
 
@@ -140,16 +138,16 @@ def main(name, parameter_precision, model_parameters, weight_update_type):
     model.loss_fn = nn.MSELoss()
     model.accuracy_fn = accuracy_fn
     if parameter_precision is not None:
-        StochasticReducePrecisionParameter.convert_model(
+        ReducePrecisionParameter.convert_model(
             model,
             precision=parameter_precision,
             use_zero_pseudo_tensor=False
         )
 
-    model.optimizer = StochasticReducePrecisionOptimizer(
+    model.optimizer = ReducePrecisionOptimizer(
         optim.Adam,
         model.parameters(),
-        # weight_update_type=weight_update_type,
+        weight_update_type=weight_update_type,
         lr=0.03
     )
     # print("optimizer: ", model.optimizer)
@@ -188,9 +186,9 @@ def main(name, parameter_precision, model_parameters, weight_update_type):
 if __name__ == '__main__':
     DATA_FOLDER = f"C:/_data/tensorboard_SRP/"
     set_device("cpu")
-    if os.path.exists(DATA_FOLDER):
-        shutil.rmtree(DATA_FOLDER)
-    os.mkdir(DATA_FOLDER)
+    # if os.path.exists(DATA_FOLDER):
+    #     shutil.rmtree(DATA_FOLDER)
+    # os.mkdir(DATA_FOLDER)
 
     TENSORBOARD = True
     timestamp = str(int(time.time()))
@@ -206,12 +204,14 @@ if __name__ == '__main__':
     print(f"{'target'.rjust(43)}: {out}")
 
     epochs = 10000
-    model_parameters = {
-        'approach': TestModel.BackPassTypes.BP,
-        'std': None,
-        'activation_class': LeakyReLU
-    }
-    # for weight_update_type in PrecisionUpdateTypes:
-    for precision in [2, 4, 8, 16, 32, 64]:
-        main(f"{timestamp}-RP-{precision}-STOCHASTIC", precision, model_parameters, "STOCHASTIC")
-    # main(f"{timestamp}-RP-max", None, model_parameters)
+    for approach in TestModel.BackPassTypes:
+        model_parameters = {
+            'approach': approach,
+            'std': None,
+            'activation_class': LeakyReLU
+        }
+        for weight_update_type in PrecisionUpdateTypes:
+            for precision in [2, 4, 8, 16, 32, 64]:
+                main(f"{timestamp}-RP-{model_parameters['approach'].value}-{precision}-{weight_update_type.value}",
+                     precision, model_parameters, weight_update_type)
+        # main(f"{timestamp}-RP-max", None, model_parameters)

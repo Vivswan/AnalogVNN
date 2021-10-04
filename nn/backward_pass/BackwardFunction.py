@@ -8,7 +8,7 @@ from nn.BaseLayer import BaseLayer
 class BackwardFunction:
     __constants__ = ['main_layer']
 
-    def __init__(self, layer):
+    def __init__(self, layer: 'BaseLayer'):
         self._layer = layer
         self.reset_parameters()
 
@@ -29,3 +29,19 @@ class BackwardFunction:
 
     def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
         raise NotImplementedError
+
+
+class BackwardUsingForward(BackwardFunction):
+    def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
+        mode = self._layer.training
+
+        self._layer.training = True
+        result = self._layer.forward(grad_output)
+        self._layer.training = mode
+
+        return result
+
+
+class BackwardIdentity(BackwardFunction):
+    def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
+        return grad_output
