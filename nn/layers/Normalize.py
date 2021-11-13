@@ -1,38 +1,76 @@
 from abc import ABC
+from typing import Union
 
 import torch
 from torch import Tensor
 
 from nn.BaseLayer import BaseLayer
-from nn.backward_pass.BackwardFunction import BackwardFunction
+from nn.backward_pass.BackwardFunction import BackwardIdentity
 from nn.utils.is_using_cuda import get_device
 
 
-class Normalize(BaseLayer, BackwardFunction, ABC):
+class Normalize(BaseLayer, BackwardIdentity, ABC):
     pass
-    # def activation(self):
-    #     pass
 
 
-class Norm(Normalize):
+class L1Norm(Normalize):
     def forward(self, x: Tensor):
-        if self.training:
-            self.save_tensor("input", x)
-            norm = x.norm()
-            if torch.isclose(norm, torch.tensor(0., device=get_device())):
-                return x
-            else:
-                return x / norm
-        else:
-            return x
+        self.save_tensor("input", x)
+        norm = torch.norm(x, 1, -1)
+        norm = torch.clamp(norm, min=1e-4)
+        x = torch.div(x.T, norm).T
+        return x
+
+    def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
+        x = self.get_tensor("input")
+        norm = self.get_tensor("norm")
+        grad = (torch.div(torch.ones_like(x, device=get_device()).T, norm)).T - (
+            torch.div(2 * torch.pow(x, 2).T, torch.pow(norm, 2))).T
+        return grad_output * grad
+
+
+class L2Norm(Normalize):
+    def forward(self, x: Tensor):
+        self.save_tensor("input", x)
+        norm = torch.norm(x, 2, -1)
+        norm = torch.clamp(norm, min=1e-4)
+        self.save_tensor("norm", norm)
+
+        x = torch.div(x.T, norm).T
+        return x
+
+    def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
+        x = self.get_tensor("input")
+        norm = self.get_tensor("norm")
+        grad = (torch.div(torch.ones_like(x, device=get_device()).T, norm)).T - (
+            torch.div(torch.pow(x, 2).T, torch.pow(norm, 2.5))).T
+        return grad_output * grad
+
+
+class L1NormW(Normalize):
+    def forward(self, x: Tensor):
+        self.save_tensor("input", x)
+        norm = torch.norm(x, 1)
+        norm = torch.clamp(norm, min=1e-4)
+        x = torch.div(x, norm)
+        return x
+
+
+class L2NormW(Normalize):
+    def forward(self, x: Tensor):
+        self.save_tensor("input", x)
+        norm = torch.norm(x, 2)
+        norm = torch.clamp(norm, min=1e-4)
+        x = torch.div(x, norm)
+        return x
 
 
 class Clamp(Normalize):
     def forward(self, x: Tensor):
-        if self.training:
-            y = torch.clamp(x, min=-1, max=1)
-            self.save_tensor("input", x)
-            self.save_tensor("output", y)
-            return y
-        else:
-            return x
+        self.save_tensor("input", x)
+        return torch.clamp(x, min=-1, max=1)
+
+    def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
+        x = self.get_tensor("input")
+        grad = ((-1 <= x) * (x <= 1.)).type(torch.float)
+        return grad_output * grad

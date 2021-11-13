@@ -5,16 +5,20 @@ from torch.utils.data import DataLoader
 def test(model, test_loader: DataLoader):
     model.eval()
     total_loss = 0
-    correct = 0
+    total_accuracy = 0
+    total_size = 0
+
     with torch.no_grad():
         for data, target in test_loader:
             data, target = data.to(model.device), target.to(model.device)
+
             output = model.output(data)
             loss, accuracy = model.loss(output, target)
-            total_loss += loss.item()
-            correct += accuracy
 
-    total_loss /= len(test_loader.dataset)
-    accuracy = correct / len(test_loader.dataset)
+            total_loss += loss.item() * len(data)
+            total_accuracy += accuracy * len(data)
+            total_size += len(data)
 
-    return total_loss, accuracy
+    total_loss /= total_size
+    total_accuracy /= total_size
+    return total_loss, total_accuracy

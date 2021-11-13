@@ -49,16 +49,8 @@ class GaussianNoise(BaseLayer, BackwardFunction):
 
     def forward(self, x: Tensor, force: bool = False) -> Tensor:
         if self.training or force:
-            distribution = torch.distributions.normal.Normal(loc=self.mean(x), scale=self.std(x))
-            return distribution.sample()
+            return torch.normal(mean=x, std=torch.abs(x))
         return x
 
     def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
         return self.forward(grad_output, force=True)
-
-
-if __name__ == '__main__':
-    input = torch.ones(2, 2)
-    print(input)
-    print(GaussianNoise())
-    print(GaussianNoise()(input))

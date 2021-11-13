@@ -16,8 +16,10 @@ class Tanh(Activation):
         grad = 1 - torch.pow(torch.tanh(x), 2)
         return grad_output * grad
 
-    def initialise(self, tensor: Tensor) -> Tensor:
+    @staticmethod
+    def initialise(tensor: Tensor) -> Tensor:
         return nn.init.xavier_uniform(tensor, gain=nn.init.calculate_gain('tanh'))
 
-    def initialise_(self, tensor: Tensor) -> Tensor:
+    @staticmethod
+    def initialise_(tensor: Tensor) -> Tensor:
         return nn.init.xavier_uniform_(tensor, gain=nn.init.calculate_gain('tanh'))

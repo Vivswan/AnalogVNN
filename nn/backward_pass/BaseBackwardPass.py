@@ -1,8 +1,10 @@
+import inspect
 from typing import Union, Callable
 
 import torch
 from torch import Tensor
 
+from nn.BaseLayer import BaseLayer
 from nn.backward_pass.BackwardFunction import BackwardFunction
 
 _backward_fn_type = Union[BackwardFunction, Callable[[Union[None, Tensor]], Union[None, Tensor]]]
@@ -10,6 +12,7 @@ _backward_fn_type = Union[BackwardFunction, Callable[[Union[None, Tensor]], Unio
 
 class BaseBackwardPass:
     OUTPUT = "output"
+    STOP = "stop"
 
     def __init__(self, use_default_graph: bool = False):
         self.use_default_graph: bool = use_default_graph
@@ -27,6 +30,10 @@ class BaseBackwardPass:
             raise Exception("loss is not set.")
 
         self._loss.backward()
+        if not self.use_default_graph:
+            self._backward_pass(self._output.grad)
+        self._output = None
+        self._loss = None
 
     def set_output(self, output: Tensor):
         if self._output_hook is not None:
@@ -34,20 +41,24 @@ class BaseBackwardPass:
 
         if self.use_default_graph:
             self._output = output
-            # self._output_hook = output.register_hook(self._backward_pass_hook)
         else:
             self._output = output.detach_()
             self._output.requires_grad = True
-            self._output_hook = output.register_hook(self._backward_pass_hook)
         return output
 
     def set_loss(self, loss: Tensor):
         self._loss = loss
 
-    def _completed_backward_pass(self):
-        self._output_hook.remove()
-        self._output = None
-        self._loss = None
+    @staticmethod
+    def get_backward_function(module):
+        if isinstance(module, BaseLayer):
+            if module.get_backward_module() is not None:
+                return module.get_backward_module().backward
+        if isinstance(module, BackwardFunction):
+            return module.backward
+        if inspect.ismethod(module) or inspect.isfunction(module):
+            return module
+        return None
 
     def add_relation(self, start_at, *args: Union[str, BackwardFunction]):
         raise NotImplemented
@@ -56,5 +67,5 @@ class BaseBackwardPass:
         raise NotImplemented
 
     @torch.no_grad()
-    def _backward_pass_hook(self, grad_output: Tensor):
+    def _backward_pass(self, grad_output: Tensor):
         raise NotImplemented

@@ -23,4 +23,4 @@ On each Approach and Model
     1. x, y
     2. W
     3. x, y, W
-4. Gaussian Noise
+4. Shot Noise (Gaussian Noise)

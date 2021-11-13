@@ -24,6 +24,7 @@ class BaseModel(nn.Module):
 
         self._compiled = False
         self._output_hook = None
+        self._sequential_forward = None
 
         self.tensorboard = None
         if tensorboard_log_dir is not None:
@@ -76,11 +77,13 @@ class BaseModel(nn.Module):
                     continue
                 p.data = layer.forward(p.data)
 
-    def train_on(self, train_loader: DataLoader, epoch: int = None):
+    def train_on(self, train_loader: DataLoader, epoch: int = None, apply_fn=None):
+        if apply_fn is None:
+            apply_fn = []
         if self._compiled is False:
             raise Exception("model is not complied yet")
 
-        train_loss, train_accuracy = train(self, train_loader, epoch)
+        train_loss, train_accuracy = train(self, train_loader, epoch, apply_fn)
 
         if self.tensorboard is not None:
             self.tensorboard.add_graph(train_loader)
@@ -113,3 +116,24 @@ class BaseModel(nn.Module):
         self.tensorboard = tensorboard
         if self._compiled is True:
             self.tensorboard.on_compile()
+
+    def add_sequential_relation(self, *args):
+        args = list(args)
+        self._sequential_forward = args
+        self.backward.add_relation(*([self.backward.OUTPUT] + list(reversed(args))))
+        if self.backward.STOP in self.backward.STOP:
+            args.remove(self.backward.STOP)
+        for idx, module in enumerate(args):
+            self.add_module(str(idx), module)
+
+    def forward(self, x: Tensor):
+        if self._sequential_forward is not None:
+            for i, module in enumerate(self._sequential_forward):
+                x = module(x)
+                # y = module(x)
+                # if bool(torch.any(torch.isnan(y))):
+                #     raise ValueError(f"{i}: {module}")
+                # x = y
+            return x
+        else:
+            raise NotImplementedError

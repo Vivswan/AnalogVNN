@@ -41,10 +41,7 @@ class StochasticReducePrecision(BaseLayer, BackwardFunction):
         return 1 / self.precision
 
     def extra_repr(self) -> str:
-        return f'precision={self.precision}, divide={self.divide}'
+        return f'precision={self.precision}'
 
     def forward(self, x: Tensor, force=False):
-        if self.training or force:
-            return stochastic_reduce_precision(x, self.precision.data)
-        else:
-            return x
+        return stochastic_reduce_precision(x, self.precision.data)

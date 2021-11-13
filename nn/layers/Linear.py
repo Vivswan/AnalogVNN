@@ -64,7 +64,8 @@ class LinearFeedforwardAlignment(LinearBackpropagation):
     def backward(self, grad_output: Union[None, Tensor], weight: Union[None, Tensor] = None) -> Union[None, Tensor]:
         if weight is None:
             if not self.is_fixed or self._fixed_weight is None:
-                self._fixed_weight = generate_random_weight(mean=self.mean, std=self.std, size=self.weight.size(), device=grad_output.device)
+                self._fixed_weight = generate_random_weight(mean=self.mean, std=self.std, size=self.weight.size(),
+                                                            device=grad_output.device)
             weight = self._fixed_weight
 
         return super(LinearFeedforwardAlignment, self).backward(grad_output, weight)
@@ -77,7 +78,8 @@ class LinearDirectFeedforwardAlignment(LinearFeedforwardAlignment):
         size = (grad_output.size()[1], self.weight.size()[0])
 
         if not self.is_fixed or self._fixed_weight is None:
-            self._fixed_weight = generate_random_weight(mean=self.mean, std=self.std, size=size, device=grad_output.device)
+            self._fixed_weight = generate_random_weight(mean=self.mean, std=self.std, size=size,
+                                                        device=grad_output.device)
 
         grad_output = grad_output @ self._fixed_weight
         return grad_output
@@ -145,10 +147,6 @@ class Linear(BaseLayer):
         else:
             self.register_parameter('bias', None)
 
-        self.backpropagation = LinearBackpropagation(self)
-        self.feedforward_alignment = LinearFeedforwardAlignment(self)
-        self.direct_feedforward_alignment = LinearDirectFeedforwardAlignment(self)
-        self.weight_feedforward_alignment = LinearWeightFeedforwardAlignment(self)
         self.reset_parameters()
 
     def reset_parameters(self) -> None:
@@ -159,7 +157,7 @@ class Linear(BaseLayer):
             nn.init.uniform_(self.bias, -bound, bound)
 
     def forward(self, x: Tensor):
-        y = x @ self.weight.t()
+        y = torch.mm(x, self.weight.t())
         if self.bias is not None:
             y += self.bias
 

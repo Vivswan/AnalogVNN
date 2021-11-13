@@ -16,10 +16,12 @@ class Logistic(Activation):
         grad = self.forward(x) * (1 - self.forward(x))
         return grad_output * grad
 
-    def initialise(self, tensor: Tensor) -> Tensor:
+    @staticmethod
+    def initialise(tensor: Tensor) -> Tensor:
         return nn.init.xavier_uniform(tensor, gain=nn.init.calculate_gain('sigmoid'))
 
-    def initialise_(self, tensor: Tensor) -> Tensor:
+    @staticmethod
+    def initialise_(tensor: Tensor) -> Tensor:
         return nn.init.xavier_uniform_(tensor, gain=nn.init.calculate_gain('sigmoid'))
 
 

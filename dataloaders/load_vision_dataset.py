@@ -11,7 +11,7 @@ def load_vision_dataset(dataset: Type[VisionDataset], path, batch_size, is_cuda=
     transform = transforms.Compose([
         transforms.Grayscale(),
         transforms.ToTensor(),
-        transforms.Normalize(mean=[0.5], std=[0.5])
+        # transforms.Normalize(mean=[0.5], std=[0.5])
     ])
 
     dataset_kwargs = {
@@ -35,6 +35,7 @@ def load_vision_dataset(dataset: Type[VisionDataset], path, batch_size, is_cuda=
     test_set = dataset(root=path, train=False, download=True, transform=transform)
     test_loader = DataLoader(test_set, **dataset_kwargs)
 
-    input_shape = list(next(iter(test_loader))[0].shape)
+    zeroth_element = next(iter(test_loader))[0]
+    input_shape = list(zeroth_element.shape)
 
     return train_loader, test_loader, input_shape, tuple(train_set.classes)

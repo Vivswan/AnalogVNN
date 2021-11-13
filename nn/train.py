@@ -1,11 +1,18 @@
 from torch.utils.data import DataLoader
 
 
-def train(model, train_loader: DataLoader, epoch=None):
+def train(model, train_loader: DataLoader, epoch=None, apply_fn=None):
+    if apply_fn is None:
+        apply_fn = []
     model.train()
     total_loss = 0.0
-    correct = 0
-    dataset_size = len(list(train_loader))
+    total_accuracy = 0
+    total_size = 0
+    if isinstance(train_loader, DataLoader):
+        # noinspection PyTypeChecker
+        dataset_size = len(train_loader.dataset)
+    else:
+        dataset_size = len(train_loader)
 
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(model.device), target.to(model.device)
@@ -19,24 +26,25 @@ def train(model, train_loader: DataLoader, epoch=None):
         loss, accuracy = model.loss(output, target)
 
         model.backward()
+        for i in apply_fn:
+            model.apply_to_parameters(i)
         model.optimizer.step()
 
         # print statistics
-        total_loss += loss.item()
-        correct += accuracy
+        total_loss += loss.item() * len(data)
+        total_accuracy += accuracy * len(data)
+        total_size += len(data)
 
         print_mod = int(dataset_size / (len(data) * 5))
         if print_mod > 0 and batch_idx % print_mod == 0 and batch_idx > 0:
             print(
                 f'Train Epoch:'
                 f' {((epoch + 1) if epoch is not None else "")}'
-                f' '
-                f'[{batch_idx * len(data)}/{dataset_size}'
-                f' ({100. * batch_idx / len(train_loader):.0f}%)'
-                f']'
-                f'\tLoss: {total_loss / (batch_idx * len(data)):.6f}'
+                f' [{batch_idx * len(data)}/{dataset_size} ({100. * batch_idx / len(train_loader):.0f}%)]'
+                f'\tLoss: {total_loss / total_size:.6f}'
+                f'\tAccuracy: {total_accuracy / total_size * 100:.2f}%'
             )
 
-    total_loss /= dataset_size
-    accuracy = correct / dataset_size
-    return total_loss, accuracy
+    total_loss /= total_size
+    total_accuracy /= total_size
+    return total_loss, total_accuracy

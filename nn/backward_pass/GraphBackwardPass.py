@@ -1,4 +1,3 @@
-import inspect
 from typing import Union, Dict, Set, Tuple
 
 import torch
@@ -38,7 +37,7 @@ class GraphBackwardPass(BaseBackwardPass):
                 to_visit.add(i)
 
     @torch.no_grad()
-    def _backward_pass_hook(self, grad_output: Tensor):
+    def _backward_pass(self, grad_output: Tensor):
         to_visit_with: Set[Tuple[Union[_backward_fn_type, str], Tensor]] = set()
         to_visit_with.add((self.OUTPUT, grad_output))
 
@@ -48,14 +47,12 @@ class GraphBackwardPass(BaseBackwardPass):
             if function_id not in self.relation_dict:
                 continue
 
-            for func in self.relation_dict[function_id]:
-                if isinstance(func, BackwardFunction):
-                    new_pair = (func, func.backward(function_grad_output))
-                elif inspect.ismethod(func) or inspect.isfunction(func):
-                    new_pair = (func, func(function_grad_output))
-                else:
+            for module in self.relation_dict[function_id]:
+                if module == self.STOP:
+                    continue
+
+                backward_fn = self.get_backward_function(module)
+                if backward_fn is None:
                     raise NotImplementedError
 
-                to_visit_with.add(new_pair)
-
-        self._completed_backward_pass()
+                to_visit_with.add((module, backward_fn(function_grad_output)))

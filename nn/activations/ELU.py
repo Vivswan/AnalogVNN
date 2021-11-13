@@ -28,10 +28,12 @@ class SELU(Activation):
         grad = self.scale_factor * ((x < 0).type(torch.float) * self.alpha * torch.exp(x) + (x >= 0).type(torch.float))
         return grad_output * grad
 
-    def initialise(self, tensor: Tensor) -> Tensor:
+    @staticmethod
+    def initialise(tensor: Tensor) -> Tensor:
         return nn.init.xavier_uniform(tensor, gain=nn.init.calculate_gain('selu'))
 
-    def initialise_(self, tensor: Tensor) -> Tensor:
+    @staticmethod
+    def initialise_(tensor: Tensor) -> Tensor:
         return nn.init.xavier_uniform_(tensor, gain=nn.init.calculate_gain('selu'))
 
 

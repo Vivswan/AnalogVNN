@@ -1,10 +1,8 @@
-import inspect
 from typing import Set, List
 
 import torch
 from torch import Tensor
 
-from nn.backward_pass.BackwardFunction import BackwardFunction
 from nn.backward_pass.BaseBackwardPass import BaseBackwardPass, _backward_fn_type
 
 
@@ -26,15 +24,13 @@ class TreeBackwardPass(BaseBackwardPass):
         pass
 
     @torch.no_grad()
-    def _backward_pass_hook(self, grad_output: Tensor):
+    def _backward_pass(self, grad_output: Tensor):
         for backward_list in self.relation_set:
             current_grad_output = grad_output
-            for func in backward_list:
-                if isinstance(func, BackwardFunction):
-                    current_grad_output = func.backward(current_grad_output)
-                elif inspect.ismethod(func) or inspect.isfunction(func):
-                    current_grad_output = func(current_grad_output)
-                else:
+            for module in backward_list:
+                backward_fn = self.get_backward_function(module)
+
+                if backward_fn is None:
                     raise NotImplementedError
 
-        self._completed_backward_pass()
+                current_grad_output = backward_fn(current_grad_output)

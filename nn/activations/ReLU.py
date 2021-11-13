@@ -26,10 +26,12 @@ class PReLU(Activation):
         grad = (x < 0).type(torch.float) * self.alpha + (x >= 0).type(torch.float)
         return grad_output * grad
 
-    def initialise(self, tensor: Tensor) -> Tensor:
+    @staticmethod
+    def initialise(tensor: Tensor) -> Tensor:
         return nn.init.xavier_uniform(tensor, gain=nn.init.calculate_gain('leaky_relu', param=float(self.alpha)))
 
-    def initialise_(self, tensor: Tensor) -> Tensor:
+    @staticmethod
+    def initialise_(tensor: Tensor) -> Tensor:
         return nn.init.xavier_uniform_(tensor, gain=nn.init.calculate_gain('leaky_relu', param=float(self.alpha)))
 
 
@@ -37,10 +39,12 @@ class ReLU(PReLU):
     def __init__(self):
         super(ReLU, self).__init__(alpha=0)
 
-    def initialise(self, tensor: Tensor) -> Tensor:
+    @staticmethod
+    def initialise(tensor: Tensor) -> Tensor:
         return nn.init.kaiming_uniform(tensor, a=math.sqrt(5), nonlinearity="relu")
 
-    def initialise_(self, tensor: Tensor) -> Tensor:
+    @staticmethod
+    def initialise_(tensor: Tensor) -> Tensor:
         return nn.init.kaiming_uniform_(tensor, a=math.sqrt(5), nonlinearity="relu")
 
 
@@ -48,8 +52,10 @@ class LeakyReLU(PReLU):
     def __init__(self):
         super(LeakyReLU, self).__init__(alpha=0.01)
 
-    def initialise(self, tensor: Tensor) -> Tensor:
+    @staticmethod
+    def initialise(tensor: Tensor) -> Tensor:
         return nn.init.kaiming_uniform(tensor, a=math.sqrt(5), nonlinearity="leaky_relu")
 
-    def initialise_(self, tensor: Tensor) -> Tensor:
+    @staticmethod
+    def initialise_(tensor: Tensor) -> Tensor:
         return nn.init.kaiming_uniform_(tensor, a=math.sqrt(5), nonlinearity="leaky_relu")

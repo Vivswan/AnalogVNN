@@ -7,10 +7,12 @@ from nn.backward_pass.BackwardFunction import BackwardFunction
 
 
 class InitImplement:
-    def initialise(self, tensor: Tensor) -> Tensor:
+    @staticmethod
+    def initialise(tensor: Tensor) -> Tensor:
         return nn.init.xavier_uniform(tensor)
 
-    def initialise_(self, tensor: Tensor) -> Tensor:
+    @staticmethod
+    def initialise_(tensor: Tensor) -> Tensor:
         return nn.init.xavier_uniform_(tensor)
 
 
