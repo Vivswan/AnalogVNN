@@ -9,3 +9,4 @@ tabulate
 dataclasses~=0.8
 pillow~=8.4.0
 graphviz~=2.38
+tensorflow~=2.7.0

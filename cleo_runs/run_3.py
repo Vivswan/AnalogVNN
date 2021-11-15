@@ -12,6 +12,7 @@ from nn.BaseModel import BaseModel
 from nn.activations.Activation import Activation
 from nn.activations.Identity import Identity
 from nn.backward_pass.BackwardFunction import BackwardIdentity, BackwardUsingForward
+from nn.layers.GaussianNoise import GaussianNoise
 from nn.layers.Linear import Linear, LinearBackpropagation
 from nn.layers.Normalize import Normalize
 from nn.layers.ReducePrecision import ReducePrecision
@@ -26,7 +27,7 @@ from utils.path_functions import path_join
 class Linear2(BaseModel):
     def __init__(
             self, approach: str, in_features, out_features,
-            activation_class: Type[Activation], norm_class: Type[Normalize], precision: int
+            activation_class: Type[Activation], norm_class: Type[Normalize], precision: int, leakage: float
     ):
         super(Linear2, self).__init__()
         self.activation_class = activation_class
@@ -50,14 +51,17 @@ class Linear2(BaseModel):
         self.rp2_post = (ReducePrecision(precision=precision) if precision is not None else Identity()) \
             .use(BackwardIdentity)
 
+        self.noise1_pre = GaussianNoise(leakage=leakage, precision=precision)
+        self.noise1_post = GaussianNoise(leakage=leakage, precision=precision)
+        self.noise2_pre = GaussianNoise(leakage=leakage, precision=precision)
+        self.noise2_post = GaussianNoise(leakage=leakage, precision=precision)
+
         self.activation1 = activation_class()
         self.activation2 = activation_class()
 
         activation_class.initialise_(self.linear1.weight)
         activation_class.initialise_(self.linear2.weight)
 
-        if approach == "default":
-            self.backward.use_default_graph = True
         if approach == "full":
             pass
         if approach == "no_norm":
@@ -77,14 +81,18 @@ class Linear2(BaseModel):
 
             self.norm1_pre,
             self.rp1_pre,
+            self.noise1_pre,
             self.linear1,
+            self.noise1_post,
             self.norm1_post,
             self.rp1_post,
             self.activation1,
 
             self.norm2_pre,
             self.rp2_pre,
+            self.noise2_pre,
             self.linear2,
+            self.noise2_post,
             self.norm2_post,
             self.rp2_post,
             self.activation2,
@@ -94,7 +102,7 @@ class Linear2(BaseModel):
 class Linear3(BaseModel):
     def __init__(
             self, approach: str, in_features, out_features,
-            activation_class: Type[Activation], norm_class: Type[Normalize], precision: int
+            activation_class: Type[Activation], norm_class: Type[Normalize], precision: int, leakage: float
     ):
         super(Linear3, self).__init__()
         self.activation_class = activation_class
@@ -125,6 +133,13 @@ class Linear3(BaseModel):
         self.rp3_post = (ReducePrecision(precision=precision) if precision is not None else Identity()) \
             .use(BackwardIdentity)
 
+        self.noise1_pre = GaussianNoise(leakage=leakage, precision=precision)
+        self.noise1_post = GaussianNoise(leakage=leakage, precision=precision)
+        self.noise2_pre = GaussianNoise(leakage=leakage, precision=precision)
+        self.noise2_post = GaussianNoise(leakage=leakage, precision=precision)
+        self.noise3_pre = GaussianNoise(leakage=leakage, precision=precision)
+        self.noise3_post = GaussianNoise(leakage=leakage, precision=precision)
+
         self.activation1 = activation_class()
         self.activation2 = activation_class()
         self.activation3 = activation_class()
@@ -133,8 +148,6 @@ class Linear3(BaseModel):
         activation_class.initialise_(self.linear2.weight)
         activation_class.initialise_(self.linear3.weight)
 
-        if approach == "default":
-            self.backward.use_default_graph = True
         if approach == "full":
             pass
         if approach == "no_norm":
@@ -158,21 +171,27 @@ class Linear3(BaseModel):
 
             self.norm1_pre,
             self.rp1_pre,
+            self.noise1_pre,
             self.linear1,
+            self.noise1_post,
             self.norm1_post,
             self.rp1_post,
             self.activation1,
 
             self.norm2_pre,
             self.rp2_pre,
+            self.noise2_pre,
             self.linear2,
+            self.noise2_post,
             self.norm2_post,
             self.rp2_post,
             self.activation2,
 
             self.norm3_pre,
             self.rp3_pre,
+            self.noise3_pre,
             self.linear3,
+            self.noise3_post,
             self.norm3_post,
             self.rp3_post,
             self.activation3,
@@ -182,7 +201,7 @@ class Linear3(BaseModel):
 class Linear4(BaseModel):
     def __init__(
             self, approach: str, in_features, out_features,
-            activation_class: Type[Activation], norm_class: Type[Normalize], precision: int
+            activation_class: Type[Activation], norm_class: Type[Normalize], precision: int, leakage: float
     ):
         super(Linear4, self).__init__()
         self.activation_class = activation_class
@@ -220,6 +239,15 @@ class Linear4(BaseModel):
         self.rp4_post = (ReducePrecision(precision=precision) if precision is not None else Identity()) \
             .use(BackwardIdentity)
 
+        self.noise1_pre = GaussianNoise(leakage=leakage, precision=precision).use(BackwardIdentity)
+        self.noise1_post = GaussianNoise(leakage=leakage, precision=precision).use(BackwardIdentity)
+        self.noise2_pre = GaussianNoise(leakage=leakage, precision=precision).use(BackwardIdentity)
+        self.noise2_post = GaussianNoise(leakage=leakage, precision=precision).use(BackwardIdentity)
+        self.noise3_pre = GaussianNoise(leakage=leakage, precision=precision).use(BackwardIdentity)
+        self.noise3_post = GaussianNoise(leakage=leakage, precision=precision).use(BackwardIdentity)
+        self.noise4_pre = GaussianNoise(leakage=leakage, precision=precision).use(BackwardIdentity)
+        self.noise4_post = GaussianNoise(leakage=leakage, precision=precision).use(BackwardIdentity)
+
         self.activation1 = activation_class()
         self.activation2 = activation_class()
         self.activation3 = activation_class()
@@ -230,10 +258,26 @@ class Linear4(BaseModel):
         activation_class.initialise_(self.linear3.weight)
         activation_class.initialise_(self.linear4.weight)
 
-        if approach == "default":
-            self.backward.use_default_graph = True
         if approach == "full":
             pass
+        if approach == "no_norm":
+            self.norm1_pre.use(BackwardIdentity)
+            self.norm1_post.use(BackwardIdentity)
+            self.norm2_pre.use(BackwardIdentity)
+            self.norm2_post.use(BackwardIdentity)
+            self.norm3_pre.use(BackwardIdentity)
+            self.norm3_post.use(BackwardIdentity)
+            self.norm4_pre.use(BackwardIdentity)
+            self.norm4_post.use(BackwardIdentity)
+        if approach == "use_norm_forward":
+            self.norm1_pre.use(BackwardUsingForward)
+            self.norm1_post.use(BackwardUsingForward)
+            self.norm2_pre.use(BackwardUsingForward)
+            self.norm2_post.use(BackwardUsingForward)
+            self.norm3_pre.use(BackwardUsingForward)
+            self.norm3_post.use(BackwardUsingForward)
+            self.norm4_pre.use(BackwardUsingForward)
+            self.norm4_post.use(BackwardUsingForward)
         if approach == "no_norm":
             self.norm1_pre.use(BackwardIdentity)
             self.norm1_post.use(BackwardIdentity)
@@ -259,28 +303,36 @@ class Linear4(BaseModel):
 
             self.norm1_pre,
             self.rp1_pre,
+            self.noise1_pre,
             self.linear1,
+            self.noise1_post,
             self.norm1_post,
             self.rp1_post,
             self.activation1,
 
             self.norm2_pre,
             self.rp2_pre,
+            self.noise2_pre,
             self.linear2,
+            self.noise2_post,
             self.norm2_post,
             self.rp2_post,
             self.activation2,
 
             self.norm3_pre,
             self.rp3_pre,
+            self.noise3_pre,
             self.linear3,
+            self.noise3_post,
             self.norm3_post,
             self.rp3_post,
             self.activation3,
 
             self.norm4_pre,
             self.rp4_pre,
+            self.noise4_pre,
             self.linear4,
+            self.noise4_post,
             self.norm4_post,
             self.rp4_post,
             self.activation4,
@@ -346,11 +398,9 @@ def main(
         'norm_class_w': norm_class_w.__name__,
         'precision_y': str(precision_y),
         'precision_w': str(precision_w),
-        'precision_class': ReducePrecision.__name__,
         "loss_class": model.loss_fn.__class__.__name__,
         "model_class": model.__class__.__name__,
         'optimiser_class': model.optimizer.__class__.__name__,
-        'optimiser_update_type': PrecisionUpdateTypes.WEIGHT_UPDATE,
         'batch_size': batch_size,
     }
 

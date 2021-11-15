@@ -52,7 +52,7 @@ class BaseModel(nn.Module):
     def output(self, x) -> Tensor:
         result = self(x)
         if self.training:
-            self.backward.set_output(result)
+            result = self.backward.set_output(result)
         return result
 
     def loss(self, x, y):

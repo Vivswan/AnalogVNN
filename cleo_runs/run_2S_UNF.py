@@ -3,7 +3,7 @@ import time
 
 import torchvision
 
-from cleo_runs.run_2 import *
+from cleo_runs.run_2S import *
 from nn.activations.ELU import ELU
 from nn.activations.Gaussian import GeLU
 from nn.activations.ReLU import ReLU, LeakyReLU

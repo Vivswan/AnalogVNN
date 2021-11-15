@@ -10,17 +10,14 @@ from nn.layers.ReducePrecision import ReducePrecision
 def main():
     torch.device('cpu')
     precision = 2 ** 2
-    normal_reference_std = 3.33
+    normal_reference_std = 1
     normal_reference_leakage = 1 - torch.erf(torch.tensor(normal_reference_std / math.sqrt(2)))
     normal_leakage = 0.1
     normal_std = 1 / (2 * precision * torch.erfinv(torch.tensor(1 - normal_leakage)) * math.sqrt(2))
     normal_snr = 1 / (normal_reference_std * 2 * normal_std)
     # factor = 1
     poisson_lambda = 50
-    ls = 1 - torch.erf(torch.tensor(normal_std / math.sqrt(2)))
-    print(ls, 1 / (2 * normal_std * torch.erfinv(torch.tensor(1 - normal_leakage)) * math.sqrt(2)))
 
-    exit()
     xlim = [-1.01, 1.01]
     ylim = [-1.5, 1.5]
 
@@ -105,7 +102,7 @@ def main():
 
     fig.tight_layout()
     plt.show()
-    # fig.savefig('image.svg', dpi=fig.dpi)
+    fig.savefig('image.svg', dpi=fig.dpi)
     print()
 
 

@@ -42,9 +42,9 @@ class BaseBackwardPass:
         if self.use_default_graph:
             self._output = output
         else:
-            self._output = output.detach_()
+            self._output = output.detach()
             self._output.requires_grad = True
-        return output
+        return self._output
 
     def set_loss(self, loss: Tensor):
         self._loss = loss

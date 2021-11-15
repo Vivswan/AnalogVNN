@@ -3,7 +3,7 @@ import time
 
 import torchvision
 
-from cleo_runs.run_2 import *
+from cleo_runs.run_2S import *
 from nn.activations.ELU import ELU
 from nn.activations.Gaussian import GeLU
 from nn.activations.ReLU import ReLU, LeakyReLU
@@ -18,7 +18,7 @@ if __name__ == '__main__':
 
     timestamp = str(int(time.time()))
 
-    approach = "use_norm_forward"
+    approach = "full"
     ticker = "".join([i[0].upper() for i in approach.split("_")])
     cleo_default_parameters["data_folder"] = DATA_FOLDER
     cleo_default_parameters["approach"] = approach

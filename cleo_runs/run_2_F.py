@@ -28,8 +28,8 @@ if __name__ == '__main__':
         ("activation_class", [ReLU, LeakyReLU, Tanh, ELU, SiLU, GeLU]),
         ("norm_class_y", [Clamp, L2Norm]),
         ("norm_class_w", [Clamp, L2Norm]),
-        ("precision_y", [2 ** 2, 2 ** 4, 2 ** 4, None]),
-        ("precision_w", [2 ** 2, 2 ** 4, 2 ** 4, None]),
+        ("precision_y", [2 ** 2, 2 ** 4, 2 ** 6, None]),
+        ("precision_w", [2 ** 2, 2 ** 4, 2 ** 6, None]),
         ("dataset", [torchvision.datasets.MNIST, torchvision.datasets.FashionMNIST]),
     )
     print(len(parameters.keys()))

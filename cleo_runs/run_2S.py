@@ -14,9 +14,9 @@ from nn.activations.Identity import Identity
 from nn.backward_pass.BackwardFunction import BackwardIdentity, BackwardUsingForward
 from nn.layers.Linear import Linear, LinearBackpropagation
 from nn.layers.Normalize import Normalize
-from nn.layers.ReducePrecision import ReducePrecision
-from nn.optimizer.ReducePrecisionOptimizer import ReducePrecisionOptimizer, PrecisionUpdateTypes
-from nn.parameters.ReducePrecisionParameter import ReducePrecisionParameter
+from nn.layers.StochasticReducePrecision import StochasticReducePrecision
+from nn.optimizer.StochasticReducePrecisionOptimizer import StochasticReducePrecisionOptimizer
+from nn.parameters.StochasticReducePrecisionParameter import StochasticReducePrecisionParameter
 from nn.utils.is_using_cuda import get_device, is_using_cuda
 from nn.utils.summary import summary
 from utils.data_dirs import data_dirs
@@ -41,13 +41,13 @@ class Linear2(BaseModel):
         self.norm2_pre = norm_class()
         self.norm2_post = norm_class()
 
-        self.rp1_pre = (ReducePrecision(precision=precision) if precision is not None else Identity()) \
+        self.rp1_pre = (StochasticReducePrecision(precision=precision) if precision is not None else Identity()) \
             .use(BackwardIdentity)
-        self.rp1_post = (ReducePrecision(precision=precision) if precision is not None else Identity()) \
+        self.rp1_post = (StochasticReducePrecision(precision=precision) if precision is not None else Identity()) \
             .use(BackwardIdentity)
-        self.rp2_pre = (ReducePrecision(precision=precision) if precision is not None else Identity()) \
+        self.rp2_pre = (StochasticReducePrecision(precision=precision) if precision is not None else Identity()) \
             .use(BackwardIdentity)
-        self.rp2_post = (ReducePrecision(precision=precision) if precision is not None else Identity()) \
+        self.rp2_post = (StochasticReducePrecision(precision=precision) if precision is not None else Identity()) \
             .use(BackwardIdentity)
 
         self.activation1 = activation_class()
@@ -112,17 +112,17 @@ class Linear3(BaseModel):
         self.norm3_pre = norm_class()
         self.norm3_post = norm_class()
 
-        self.rp1_pre = (ReducePrecision(precision=precision) if precision is not None else Identity()) \
+        self.rp1_pre = (StochasticReducePrecision(precision=precision) if precision is not None else Identity()) \
             .use(BackwardIdentity)
-        self.rp1_post = (ReducePrecision(precision=precision) if precision is not None else Identity()) \
+        self.rp1_post = (StochasticReducePrecision(precision=precision) if precision is not None else Identity()) \
             .use(BackwardIdentity)
-        self.rp2_pre = (ReducePrecision(precision=precision) if precision is not None else Identity()) \
+        self.rp2_pre = (StochasticReducePrecision(precision=precision) if precision is not None else Identity()) \
             .use(BackwardIdentity)
-        self.rp2_post = (ReducePrecision(precision=precision) if precision is not None else Identity()) \
+        self.rp2_post = (StochasticReducePrecision(precision=precision) if precision is not None else Identity()) \
             .use(BackwardIdentity)
-        self.rp3_pre = (ReducePrecision(precision=precision) if precision is not None else Identity()) \
+        self.rp3_pre = (StochasticReducePrecision(precision=precision) if precision is not None else Identity()) \
             .use(BackwardIdentity)
-        self.rp3_post = (ReducePrecision(precision=precision) if precision is not None else Identity()) \
+        self.rp3_post = (StochasticReducePrecision(precision=precision) if precision is not None else Identity()) \
             .use(BackwardIdentity)
 
         self.activation1 = activation_class()
@@ -203,21 +203,21 @@ class Linear4(BaseModel):
         self.norm4_pre = norm_class()
         self.norm4_post = norm_class()
 
-        self.rp1_pre = (ReducePrecision(precision=precision) if precision is not None else Identity()) \
+        self.rp1_pre = (StochasticReducePrecision(precision=precision) if precision is not None else Identity()) \
             .use(BackwardIdentity)
-        self.rp1_post = (ReducePrecision(precision=precision) if precision is not None else Identity()) \
+        self.rp1_post = (StochasticReducePrecision(precision=precision) if precision is not None else Identity()) \
             .use(BackwardIdentity)
-        self.rp2_pre = (ReducePrecision(precision=precision) if precision is not None else Identity()) \
+        self.rp2_pre = (StochasticReducePrecision(precision=precision) if precision is not None else Identity()) \
             .use(BackwardIdentity)
-        self.rp2_post = (ReducePrecision(precision=precision) if precision is not None else Identity()) \
+        self.rp2_post = (StochasticReducePrecision(precision=precision) if precision is not None else Identity()) \
             .use(BackwardIdentity)
-        self.rp3_pre = (ReducePrecision(precision=precision) if precision is not None else Identity()) \
+        self.rp3_pre = (StochasticReducePrecision(precision=precision) if precision is not None else Identity()) \
             .use(BackwardIdentity)
-        self.rp3_post = (ReducePrecision(precision=precision) if precision is not None else Identity()) \
+        self.rp3_post = (StochasticReducePrecision(precision=precision) if precision is not None else Identity()) \
             .use(BackwardIdentity)
-        self.rp4_pre = (ReducePrecision(precision=precision) if precision is not None else Identity()) \
+        self.rp4_pre = (StochasticReducePrecision(precision=precision) if precision is not None else Identity()) \
             .use(BackwardIdentity)
-        self.rp4_post = (ReducePrecision(precision=precision) if precision is not None else Identity()) \
+        self.rp4_post = (StochasticReducePrecision(precision=precision) if precision is not None else Identity()) \
             .use(BackwardIdentity)
 
         self.activation1 = activation_class()
@@ -324,16 +324,15 @@ def main(
     model.accuracy_fn = cross_entropy_loss_accuracy
 
     if precision_w is not None:
-        ReducePrecisionParameter.convert_model(
+        StochasticReducePrecisionParameter.convert_model(
             model,
             precision=precision_w,
             use_zero_pseudo_tensor=False
         )
 
-    model.optimizer = ReducePrecisionOptimizer(
+    model.optimizer = StochasticReducePrecisionOptimizer(
         optimiser_class,
         model.parameters(),
-        weight_update_type=PrecisionUpdateTypes.WEIGHT_UPDATE,
         **optimiser_parameters
     )
 
@@ -346,11 +345,11 @@ def main(
         'norm_class_w': norm_class_w.__name__,
         'precision_y': str(precision_y),
         'precision_w': str(precision_w),
-        'precision_class': ReducePrecision.__name__,
+        'precision_class': StochasticReducePrecision.__name__,
         "loss_class": model.loss_fn.__class__.__name__,
         "model_class": model.__class__.__name__,
         'optimiser_class': model.optimizer.__class__.__name__,
-        'optimiser_update_type': PrecisionUpdateTypes.WEIGHT_UPDATE,
+        'optimiser_update_type': "None",
         'batch_size': batch_size,
     }
 

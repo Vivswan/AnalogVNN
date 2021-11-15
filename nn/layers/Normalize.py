@@ -18,6 +18,7 @@ class L1Norm(Normalize):
         self.save_tensor("input", x)
         norm = torch.norm(x, 1, -1)
         norm = torch.clamp(norm, min=1e-4)
+        self.save_tensor("norm", norm)
         x = torch.div(x.T, norm).T
         return x
 
