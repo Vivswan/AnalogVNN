@@ -74,3 +74,14 @@ class Clamp(Normalize):
         x = self.get_tensor("input")
         grad = ((-1 <= x) * (x <= 1.)).type(torch.float)
         return grad_output * grad
+
+
+class Clamp01(Normalize):
+    def forward(self, x: Tensor):
+        self.save_tensor("input", x)
+        return torch.clamp(x, min=0, max=1)
+
+    def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
+        x = self.get_tensor("input")
+        grad = ((0 <= x) * (x <= 1.)).type(torch.float)
+        return grad_output * grad

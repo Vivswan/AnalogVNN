@@ -6,7 +6,6 @@ import torchvision
 from cleo_runs.run_2 import *
 from nn.activations.ELU import ELU
 from nn.activations.Gaussian import GeLU
-from nn.activations.Identity import Identity
 from nn.activations.ReLU import ReLU, LeakyReLU
 from nn.activations.SiLU import SiLU
 from nn.activations.Tanh import Tanh
@@ -26,7 +25,7 @@ if __name__ == '__main__':
     parameters = combination_parameters_sequence(
         {ticker: cleo_default_parameters},
         ("model_class", [Linear2, Linear3, Linear4]),
-        ("activation_class", [ReLU, Identity, LeakyReLU, Tanh, ELU, SiLU, GeLU]),
+        ("activation_class", [ReLU, LeakyReLU, Tanh, ELU, SiLU, GeLU]),
         ("norm_class_y", [L2Norm, Clamp]),
         ("norm_class_w", [Clamp, L2Norm]),
         ("precision_y", [2 ** 2, 2 ** 4, 2 ** 4, None]),
