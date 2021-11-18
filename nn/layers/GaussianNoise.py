@@ -8,10 +8,14 @@ from nn.backward_pass.BackwardFunction import BackwardIdentity
 
 
 class GaussianNoise(BaseLayer, BackwardIdentity):
-    __constants__ = ['std']
+    __constants__ = ['std', 'leakage', 'precision']
 
-    def __init__(self, std: Union[None, int, float] = None, leakage: Union[None, int, float] = None,
-                 precision: Union[None, int] = None):
+    def __init__(
+            self,
+            std: Union[None, int, float] = None,
+            leakage: Union[None, int, float] = None,
+            precision: Union[None, int] = None
+    ):
         super(GaussianNoise, self).__init__()
         if std is None and leakage is None:
             raise ValueError("Invalid arguments not found std or leakage")
@@ -34,13 +38,11 @@ class GaussianNoise(BaseLayer, BackwardIdentity):
         self.leakage = nn.Parameter(self.leakage, requires_grad=False)
         self.precision = nn.Parameter(self.precision, requires_grad=False)
 
-    def extra_repr(self) -> str:
-        return f'std={self.std}, leakage={self.leakage}, precision={self.precision}'
-
     def forward(self, x: Tensor) -> Tensor:
-        return torch.normal(mean=x, std=self.leakage)
+        return torch.normal(mean=x, std=self.std)
 
+    def extra_repr(self) -> str:
+        return f'std={self.std:.4f}, leakage={self.leakage:.4f}, precision={self.precision}'
 
-if __name__ == '__main__':
-    x = torch.randn((2, 2))
-    print(GaussianNoise(leakage=0.1, precision=1)(x))
+    def signal_to_noise_ratio(self, reference_std=1):
+        return 1 / (reference_std * 2 * self.std)

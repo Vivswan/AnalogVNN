@@ -26,9 +26,9 @@ def train(model, train_loader: DataLoader, epoch=None, apply_fn=None):
         loss, accuracy = model.loss(output, target)
 
         model.backward()
+        model.optimizer.step()
         for i in apply_fn:
             model.apply_to_parameters(i)
-        model.optimizer.step()
 
         # print statistics
         total_loss += loss.item() * len(data)

@@ -1,4 +1,4 @@
-from typing import Union, Type
+from typing import Union, Type, Callable
 
 import torch
 from torch import nn, Tensor
@@ -69,13 +69,17 @@ class BaseModel(nn.Module):
 
         return loss_result, accuracy_result
 
-    def apply_to_parameters(self: nn.Module, layer: BaseLayer, requires_grad=True):
+    def apply_to_parameters(self: nn.Module, layer: Union[BaseLayer, Callable], requires_grad=True):
         with torch.no_grad():
-            layer.train()
+            if isinstance(layer, BaseLayer):
+                layer.train()
             for p in self.parameters():
                 if requires_grad and not p.requires_grad:
                     continue
-                p.data = layer.forward(p.data)
+                if isinstance(layer, BaseLayer):
+                    p.data = layer.forward(p.data)
+                else:
+                    layer(p)
 
     def train_on(self, train_loader: DataLoader, epoch: int = None, apply_fn=None):
         if apply_fn is None:

@@ -4,15 +4,16 @@ from pathlib import Path
 from typing import List, Dict, Union
 
 import matplotlib
+import numpy as np
 import seaborn as seaborn
 from matplotlib import pyplot as plt
 from matplotlib.pyplot import figure
-from tensorboard.plugins.hparams.metadata import SESSION_START_INFO_TAG
-from tensorboard.plugins.hparams.plugin_data_pb2 import HParamsPluginData
-from tensorflow.python.summary.summary_iterator import summary_iterator
 
 
 def collect_parameters_to_json(path):
+    from tensorboard.plugins.hparams.metadata import SESSION_START_INFO_TAG
+    from tensorboard.plugins.hparams.plugin_data_pb2 import HParamsPluginData
+    from tensorflow.python.summary.summary_iterator import summary_iterator
     tensorboard_dir = Path(path).joinpath("tensorboard")
     all_files: List[Path] = []
     for root, dirs, files in os.walk(tensorboard_dir):
@@ -34,7 +35,7 @@ def collect_parameters_to_json(path):
                 "test_loss": {},
                 "train_loss": {},
                 "parameters": {},
-                # "raw": [],
+                "raw": [],
             }
 
         this_data = parameter_data[name]
@@ -63,7 +64,7 @@ def collect_parameters_to_json(path):
 
         # if c:
         # break
-    file_path = tensorboard_dir.parent.joinpath(f"{Path(path).name.split('.')[0]}_full_parameter_data.json")
+    file_path = tensorboard_dir.parent.joinpath(f"full_parameter_data.json")
     with open(file_path, "w") as file:
         file.write(json.dumps(parameter_data))
 
@@ -81,32 +82,49 @@ def create_figure(json_file_path):
     max_accuracies: Dict[str, float] = {}
     parameters_map: Dict[str, Dict[str, Union[str, float]]] = {}
     for key, value in run_data.items():
-        key = key[key.find("_") + 1:]
-        if key in max_accuracies:
-            max_accuracies[key] = max(*value["test_accuracy"].values(), max_accuracies[key])
-        else:
-            max_accuracies[key] = max(value["test_accuracy"].values())
-            parameters_map[key] = value["parameters"]
+        # key = key[key.find("_") + 1:]
+        # if key in max_accuracies:
+        #     max_accuracies[key] = max(*value["test_accuracy"].values(), max_accuracies[key])
+        # else:
+        max_accuracies[key] = max(value["test_accuracy"].values())
+        parameters_map[key] = value["parameters"]
 
-    x = []
-    y = []
-    hue = []
+    plot_data = {
+        "x": [],
+        "y": [],
+        "hue": [],
+        "hue_order": [],
+    }
+    kt = ("norm_class_w", "norm_class_y")
     for key, value in max_accuracies.items():
-        x.append(parameters_map[key]["norm_class_w"])
-        hue.append(parameters_map[key]['norm_class_y'])
-        y.append(value)
+        # if parameters_map[key]["dataset"] == "MNIST":
+        #     continue
+
+        plot_data["x"].append(parameters_map[key][kt[0]])
+        plot_data["hue"].append(parameters_map[key][kt[1]])
+        plot_data["y"].append(value * 100)
+
+    plot_data["hue_order"] = list(sorted(set(plot_data["hue"])))
+    if "Identity" in plot_data["hue_order"]:
+        plot_data["hue_order"].remove("Identity")
+        plot_data["hue_order"].insert(0, "Identity")
+    if "None" in plot_data["hue_order"]:
+        plot_data["hue_order"].remove("None")
+        plot_data["hue_order"].insert(0, "None")
 
     fig = figure()
     fig.set_size_inches(8, 5)
     fig.set_dpi(200)
-    seaborn.violinplot(x=x, y=y, hue=hue, cut=0, palette="Set2", inner=None, linewidth=0.5)
+    seaborn.violinplot(**plot_data, cut=0, palette="Set2", inner=None, linewidth=0.1)
+    seaborn.stripplot(**plot_data, palette="Set2", linewidth=0.25, size=3, jitter=1 / 3, dodge=True)
     fig.tight_layout()
+    plt.yticks(np.arange(0, 100, 10))
+    plt.ylim([0, 100])
+    plt.legend(plot_data["hue_order"])
     plt.show()
     fig.savefig('image.svg', dpi=fig.dpi)
-    print()
 
 
 if __name__ == '__main__':
-    # json_file = collect_parameters_to_json("C:/_data/tensorboard_cleo_run_1_D.py")
-    create_figure("C:/_data/tensorboard_cleo_run_1_D.py/tensorboard_cleo_run_1_D_full_parameter_data.json")
-    print()
+    # json_file = collect_parameters_to_json("C:/_data/tensorboard_cleo_run_1")
+    create_figure("C:/_data/tensorboard_cleo_run_1/full_parameter_data.json")

@@ -7,6 +7,7 @@ from torch import nn
 from torch.nn import Flatten
 
 from cleo_runs.common import *
+from cleo_runs.common_parameter_fn import normalize_parameter
 from dataloaders.load_vision_dataset import load_vision_dataset
 from nn.BaseModel import BaseModel
 from nn.activations.Activation import Activation
@@ -350,7 +351,7 @@ def main(
         "loss_class": model.loss_fn.__class__.__name__,
         "model_class": model.__class__.__name__,
         'optimiser_class': model.optimizer.__class__.__name__,
-        'optimiser_update_type': PrecisionUpdateTypes.WEIGHT_UPDATE,
+        'optimiser_update_type': PrecisionUpdateTypes.WEIGHT_UPDATE.value,
         'batch_size': batch_size,
     }
 
@@ -365,8 +366,9 @@ def main(
     data = data.to(model.device)
     save_graph(path_join(paths.logs, paths.name), model(data), model.named_parameters())
 
+    apply_fn = [normalize_parameter(norm_class_w)]
     for epoch in range(epochs):
-        train_loss, train_accuracy = model.train_on(train_loader, epoch=epoch, apply_fn=[norm_class_w()])
+        train_loss, train_accuracy = model.train_on(train_loader, epoch=epoch, apply_fn=apply_fn)
         test_loss, test_accuracy = model.test_on(test_loader, epoch=epoch)
 
         str_epoch = str(epoch).zfill(math.ceil(math.log10(epochs)))

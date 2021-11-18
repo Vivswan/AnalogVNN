@@ -283,8 +283,9 @@ def main(
     data = data.to(model.device)
     save_graph(path_join(paths.logs, paths.name), model(data), model.named_parameters())
 
+    apply_fn = [norm_class_w()]
     for epoch in range(epochs):
-        train_loss, train_accuracy = model.train_on(train_loader, epoch=epoch, apply_fn=[norm_class_w()])
+        train_loss, train_accuracy = model.train_on(train_loader, epoch=epoch, apply_fn=apply_fn)
         test_loss, test_accuracy = model.test_on(test_loader, epoch=epoch)
 
         str_epoch = str(epoch).zfill(math.ceil(math.log10(epochs)))

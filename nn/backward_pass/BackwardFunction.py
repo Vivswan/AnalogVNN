@@ -7,11 +7,11 @@ from nn.BaseLayer import BaseLayer, BackwardFunction
 
 class BackwardUsingForward(BackwardFunction):
     def backward(self: Type[BaseLayer], grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
-        mode = self.training
+        mode = self._layer.training
 
-        self.training = True
-        result = self.forward(grad_output)
-        self.training = mode
+        self._layer.training = True
+        result = self._layer.forward(grad_output)
+        self._layer.training = mode
 
         return result
 

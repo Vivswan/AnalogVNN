@@ -40,7 +40,6 @@ class BasePrecisionOptimizer(BaseOptimizer):
                 class_parameters["params"] = parameter_for_optimizer
                 group['optimizer'] = group['optimizer_cls'](**class_parameters)
 
-            rp_parameter_with_grad = []
             for p in group['params']:
                 if p.grad is None:
                     continue
@@ -53,7 +52,6 @@ class BasePrecisionOptimizer(BaseOptimizer):
                     else:
                         p.pseudo_tensor.grad += p.grad
                     set_grad_zero(p, set_to_none=set_to_none)
-                    rp_parameter_with_grad.append(p.pseudo_tensor)
 
             group['optimizer'].step()
 

@@ -4,18 +4,14 @@ import numpy as np
 import torch
 from matplotlib import pyplot as plt
 
+from nn.layers.GaussianNoise import GaussianNoise
 from nn.layers.ReducePrecision import ReducePrecision
 
 
 def main():
     torch.device('cpu')
     precision = 2 ** 2
-    normal_reference_std = 1
-    normal_reference_leakage = 1 - torch.erf(torch.tensor(normal_reference_std / math.sqrt(2)))
     normal_leakage = 0.1
-    normal_std = 1 / (2 * precision * torch.erfinv(torch.tensor(1 - normal_leakage)) * math.sqrt(2))
-    normal_snr = 1 / (normal_reference_std * 2 * normal_std)
-    # factor = 1
     poisson_lambda = 50
 
     xlim = [-1.01, 1.01]
@@ -23,10 +19,10 @@ def main():
 
     num_line = torch.Tensor(np.linspace(-1, 1, 1000))
     rp_module = ReducePrecision(precision=precision)
+    gaussian_noise = GaussianNoise(leakage=normal_leakage, precision=precision)
     reduce_precision = rp_module(num_line)
 
     sp = [3, 3]
-
     fig, axes = plt.subplots(nrows=sp[0], ncols=sp[1])
     fig.set_size_inches(14, 11)
     fig.set_dpi(200)
@@ -41,7 +37,7 @@ def main():
     plt.subplot(*sp, 4)
     plt.gca().set_xlim(xlim)
     plt.gca().set_ylim(ylim)
-    plt.title(f"Normal (std: {normal_std:.4f}, snr: {normal_snr:.4})")
+    plt.title(f"Normal (std: {gaussian_noise.std:.4f}, snr: {gaussian_noise.signal_to_noise_ratio():.4})")
 
     plt.subplot(*sp, 5)
     plt.gca().set_xlim(xlim)
@@ -56,11 +52,11 @@ def main():
     leakage_normal_noise = []
     leakage_poisson_noise = []
     leakage_normal_poisson_noise = []
-    for i in range(100):
+    for i in range(1000):
         x = reduce_precision
         x_size = sum(x.size())
 
-        normal_noise = torch.normal(mean=x, std=normal_std)
+        normal_noise = gaussian_noise(x)
         poisson_noise = torch.sign(x) * (torch.poisson(torch.abs(x) * poisson_lambda) / poisson_lambda)
         normal_poisson_noise = torch.sign(normal_noise) * (
                 torch.poisson(torch.abs(normal_noise) * poisson_lambda) / poisson_lambda)
@@ -102,7 +98,7 @@ def main():
 
     fig.tight_layout()
     plt.show()
-    fig.savefig('image.svg', dpi=fig.dpi)
+    # fig.savefig('image.svg', dpi=fig.dpi)
     print()
 
 

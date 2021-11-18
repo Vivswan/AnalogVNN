@@ -16,8 +16,8 @@ from nn.layers.GaussianNoise import GaussianNoise
 from nn.layers.Linear import Linear, LinearBackpropagation
 from nn.layers.Normalize import Normalize
 from nn.layers.ReducePrecision import ReducePrecision
-from nn.optimizer.ReducePrecisionOptimizer import ReducePrecisionOptimizer, PrecisionUpdateTypes
-from nn.parameters.ReducePrecisionParameter import ReducePrecisionParameter
+from nn.optimizer.StochasticReducePrecisionOptimizer import StochasticReducePrecisionOptimizer
+from nn.parameters.StochasticReducePrecisionParameter import StochasticReducePrecisionParameter
 from nn.utils.is_using_cuda import get_device, is_using_cuda, set_device
 from nn.utils.summary import summary
 from utils.data_dirs import data_dirs
@@ -360,16 +360,15 @@ def main(
     model.accuracy_fn = cross_entropy_loss_accuracy
 
     if precision_w is not None:
-        ReducePrecisionParameter.convert_model(
+        StochasticReducePrecisionParameter.convert_model(
             model,
             precision=precision_w,
             use_zero_pseudo_tensor=False
         )
 
-    model.optimizer = ReducePrecisionOptimizer(
+    model.optimizer = StochasticReducePrecisionOptimizer(
         optimiser_class,
         model.parameters(),
-        weight_update_type=PrecisionUpdateTypes.WEIGHT_UPDATE,
         **optimiser_parameters
     )
 
