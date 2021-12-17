@@ -57,7 +57,7 @@ def run_function_with_parameters(func, parameters, continue_from=None):
     c = False
     for i, (name, p) in enumerate(parameters.items()):
         if continue_from is not None and len(continue_from) > 0:
-            if name == "D_Linear3_LeakyReLU_L2Norm_L2NormW_MNIST":
+            if name == continue_from:
                 c = True
             if not c:
                 continue

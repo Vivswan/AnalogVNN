@@ -5,6 +5,7 @@ from torch import Tensor, nn
 
 from nn.BaseLayer import BaseLayer
 from nn.backward_pass.BackwardFunction import BackwardIdentity
+from nn.utils.is_using_cuda import get_device
 
 
 class GaussianNoise(BaseLayer, BackwardIdentity):
@@ -20,18 +21,18 @@ class GaussianNoise(BaseLayer, BackwardIdentity):
         if std is None and leakage is None:
             raise ValueError("Invalid arguments not found std or leakage")
 
-        tensor_sqrt_2 = torch.sqrt(torch.tensor(2, requires_grad=False))
+        tensor_sqrt_2 = torch.sqrt(torch.tensor(2, requires_grad=False, device=get_device()))
         self.leakage = None
         self.precision = None
         if std is not None:
-            self.std = torch.tensor(std, requires_grad=False)
+            self.std = torch.tensor(std, requires_grad=False, device=get_device())
 
         if leakage is not None:
             if precision is None:
                 raise ValueError("Invalid arguments 'precision' not found with leakage")
 
-            self.leakage = torch.tensor(leakage, requires_grad=False)
-            self.precision = torch.tensor(precision, requires_grad=False)
+            self.leakage = torch.tensor(leakage, requires_grad=False, device=get_device())
+            self.precision = torch.tensor(precision, requires_grad=False, device=get_device())
             self.std = 1 / (2 * self.precision * torch.erfinv(1 - self.leakage) * tensor_sqrt_2)
 
         self.std = nn.Parameter(self.std, requires_grad=False)

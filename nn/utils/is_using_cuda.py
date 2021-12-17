@@ -6,6 +6,7 @@ DEVICE_NAME = "cuda" if torch.cuda.is_available() else "cpu"
 def set_device(device_name):
     global DEVICE_NAME
     DEVICE_NAME = device_name
+    torch.device(device_name)
 
 
 def reset_device():
