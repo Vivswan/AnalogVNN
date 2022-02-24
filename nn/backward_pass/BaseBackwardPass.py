@@ -4,7 +4,7 @@ from typing import Union, Callable
 import torch
 from torch import Tensor
 
-from nn.BaseLayer import BaseLayer
+from nn.layers.BaseLayer import BaseLayer
 from nn.backward_pass.BackwardFunction import BackwardFunction
 
 _backward_fn_type = Union[BackwardFunction, Callable[[Union[None, Tensor]], Union[None, Tensor]]]

@@ -1,11 +1,6 @@
 from collections import OrderedDict
-from typing import TypeVar
-
-from torch import nn
 
 from nn.modules.Sequential import Sequential
-
-T = TypeVar('T', bound=nn.Module)
 
 
 class FullSequential(Sequential):

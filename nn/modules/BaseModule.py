@@ -4,7 +4,7 @@ import torch
 from torch import nn, Tensor
 from torch.utils.data import DataLoader
 
-from nn.BaseLayer import BaseLayer
+from nn.layers.BaseLayer import BaseLayer
 from nn.TensorboardModelLog import TensorboardModelLog
 from nn.backward_pass.BaseBackwardPass import BaseBackwardPass
 from nn.backward_pass.GraphBackwardPass import GraphBackwardPass

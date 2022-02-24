@@ -3,7 +3,7 @@ from typing import Union
 import torch
 from torch import Tensor, nn
 
-from nn.BaseLayer import BaseLayer
+from nn.layers.BaseLayer import BaseLayer
 from nn.backward_pass.BackwardFunction import BackwardIdentity
 from nn.utils.is_using_cuda import get_device
 
