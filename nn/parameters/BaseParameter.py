@@ -5,13 +5,10 @@ from torch.nn import Parameter
 
 class BaseParameter(Parameter):
     def __new__(cls, data=None, requires_grad=True, *args, **kwargs):
-        if data is None:
-            data = torch.tensor([])
-        # noinspection PyTypeChecker
-        return torch.Tensor._make_subclass(cls, data, requires_grad)
+        return super(BaseParameter, cls).__new__(cls, data, requires_grad)
 
     # noinspection PyUnusedLocal
-    def __init__(self, data=None, requires_grad=True):
+    def __init__(self, data=None, requires_grad=True, *args, **kwargs):
         super(BaseParameter, self).__init__()
 
     def __repr__(self):
@@ -28,6 +25,9 @@ class BaseParameter(Parameter):
     @classmethod
     def convert_model(cls, model: nn.Module, *args, **kwargs):
         with torch.no_grad():
+            if len(list(model.parameters())) != len(list(model.named_parameters())):
+                raise Exception("All parameters need to be named to be converted.")
+
             for name, parameter in model.named_parameters(recurse=False):
                 if isinstance(parameter, cls):
                     continue

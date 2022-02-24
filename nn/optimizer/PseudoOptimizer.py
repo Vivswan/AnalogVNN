@@ -5,17 +5,27 @@ import torch
 from torch.optim import Optimizer
 
 from nn.optimizer.BaseOptimizer import BaseOptimizer, set_grad_zero
-from nn.parameters.BasePrecisionParameter import BasePrecisionParameter
+from nn.parameters.PseudoParameter import PseudoParameter
 
 
-class BasePrecisionOptimizer(BaseOptimizer):
-    def __init__(self, optimizer_cls: Type[Optimizer], parameter_class: Type[BasePrecisionParameter], params,
-                 defaults=None, **kwargs):
+class PseudoOptimizer(BaseOptimizer):
+    def __init__(
+            self,
+            optimizer_cls: Type[Optimizer],
+            params,
+            parameter_class: Type[PseudoParameter] = None,
+            defaults=None,
+            **kwargs
+    ):
         if defaults is None:
             defaults = dict()
 
-        defaults['parameter_class'] = parameter_class
-        super(BasePrecisionOptimizer, self).__init__(optimizer_cls, params, defaults, **kwargs)
+        if parameter_class is not None:
+            defaults['parameter_class'] = parameter_class
+        else:
+            defaults['parameter_class'] = PseudoParameter
+
+        super(PseudoOptimizer, self).__init__(optimizer_cls, params, defaults, **kwargs)
 
     @torch.no_grad()
     def step(self, closure=None, set_to_none: bool = False):
@@ -62,12 +72,13 @@ class BasePrecisionOptimizer(BaseOptimizer):
         return loss
 
     @torch.no_grad()
-    def step_precision_parameter(self, parameter, group) -> Type[BasePrecisionParameter]:
-        raise NotImplementedError
+    def step_precision_parameter(self, parameter, group) -> Type[PseudoParameter]:
+        parameter.set_data(parameter.pseudo_tensor)
+        return parameter
 
     @torch.no_grad()
     def zero_grad(self, set_to_none: bool = False):
-        super(BasePrecisionOptimizer, self).zero_grad(set_to_none=set_to_none)
+        super(PseudoOptimizer, self).zero_grad(set_to_none=set_to_none)
         for group in self.param_groups:
             for p in group['params']:
                 if isinstance(p, group['parameter_class']):

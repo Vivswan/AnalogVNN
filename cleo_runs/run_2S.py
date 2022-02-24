@@ -9,13 +9,13 @@ from torch.nn import Flatten
 from cleo_runs.common import *
 from cleo_runs.common_parameter_fn import normalize_parameter
 from dataloaders.load_vision_dataset import load_vision_dataset
-from nn.BaseModel import BaseModel
 from nn.activations.Activation import Activation
 from nn.activations.Identity import Identity
 from nn.backward_pass.BackwardFunction import BackwardIdentity, BackwardUsingForward
 from nn.layers.Linear import Linear, LinearBackpropagation
 from nn.layers.Normalize import Normalize
 from nn.layers.StochasticReducePrecision import StochasticReducePrecision
+from nn.modules.FullSequential import FullSequential
 from nn.optimizer.StochasticReducePrecisionOptimizer import StochasticReducePrecisionOptimizer
 from nn.parameters.StochasticReducePrecisionParameter import StochasticReducePrecisionParameter
 from nn.utils.is_using_cuda import get_device, is_using_cuda
@@ -24,7 +24,7 @@ from utils.data_dirs import data_dirs
 from utils.path_functions import path_join
 
 
-class Linear2(BaseModel):
+class Linear2(FullSequential):
     def __init__(
             self, approach: str, in_features, out_features,
             activation_class: Type[Activation], norm_class: Type[Normalize], precision: int
@@ -58,7 +58,7 @@ class Linear2(BaseModel):
         activation_class.initialise_(self.linear2.weight)
 
         if approach == "default":
-            self.backward.use_default_graph = True
+            self.backward.use_autograd_graph = True
         if approach == "full":
             pass
         if approach == "no_norm":
@@ -72,7 +72,7 @@ class Linear2(BaseModel):
             self.norm2_pre.use(BackwardUsingForward)
             self.norm2_post.use(BackwardUsingForward)
 
-        self.add_sequential_relation(
+        self.set_full_sequential_relation(
             Flatten(start_dim=1),
             self.backward.STOP,
 
@@ -92,7 +92,7 @@ class Linear2(BaseModel):
         )
 
 
-class Linear3(BaseModel):
+class Linear3(FullSequential):
     def __init__(
             self, approach: str, in_features, out_features,
             activation_class: Type[Activation], norm_class: Type[Normalize], precision: int
@@ -135,7 +135,7 @@ class Linear3(BaseModel):
         activation_class.initialise_(self.linear3.weight)
 
         if approach == "default":
-            self.backward.use_default_graph = True
+            self.backward.use_autograd_graph = True
         if approach == "full":
             pass
         if approach == "no_norm":
@@ -153,7 +153,7 @@ class Linear3(BaseModel):
             self.norm3_pre.use(BackwardUsingForward)
             self.norm3_post.use(BackwardUsingForward)
 
-        self.add_sequential_relation(
+        self.set_full_sequential_relation(
             Flatten(start_dim=1),
             self.backward.STOP,
 
@@ -180,7 +180,7 @@ class Linear3(BaseModel):
         )
 
 
-class Linear4(BaseModel):
+class Linear4(FullSequential):
     def __init__(
             self, approach: str, in_features, out_features,
             activation_class: Type[Activation], norm_class: Type[Normalize], precision: int
@@ -232,7 +232,7 @@ class Linear4(BaseModel):
         activation_class.initialise_(self.linear4.weight)
 
         if approach == "default":
-            self.backward.use_default_graph = True
+            self.backward.use_autograd_graph = True
         if approach == "full":
             pass
         if approach == "no_norm":
@@ -254,7 +254,7 @@ class Linear4(BaseModel):
             self.norm4_pre.use(BackwardUsingForward)
             self.norm4_post.use(BackwardUsingForward)
 
-        self.add_sequential_relation(
+        self.set_full_sequential_relation(
             Flatten(start_dim=1),
             self.backward.STOP,
 
@@ -328,7 +328,6 @@ def main(
         StochasticReducePrecisionParameter.convert_model(
             model,
             precision=precision_w,
-            use_zero_pseudo_tensor=False
         )
 
     model.optimizer = StochasticReducePrecisionOptimizer(

@@ -9,22 +9,22 @@ from torch.nn import Flatten
 from cleo_runs.common import *
 from cleo_runs.common_parameter_fn import normalize_parameter, add_gaussian_noise
 from dataloaders.load_vision_dataset import load_vision_dataset
-from nn.BaseModel import BaseModel
 from nn.activations.Activation import Activation
 from nn.backward_pass.BackwardFunction import BackwardIdentity, BackwardUsingForward
 from nn.layers.GaussianNoise import GaussianNoise
 from nn.layers.Linear import Linear, LinearBackpropagation
 from nn.layers.Normalize import Normalize
 from nn.layers.ReducePrecision import ReducePrecision
+from nn.modules.FullSequential import FullSequential
 from nn.optimizer.ReducePrecisionOptimizer import ReducePrecisionOptimizer, PrecisionUpdateTypes
 from nn.parameters.ReducePrecisionParameter import ReducePrecisionParameter
-from nn.utils.is_using_cuda import get_device, is_using_cuda, set_device
+from nn.utils.is_using_cuda import get_device, is_using_cuda
 from nn.utils.summary import summary
 from utils.data_dirs import data_dirs
 from utils.path_functions import path_join
 
 
-class Linear2(BaseModel):
+class Linear2(FullSequential):
     def __init__(
             self, approach: str, in_features, out_features,
             activation_class: Type[Activation], norm_class: Type[Normalize], precision: int, leakage: float
@@ -71,7 +71,7 @@ class Linear2(BaseModel):
             self.norm2_pre.use(BackwardUsingForward)
             self.norm2_post.use(BackwardUsingForward)
 
-        self.add_sequential_relation(
+        self.set_full_sequential_relation(
             Flatten(start_dim=1),
             self.backward.STOP,
 
@@ -95,7 +95,7 @@ class Linear2(BaseModel):
         )
 
 
-class Linear3(BaseModel):
+class Linear3(FullSequential):
     def __init__(
             self, approach: str, in_features, out_features,
             activation_class: Type[Activation], norm_class: Type[Normalize], precision: int, leakage: float
@@ -155,7 +155,7 @@ class Linear3(BaseModel):
             self.norm3_pre.use(BackwardUsingForward)
             self.norm3_post.use(BackwardUsingForward)
 
-        self.add_sequential_relation(
+        self.set_full_sequential_relation(
             Flatten(start_dim=1),
             self.backward.STOP,
 
@@ -188,7 +188,7 @@ class Linear3(BaseModel):
         )
 
 
-class Linear4(BaseModel):
+class Linear4(FullSequential):
     def __init__(
             self, approach: str, in_features, out_features,
             activation_class: Type[Activation], norm_class: Type[Normalize], precision: int, leakage: float
@@ -279,7 +279,7 @@ class Linear4(BaseModel):
             self.norm4_pre.use(BackwardUsingForward)
             self.norm4_post.use(BackwardUsingForward)
 
-        self.add_sequential_relation(
+        self.set_full_sequential_relation(
             Flatten(start_dim=1),
             self.backward.STOP,
 
@@ -328,7 +328,6 @@ def main(
         optimiser_class, optimiser_parameters,
         dataset, batch_size, epochs
 ):
-    set_device("cpu")
     device, is_cuda = is_using_cuda()
     print()
     print(device, name)
@@ -363,7 +362,6 @@ def main(
         ReducePrecisionParameter.convert_model(
             model,
             precision=precision_w,
-            use_zero_pseudo_tensor=False
         )
 
     model.optimizer = ReducePrecisionOptimizer(

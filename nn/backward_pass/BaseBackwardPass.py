@@ -14,8 +14,8 @@ class BaseBackwardPass:
     OUTPUT = "output"
     STOP = "stop"
 
-    def __init__(self, use_default_graph: bool = False):
-        self.use_default_graph: bool = use_default_graph
+    def __init__(self, use_autograd_graph: bool = False):
+        self.use_autograd_graph: bool = use_autograd_graph
 
         self._output: Union[None, Tensor] = None
         self._loss: Union[None, Tensor] = None
@@ -30,7 +30,7 @@ class BaseBackwardPass:
             raise Exception("loss is not set.")
 
         self._loss.backward()
-        if not self.use_default_graph:
+        if not self.use_autograd_graph:
             self._backward_pass(self._output.grad)
         self._output = None
         self._loss = None
@@ -39,7 +39,7 @@ class BaseBackwardPass:
         if self._output_hook is not None:
             self._output_hook.remove()
 
-        if self.use_default_graph:
+        if self.use_autograd_graph:
             self._output = output
         else:
             self._output = output.detach()

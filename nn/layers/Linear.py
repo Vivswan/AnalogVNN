@@ -24,16 +24,12 @@ def generate_random_weight(mean, std, size, device=get_device()):
 
 class LinearBackpropagation(BackwardFunction):
     @property
-    def x(self):
-        return self.get_tensor("input")
-
-    @property
     def weight(self):
-        return self.get_tensor("weight")
+        return self.get_parameter("weight")
 
     @property
     def bias(self):
-        return self.get_tensor("bias")
+        return self.get_parameter("bias")
 
     def backward(self, grad_output: Union[None, Tensor], weight: Union[None, Tensor] = None) -> Union[None, Tensor]:
         grad_output = to_matrix(grad_output)
@@ -161,8 +157,7 @@ class Linear(BaseLayer):
         if self.bias is not None:
             y += self.bias
 
-        self.save_tensor("input", x)
-        self.save_tensor("output", y)
+        self.save_xy(x, y)
         return y
 
     def extra_repr(self) -> str:

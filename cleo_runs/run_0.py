@@ -8,16 +8,16 @@ from torch.nn import Flatten
 
 from cleo_runs.common import *
 from dataloaders.load_vision_dataset import load_vision_dataset
-from nn.BaseModel import BaseModel
 from nn.activations.Activation import Activation
 from nn.layers.Linear import Linear, LinearBackpropagation
+from nn.modules.FullSequential import FullSequential
 from nn.utils.is_using_cuda import get_device, is_using_cuda
 from nn.utils.summary import summary
 from utils.data_dirs import data_dirs
 from utils.path_functions import path_join
 
 
-class Linear2(BaseModel):
+class Linear2(FullSequential):
     def __init__(self, approach: str, in_features, out_features, activation_class: Type[Activation]):
         super(Linear2, self).__init__()
         self.activation_class = activation_class
@@ -33,11 +33,11 @@ class Linear2(BaseModel):
         activation_class.initialise_(self.linear2.weight)
 
         if approach == "default":
-            self.backward.use_default_graph = True
+            self.backward.use_autograd_graph = True
         if approach == "full":
             pass
 
-        self.add_sequential_relation(
+        self.set_full_sequential_relation(
             Flatten(start_dim=1),
             self.backward.STOP,
 
@@ -49,7 +49,7 @@ class Linear2(BaseModel):
         )
 
 
-class Linear3(BaseModel):
+class Linear3(FullSequential):
     def __init__(self, approach: str, in_features, out_features, activation_class: Type[Activation]):
         super(Linear3, self).__init__()
         self.activation_class = activation_class
@@ -68,11 +68,11 @@ class Linear3(BaseModel):
         activation_class.initialise_(self.linear3.weight)
 
         if approach == "default":
-            self.backward.use_default_graph = True
+            self.backward.use_autograd_graph = True
         if approach == "full":
             pass
 
-        self.add_sequential_relation(
+        self.set_full_sequential_relation(
             Flatten(start_dim=1),
             self.backward.STOP,
 
@@ -87,7 +87,7 @@ class Linear3(BaseModel):
         )
 
 
-class Linear4(BaseModel):
+class Linear4(FullSequential):
     def __init__(self, approach: str, in_features, out_features, activation_class: Type[Activation]):
         super(Linear4, self).__init__()
         self.activation_class = activation_class
@@ -109,11 +109,11 @@ class Linear4(BaseModel):
         activation_class.initialise_(self.linear4.weight)
 
         if approach == "default":
-            self.backward.use_default_graph = True
+            self.backward.use_autograd_graph = True
         if approach == "full":
             pass
 
-        self.add_sequential_relation(
+        self.set_full_sequential_relation(
             Flatten(start_dim=1),
             self.backward.STOP,
 

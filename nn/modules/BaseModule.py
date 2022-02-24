@@ -13,18 +13,17 @@ from nn.train import train
 from nn.utils.is_using_cuda import get_device
 
 
-class BaseModel(nn.Module):
+class BaseModule(nn.Module):
     __constants__ = ['in_features', 'device']
 
     device: torch.device
     tensorboard: Union[None, TensorboardModelLog]
 
     def __init__(self, tensorboard_log_dir=None, backward_class: Type[BaseBackwardPass] = GraphBackwardPass):
-        super(BaseModel, self).__init__()
+        super(BaseModule, self).__init__()
 
         self._compiled = False
         self._output_hook = None
-        self._sequential_forward = None
 
         self.tensorboard = None
         if tensorboard_log_dir is not None:
@@ -121,23 +120,5 @@ class BaseModel(nn.Module):
         if self._compiled is True:
             self.tensorboard.on_compile()
 
-    def add_sequential_relation(self, *args):
-        args = list(args)
-        self._sequential_forward = args
-        self.backward.add_relation(*([self.backward.OUTPUT] + list(reversed(args))))
-        if self.backward.STOP in self.backward.STOP:
-            args.remove(self.backward.STOP)
-        for idx, module in enumerate(args):
-            self.add_module(str(idx), module)
-
     def forward(self, x: Tensor):
-        if self._sequential_forward is not None:
-            for i, module in enumerate(self._sequential_forward):
-                x = module(x)
-                # y = module(x)
-                # if bool(torch.any(torch.isnan(y))):
-                #     raise ValueError(f"{i}: {module}")
-                # x = y
-            return x
-        else:
-            raise NotImplementedError
+        raise NotImplementedError

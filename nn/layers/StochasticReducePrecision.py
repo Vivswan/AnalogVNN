@@ -3,28 +3,14 @@ from torch import nn, Tensor
 
 from nn.BaseLayer import BaseLayer
 from nn.backward_pass.BackwardFunction import BackwardIdentity
-
-
-def stochastic_reduce_precision(x: Tensor, precision: int) -> Tensor:
-    g: Tensor = x * precision
-    rand_x = torch.rand_like(g, requires_grad=False)
-
-    g_abs = torch.abs(g)
-    g_floor = torch.floor(g_abs)
-    g_ceil = torch.ceil(g_abs)
-
-    prob_floor = 1 - torch.abs(g_floor - g_abs)
-    bool_floor = rand_x <= prob_floor
-    do_floor = bool_floor.type(torch.float)
-    do_ceil = torch.logical_not(bool_floor).type(torch.float)
-
-    f = torch.sign(g) * (do_floor * g_floor + do_ceil * g_ceil) * (1 / precision)
-    return f
+from nn.fn.reduce_precision import stochastic_reduce_precision
+from nn.parameters.StochasticReducePrecisionParameter import StochasticReducePrecisionParameter
 
 
 class StochasticReducePrecision(BaseLayer, BackwardIdentity):
     __constants__ = ['precision']
     precision: nn.Parameter
+    parameter_class = StochasticReducePrecisionParameter
 
     def __init__(self, precision: int = 8):
         super(StochasticReducePrecision, self).__init__()
@@ -44,4 +30,4 @@ class StochasticReducePrecision(BaseLayer, BackwardIdentity):
         return f'precision={self.precision}'
 
     def forward(self, x: Tensor):
-        return stochastic_reduce_precision(x, self.precision.data)
+        return stochastic_reduce_precision(x, self.precision)

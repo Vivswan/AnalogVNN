@@ -5,9 +5,9 @@ from math import exp
 import torch
 from torch import nn, optim
 
-from nn.BaseModel import BaseModel
 from nn.activations.ReLU import LeakyReLU
 from nn.layers.Linear import Linear
+from nn.modules.BaseModule import BaseModule
 from nn.optimizer.ReducePrecisionOptimizer import PrecisionUpdateTypes, ReducePrecisionOptimizer
 from nn.parameters.ReducePrecisionParameter import ReducePrecisionParameter
 from nn.utils.is_using_cuda import get_device, set_device
@@ -18,7 +18,7 @@ def save_graph(filename, output, named_parameters):
     make_dot(output, params=dict(named_parameters)).render(filename + ".svg", cleanup=True)
 
 
-class TestModel(BaseModel):
+class TestModel(BaseModule):
     class BackPassTypes(Enum):
         default = "default"
         BP = "BP"
@@ -52,7 +52,7 @@ class TestModel(BaseModel):
         activation_class.initialise_(None, self.linear3.weight)
 
         if approach == TestModel.BackPassTypes.default:
-            self.backward.use_default_graph = True
+            self.backward.use_autograd_graph = True
 
         if approach == TestModel.BackPassTypes.BP:
             self.backward.add_relation(
@@ -141,7 +141,6 @@ def main(name, parameter_precision, model_parameters, weight_update_type):
         ReducePrecisionParameter.convert_model(
             model,
             precision=parameter_precision,
-            use_zero_pseudo_tensor=False
         )
 
     model.optimizer = ReducePrecisionOptimizer(

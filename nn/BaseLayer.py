@@ -9,14 +9,14 @@ class BaseLayer(nn.Module):
         self._saved_tensor = {}
         self._backward_module: Union[None, BackwardFunction] = None
 
-    def get_backward_module(self) -> Union[None, 'BackwardFunction']:
-        return self._backward_module
-
     def set_backward_module(self, backward_class: Type['BackwardFunction']) -> 'BaseLayer':
         if not issubclass(backward_class, BackwardFunction):
             raise Exception(f"Backward Module is not set for '{self}'")
         self._backward_module = backward_class(self)
         return self
+
+    def get_backward_module(self) -> Union[None, 'BackwardFunction']:
+        return self._backward_module
 
     def use(self, *args) -> 'BaseLayer':
         for i in args:
@@ -26,13 +26,17 @@ class BaseLayer(nn.Module):
 
     def save_tensor(self, name: str, tensor: Tensor):
         if isinstance(tensor, Tensor):
-            clone = tensor.clone()
-            clone.detach_()
-            clone.requires_grad = False
-            self._saved_tensor[name] = clone
+            tensor = tensor.clone()
+            tensor.detach_()
+            tensor.requires_grad = False
+        self._saved_tensor[name] = tensor
+
+    def save_xy(self, x: Tensor, y: Tensor):
+        self.save_tensor("input", x)
+        self.save_tensor("output", y)
 
     def get_tensor(self, name: str) -> Union[None, Tensor]:
-        if name in self._saved_tensor:
+        if self.has_tensor(name):
             return self._saved_tensor[name]
         else:
             return None
@@ -48,23 +52,31 @@ class BackwardFunction:
     __constants__ = ['main_layer']
 
     def __init__(self, layer: BaseLayer):
+        if not isinstance(layer, BaseLayer):
+            raise Exception(f'layer not instance of BaseLayer class')
+
         self._layer = layer
         self.reset_parameters()
 
-    def get_tensor(self, name: str) -> Union[None, Tensor]:
-        if hasattr(self._layer, name):
-            tensor = getattr(self._layer, name)
-            if tensor is None or isinstance(tensor, Tensor):
-                return tensor
-            else:
-                raise TypeError(f'"{name}" is not a tensor')
-        elif isinstance(self._layer, BaseLayer) and self._layer.has_tensor(name):
+    def get_parameter(self, name: str) -> Union[None, Tensor]:
+        if self._layer.has_tensor(name):
             return self._layer.get_tensor(name)
-        else:
-            raise Exception(f'"{name}" is not found')
+
+        if hasattr(self._layer, name):
+            return getattr(self._layer, name)
+
+        raise Exception(f'"{name}" is not found')
 
     def reset_parameters(self):
         pass
 
     def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
         raise NotImplementedError
+
+    @property
+    def x(self):
+        return self.get_parameter("input")
+
+    @property
+    def y(self):
+        return self.get_parameter("output")

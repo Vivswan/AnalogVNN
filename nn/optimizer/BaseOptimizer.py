@@ -1,6 +1,7 @@
 import inspect
 from typing import Type
 
+import torch
 from torch.optim import Optimizer
 
 
@@ -33,3 +34,21 @@ class BaseOptimizer(Optimizer):
 
         defaults["optimizer_cls"] = optimizer_cls
         super(BaseOptimizer, self).__init__(params, defaults)
+
+    @torch.no_grad()
+    def step(self, closure=None, set_to_none: bool = False):
+        loss = None
+        if closure is not None:
+            with torch.enable_grad():
+                loss = closure()
+
+        for group in self.param_groups:
+            if 'optimizer' not in group:
+                class_parameters = {}
+                for parameter, value in inspect.signature(group['optimizer_cls']).parameters.items():
+                    class_parameters[parameter] = group[parameter]
+                group['optimizer'] = group['optimizer_cls'](**class_parameters)
+
+            group['optimizer'].step()
+
+        return loss
