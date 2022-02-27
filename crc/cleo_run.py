@@ -2,6 +2,7 @@ import json
 import math
 from typing import Type, Union
 
+import numpy as np
 import torch
 from torch import nn, optim
 from torch.nn import Flatten
@@ -112,7 +113,7 @@ class LinearModel(FullSequential):
         if approach == "norm_grad_by_forward":
             [i.use(BackwardUsingForward) for i in self.norm_layers]
 
-        self.set_full_sequential_relation(
+        self.add_sequence(
             Flatten(start_dim=1),
             self.backward.STOP,
             *self.all_layers
@@ -183,7 +184,7 @@ def main(
         is_cuda=is_cuda
     )
 
-    model_params["layer_features_sizes"] = LAYER_SIZES[model_params["num_layer"]]
+    model_params["layer_features_sizes"] = [int(np.prod(input_shape[1:]))] + LAYER_SIZES[model_params["num_layer"]] + [len(classes)]
     del model_params["num_layer"]
     model = LinearModel(**model_params)
     if TENSORBOARD:
@@ -228,7 +229,7 @@ def main(
         train_loss, train_accuracy = model.train_on(train_loader, epoch=epoch, apply_fn=apply_fn)
         test_loss, test_accuracy = model.test_on(test_loader, epoch=epoch)
 
-        str_epoch = str(epoch).zfill(math.ceil(math.log10(epochs)))
+        str_epoch = str(epoch + 1).zfill(math.ceil(math.log10(epochs)))
         print_str = f'({str_epoch})' \
                     f' Training Loss: {train_loss:.4f},' \
                     f' Training Accuracy: {100. * train_accuracy:.0f}%,' \
@@ -239,16 +240,16 @@ def main(
         with open(log_file, "a+") as file:
             file.write(print_str)
 
-    if TENSORBOARD:
-        model.tensorboard.tensorboard.add_hparams(
-            hparam_dict=parameter_log,
-            metric_dict={
-                "train_loss": train_loss,
-                "train_accuracy": train_accuracy,
-                "test_loss": test_loss,
-                "test_accuracy": test_accuracy,
-            }
-        )
+        if TENSORBOARD and epoch == epochs:
+            model.tensorboard.tensorboard.add_hparams(
+                hparam_dict=parameter_log,
+                metric_dict={
+                    "train_loss": train_loss,
+                    "train_accuracy": train_accuracy,
+                    "test_loss": test_loss,
+                    "test_accuracy": test_accuracy,
+                }
+            )
     print()
 
 

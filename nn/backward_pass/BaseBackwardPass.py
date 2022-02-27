@@ -22,20 +22,27 @@ class BaseBackwardPass:
 
         self._output_hook = None
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, gradient=None, *args, **kwargs):
         if self._output is None:
             raise Exception("output is not set.")
 
         if self._loss is None:
             raise Exception("loss is not set.")
 
-        self._loss.backward()
+        result = self._loss.backward(gradient=gradient)
         if not self.use_autograd_graph:
-            self._backward_pass(self._output.grad)
+            result = self._backward_pass(self._output.grad)
         self._output = None
         self._loss = None
 
-    def set_output(self, output: Tensor):
+        return result
+
+    @property
+    def output(self):
+        return self._output
+
+    @output.setter
+    def output(self, output: Tensor):
         if self._output_hook is not None:
             self._output_hook.remove()
 
@@ -44,9 +51,13 @@ class BaseBackwardPass:
         else:
             self._output = output.detach()
             self._output.requires_grad = True
-        return self._output
 
-    def set_loss(self, loss: Tensor):
+    @property
+    def loss(self):
+        return self._loss
+
+    @loss.setter
+    def loss(self, loss: Tensor):
         self._loss = loss
 
     @staticmethod

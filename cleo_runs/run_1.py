@@ -57,7 +57,7 @@ class Linear2(FullSequential):
             self.norm2_pre.use(BackwardUsingForward)
             self.norm2_post.use(BackwardUsingForward)
 
-        self.set_full_sequential_relation(
+        self.add_sequence(
             Flatten(start_dim=1),
             self.backward.STOP,
 
@@ -120,7 +120,7 @@ class Linear3(FullSequential):
             self.norm3_pre.use(BackwardUsingForward)
             self.norm3_post.use(BackwardUsingForward)
 
-        self.set_full_sequential_relation(
+        self.add_sequence(
             Flatten(start_dim=1),
             self.backward.STOP,
 
@@ -197,7 +197,7 @@ class Linear4(FullSequential):
             self.norm4_pre.use(BackwardUsingForward)
             self.norm4_post.use(BackwardUsingForward)
 
-        self.set_full_sequential_relation(
+        self.add_sequence(
             Flatten(start_dim=1),
             self.backward.STOP,
 

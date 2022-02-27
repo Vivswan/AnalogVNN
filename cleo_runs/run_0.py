@@ -37,7 +37,7 @@ class Linear2(FullSequential):
         if approach == "full":
             pass
 
-        self.set_full_sequential_relation(
+        self.add_sequence(
             Flatten(start_dim=1),
             self.backward.STOP,
 
@@ -72,7 +72,7 @@ class Linear3(FullSequential):
         if approach == "full":
             pass
 
-        self.set_full_sequential_relation(
+        self.add_sequence(
             Flatten(start_dim=1),
             self.backward.STOP,
 
@@ -113,7 +113,7 @@ class Linear4(FullSequential):
         if approach == "full":
             pass
 
-        self.set_full_sequential_relation(
+        self.add_sequence(
             Flatten(start_dim=1),
             self.backward.STOP,
 

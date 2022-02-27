@@ -50,7 +50,6 @@ class GraphBackwardPass(BaseBackwardPass):
             for module in self.relation_dict[function_id]:
                 if module == self.STOP:
                     continue
-
                 backward_fn = self.get_backward_function(module)
                 if backward_fn is None:
                     raise NotImplementedError

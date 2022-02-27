@@ -43,28 +43,41 @@ class BaseModule(nn.Module):
         self.to(device=device)
         self.device = device
 
+        for module in self.modules():
+            if isinstance(module, BaseLayer):
+                module.set_parent_module(self)
+
         self._compiled = True
         if self.tensorboard is not None:
             self.tensorboard.on_compile(layer_data=layer_data)
         return self
 
-    def output(self, x) -> Tensor:
+    @property
+    def use_autograd_graph(self):
+        return self.backward.use_autograd_graph
+
+    @use_autograd_graph.setter
+    def use_autograd_graph(self, use_autograd_graph: bool):
+        self.backward.use_autograd_graph = use_autograd_graph
+
+    def output(self, x: Tensor) -> Tensor:
         result = self(x)
         if self.training:
-            result = self.backward.set_output(result)
+            self.backward.output = result
+            result = self.backward.output
         return result
 
-    def loss(self, x, y):
+    def loss(self, output, target):
         if self.loss_fn is None:
             raise Exception("loss_fn is not set")
 
-        loss_result = self.loss_fn(x, y)
+        loss_result = self.loss_fn(output, target)
         if self.training:
-            self.backward.set_loss(loss_result)
+            self.backward.loss = loss_result
 
         accuracy_result = None
         if self.accuracy_fn is not None:
-            accuracy_result = self.accuracy_fn(x, y)
+            accuracy_result = self.accuracy_fn(output, target)
 
         return loss_result, accuracy_result
 
