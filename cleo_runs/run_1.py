@@ -232,9 +232,9 @@ def main(
 ):
     print()
     print(name)
-
     paths = data_dirs(data_folder, name=name)
     device, is_cuda = is_using_cuda()
+    torch.manual_seed(0)
     log_file = path_join(paths.logs, f"{paths.name}_logs.txt")
 
     train_loader, test_loader, input_shape, classes = load_vision_dataset(

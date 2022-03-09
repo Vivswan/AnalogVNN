@@ -4,9 +4,9 @@ from typing import Type, Union
 
 import numpy as np
 import torch
+import torchvision
 from torch import nn, optim
 from torch.nn import Flatten
-from torchviz import make_dot
 
 from cleo_runs.common_parameter_fn import normalize_parameter, add_gaussian_noise
 from dataloaders.load_vision_dataset import load_vision_dataset
@@ -25,6 +25,7 @@ from nn.optimizer.IdentityOptimizer import IdentityOptimizer
 from nn.optimizer.ReducePrecisionOptimizer import ReducePrecisionOptimizer
 from nn.optimizer.StochasticReducePrecisionOptimizer import StochasticReducePrecisionOptimizer
 from nn.utils.is_using_cuda import get_device, is_using_cuda
+from nn.utils.make_dot import make_dot
 from nn.utils.summary import summary
 from utils.data_dirs import data_dirs
 from utils.helper_functions import pick_instanceof
@@ -36,16 +37,10 @@ LAYER_SIZES = {
     3: [256, 64],
     4: [256, 128, 64]
 }
-cleo_default_parameters = {
-    'optimiser_class': optim.Adam,
-    'optimiser_parameters': {},
-    'batch_size': 128,
-    'epochs': 10,
-}
 
 
 def save_graph(filename, output, named_parameters):
-    make_dot(output, params=dict(named_parameters)).render(filename, cleanup=True)
+    make_dot(output, params=dict(named_parameters)).render(filename, format="svg", cleanup=True)
 
 
 def cross_entropy_loss_accuracy(output, target):
@@ -142,17 +137,15 @@ class LinearModel(FullSequential):
         )
         return self
 
-    @property
     def hyperparameters(self):
         return {
-            'model': self.__name__,
             'model_class': self.__class__.__name__,
 
             'num_layer': self.num_layer,
             'layer_features_sizes': self.layer_features_sizes,
             'approach': self.approach,
             'activation_class': self.activation_class.__name__,
-            'norm_class_y': self.norm_class.__name__,
+            'norm_class_y': self.norm_class.__name__ if self.noise_class is not None else str(None),
             'precision_class_y': self.precision_class.__name__ if self.precision_class is not None else str(None),
             'precision_y': str(self.precision),
             'noise_class_y': self.noise_class.__name__ if self.precision_class is not None else str(None),
@@ -171,6 +164,7 @@ def main(
         dataset, batch_size, epochs
 ):
     device, is_cuda = is_using_cuda()
+    torch.manual_seed(0)
     print()
     print(device, name)
 
@@ -193,18 +187,14 @@ def main(
     model.compile(device=get_device(), layer_data=True)
     model.loss_fn = nn.CrossEntropyLoss()
     model.accuracy_fn = cross_entropy_loss_accuracy
-
-    model.set_optimizer(
-        optimiser_class,
-        **optimiser_parameters
-    )
+    model.set_optimizer(optimizer_cls=optimiser_class, **optimiser_parameters)
 
     parameter_log = {
         'dataset': dataset.__name__,
         'batch_size': batch_size,
         'is_cuda': is_cuda,
 
-        **model.hyperparameters,
+        **model.hyperparameters(),
 
         # 'norm_class_w': norm_class_w.__name__,
         # 'precision_class_w': self.precision_class.__name__ if self.precision_class is not None else str(None),
@@ -224,7 +214,8 @@ def main(
     data = data.to(model.device)
     save_graph(path_join(paths.logs, paths.name), model(data), model.named_parameters())
 
-    apply_fn = [normalize_parameter(norm_class_w), add_gaussian_noise(leakage_w, precision_w)]
+    # apply_fn = [normalize_parameter(norm_class_w), add_gaussian_noise(leakage_w, precision_w)]
+    apply_fn = None
     for epoch in range(epochs):
         train_loss, train_accuracy = model.train_on(train_loader, epoch=epoch, apply_fn=apply_fn)
         test_loss, test_accuracy = model.test_on(test_loader, epoch=epoch)
@@ -254,7 +245,25 @@ def main(
 
 
 if __name__ == '__main__':
-    model = LinearModel([28 * 28, 128, 10], ReLU,
-                        noise_class=GaussianNoise, leakage=0.5, precision=8)
-    print(model)
-    print()
+    main(
+        name="test",
+        data_folder="C:/_data/cleo_test",
+        model_params={
+            "num_layer": 2,
+            "activation_class": ReLU,
+            "approach": "default",
+            "norm_class": None,
+            "precision_class": None,
+            "precision": None,
+            "noise_class": None,
+            "leakage": None,
+        },
+        norm_class_w=None,
+        precision_w=None,
+        leakage_w=None,
+        optimiser_class=optim.Adam,
+        optimiser_parameters={},
+        dataset=torchvision.datasets.MNIST,
+        batch_size=128,
+        epochs=1
+    )

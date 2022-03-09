@@ -15,7 +15,7 @@ class BackwardWrapper(BaseLayer, BackwardFunction):
         self.output = None
 
     def forward(self, x: Tensor):
-        if self.parent_module is not None and hasattr(self.parent_module, "use_autograd_graph") and not self.parent_module.use_autograd_graph:
+        if not self._parent_module_attr("use_autograd_graph"):
             x = self.save_x(x)
             x.requires_grad = True
             y = self._layer(x)
@@ -26,6 +26,7 @@ class BackwardWrapper(BaseLayer, BackwardFunction):
 
     def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
         self.y.backward(gradient=grad_output)
+        print(self.x.grad)
         return self.x.grad
 
 
@@ -34,9 +35,9 @@ if __name__ == '__main__':
     bw.compile()
 
     X: Tensor = torch.rand((2, 2), requires_grad=True)
-    Y: Tensor = bw.output(X - torch.tensor(0.5, requires_grad=False))
+    Y: Tensor = bw(X - torch.tensor(0.5, requires_grad=False))
     print("X\t\t\t\t:", X)
     print("Y\t\t\t\t:", Y)
-    bw.backward.loss = Y
+    bw.backward.set_loss(Y)
     bw.backward(gradient=torch.flatten(X, start_dim=0) - Y)
     print("X.grad\t\t\t:", X.grad)

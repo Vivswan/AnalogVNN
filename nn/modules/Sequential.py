@@ -3,7 +3,6 @@ from collections import OrderedDict
 from itertools import islice
 from typing import Iterator, TypeVar, Union, Dict, Optional
 
-import torch
 from torch import nn
 from torch.nn import Module
 

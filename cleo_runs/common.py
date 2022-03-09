@@ -11,7 +11,7 @@ cleo_default_parameters = {
     'optimiser_class': optim.Adam,
     'optimiser_parameters': {},
     'batch_size': 128,
-    'epochs': 10,
+    'epochs': 1,
 }
 
 

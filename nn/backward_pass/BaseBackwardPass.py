@@ -17,6 +17,7 @@ class BaseBackwardPass:
     def __init__(self, use_autograd_graph: bool = False):
         self.use_autograd_graph: bool = use_autograd_graph
 
+        self._input: Union[None, Tensor] = None
         self._output: Union[None, Tensor] = None
         self._loss: Union[None, Tensor] = None
 
@@ -37,12 +38,18 @@ class BaseBackwardPass:
 
         return result
 
-    @property
-    def output(self):
+    def set_inputs(self, *inputs):
+        self._input = inputs
+        return self._input
+
+    def get_inputs(self):
+        return self._input
+
+    def get_output(self):
         return self._output
 
-    @output.setter
-    def output(self, output: Tensor):
+    @torch.no_grad()
+    def set_output(self, output: Tensor):
         if self._output_hook is not None:
             self._output_hook.remove()
 
@@ -51,13 +58,12 @@ class BaseBackwardPass:
         else:
             self._output = output.detach()
             self._output.requires_grad = True
+        return self._output
 
-    @property
-    def loss(self):
+    def get_loss(self):
         return self._loss
 
-    @loss.setter
-    def loss(self, loss: Tensor):
+    def set_loss(self, loss: Tensor):
         self._loss = loss
 
     @staticmethod

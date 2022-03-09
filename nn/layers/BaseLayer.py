@@ -8,7 +8,7 @@ class BaseLayer(nn.Module):
         super(BaseLayer, self).__init__()
         self._saved_tensor = {}
         self._backward_module: Union[None, BackwardFunction] = None
-        self.parent_module = None
+        self._parent_module_attr = lambda x: None
 
     def set_backward_module(self, backward_class: Type['BackwardFunction']) -> 'BaseLayer':
         if not issubclass(backward_class, BackwardFunction):
@@ -18,9 +18,6 @@ class BaseLayer(nn.Module):
 
     def get_backward_module(self) -> Union[None, 'BackwardFunction']:
         return self._backward_module
-
-    def set_parent_module(self, module):
-        self.parent_module = module
 
     def use(self, *args) -> 'BaseLayer':
         for i in args:
@@ -67,8 +64,6 @@ class BaseLayer(nn.Module):
 
 
 class BackwardFunction:
-    __constants__ = ['main_layer']
-
     def __init__(self, layer: BaseLayer):
         if not isinstance(layer, BaseLayer):
             raise Exception(f'layer not instance of BaseLayer class')

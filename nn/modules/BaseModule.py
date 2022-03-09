@@ -38,6 +38,13 @@ class BaseModule(nn.Module):
         self.accuracy_fn = None
         self.device = get_device()
 
+    def __call__(self, *args, **kwargs):
+        result = super(BaseModule, self).__call__(*args, **kwargs)
+        if self.training:
+            self.backward.set_inputs(*args)
+            result = self.backward.set_output(result)
+        return result
+
     def compile(self, device=get_device(), layer_data=True):
         self.backward.compile()
         self.to(device=device)
@@ -45,7 +52,7 @@ class BaseModule(nn.Module):
 
         for module in self.modules():
             if isinstance(module, BaseLayer):
-                module.set_parent_module(self)
+                module._parent_module_attr = lambda name: getattr(self, name) if hasattr(self, name) else None
 
         self._compiled = True
         if self.tensorboard is not None:
@@ -61,11 +68,7 @@ class BaseModule(nn.Module):
         self.backward.use_autograd_graph = use_autograd_graph
 
     def output(self, x: Tensor) -> Tensor:
-        result = self(x)
-        if self.training:
-            self.backward.output = result
-            result = self.backward.output
-        return result
+        return self(x)
 
     def loss(self, output, target):
         if self.loss_fn is None:
@@ -73,7 +76,7 @@ class BaseModule(nn.Module):
 
         loss_result = self.loss_fn(output, target)
         if self.training:
-            self.backward.loss = loss_result
+            self.backward.set_loss(loss_result)
 
         accuracy_result = None
         if self.accuracy_fn is not None:
