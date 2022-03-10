@@ -7,7 +7,7 @@ import torch.nn as nn
 
 def summary(model: nn.Module, input_size, include_self=False):
     result = ""
-    device = next(model.parameters()).device
+    device = model.device
 
     def register_hook(module):
 

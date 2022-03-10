@@ -8,7 +8,6 @@ import torchvision
 from torch import nn, optim
 from torch.nn import Flatten
 
-from cleo_runs.common_parameter_fn import normalize_parameter, add_gaussian_noise
 from dataloaders.load_vision_dataset import load_vision_dataset
 from nn.activations.Activation import Activation
 from nn.activations.Identity import Identity
@@ -20,12 +19,12 @@ from nn.layers.Normalize import Normalize
 from nn.layers.ReducePrecision import ReducePrecision
 from nn.layers.StochasticReducePrecision import StochasticReducePrecision
 from nn.modules.FullSequential import FullSequential
+from nn.modules.Sequential import Sequential
 from nn.optimizer.BaseOptimizer import BaseOptimizer
 from nn.optimizer.IdentityOptimizer import IdentityOptimizer
-from nn.optimizer.ReducePrecisionOptimizer import ReducePrecisionOptimizer
-from nn.optimizer.StochasticReducePrecisionOptimizer import StochasticReducePrecisionOptimizer
 from nn.utils.is_using_cuda import get_device, is_using_cuda
 from nn.utils.make_dot import make_dot
+from nn.utils.parametrize_model import parametrize_model
 from nn.utils.summary import summary
 from utils.data_dirs import data_dirs
 from utils.helper_functions import pick_instanceof
@@ -116,24 +115,17 @@ class LinearModel(FullSequential):
             *self.all_layers
         )
 
-        if precision_class == ReducePrecision or precision_class == StochasticReducePrecision:
-            precision_class.parameter_class.parametrize_model(
-                self,
-                precision=precision,
-            )
-
-    @property
-    def optimizer_superclass(self) -> Type[BaseOptimizer]:
-        if self.precision_class == ReducePrecision:
-            return ReducePrecisionOptimizer
-        elif self.precision_class == StochasticReducePrecision:
-            return StochasticReducePrecisionOptimizer
-        else:
-            return IdentityOptimizer
+    # @property
+    # def optimizer_superclass(self) -> Type[BaseOptimizer]:
+    #     if self.precision_class == ReducePrecision:
+    #         return ReducePrecisionOptimizer
+    #     elif self.precision_class == StochasticReducePrecision:
+    #         return StochasticReducePrecisionOptimizer
+    #     else:
+    #         return IdentityOptimizer
 
     def set_optimizer(self, optimizer_cls, **optimiser_parameters):
-        self.optimizer = self.optimizer_superclass(
-            optimizer_cls=optimizer_cls,
+        self.optimizer = optimizer_cls(
             params=self.parameters(),
             **optimiser_parameters
         )
@@ -141,7 +133,7 @@ class LinearModel(FullSequential):
 
     def hyperparameters(self):
         return {
-            'model_class': self.__class__.__name__,
+            'nn_model_class': self.__class__.__name__,
 
             'num_layer': self.num_layer,
             'layer_features_sizes': self.layer_features_sizes,
@@ -159,9 +151,43 @@ class LinearModel(FullSequential):
         }
 
 
+class WeightModel(Sequential):
+    def __init__(
+            self,
+            norm_class: Type[Normalize] = None,
+            precision_class: Type[Union[ReducePrecision, StochasticReducePrecision]] = None,
+            precision: Union[int, None] = None,
+            noise_class: Type[Union[GaussianNoise]] = None,
+            leakage: Union[float, None] = None,
+    ):
+        super(WeightModel, self).__init__()
+        self.norm_class = norm_class
+        self.precision_class = precision_class
+        self.precision = precision
+        self.noise_class = noise_class
+        self.leakage = leakage
+
+        norm_layer = norm_class() if norm_class is not None else Identity("Norm")
+        precision_layer = precision_class(precision=precision) if precision_class is not None else Identity("Precision")
+        noise_layer = noise_class(leakage=leakage, precision=precision) if noise_class is not None else Identity(
+            "Noise")
+
+        self.add_sequence(norm_layer, precision_layer, noise_layer)
+
+    def hyperparameters(self):
+        return {
+            'weight_model_class': self.__class__.__name__,
+
+            'norm_class_w': self.norm_class.__name__ if self.noise_class is not None else str(None),
+            'precision_class_w': self.precision_class.__name__ if self.precision_class is not None else str(None),
+            'precision_w': str(self.precision),
+            'noise_class_w': self.noise_class.__name__ if self.precision_class is not None else str(None),
+            'leakage_w': str(self.leakage),
+        }
+
+
 def main(
-        name, data_folder, model_params,
-        norm_class_w, precision_w, leakage_w,
+        name, data_folder, nn_model_params, weight_model_params,
         optimiser_class, optimiser_parameters,
         dataset, batch_size, epochs
 ):
@@ -180,47 +206,44 @@ def main(
         is_cuda=is_cuda
     )
 
-    model_params["layer_features_sizes"] = [int(np.prod(input_shape[1:]))] + LAYER_SIZES[model_params["num_layer"]] + [len(classes)]
-    del model_params["num_layer"]
-    model = LinearModel(**model_params)
+    nn_model_params["layer_features_sizes"] = [int(np.prod(input_shape[1:]))] + LAYER_SIZES[
+        nn_model_params["num_layer"]] + [len(classes)]
+    del nn_model_params["num_layer"]
+    nn_model = LinearModel(**nn_model_params)
+    weight_model = WeightModel(**weight_model_params)
     if TENSORBOARD:
-        model.create_tensorboard(paths.tensorboard)
+        nn_model.create_tensorboard(paths.tensorboard)
 
-    model.compile(device=get_device(), layer_data=True)
-    model.loss_fn = nn.CrossEntropyLoss()
-    model.accuracy_fn = cross_entropy_loss_accuracy
-    model.set_optimizer(optimizer_cls=optimiser_class, **optimiser_parameters)
+    nn_model.compile(device=get_device(), layer_data=True)
+    nn_model.loss_fn = nn.CrossEntropyLoss()
+    nn_model.accuracy_fn = cross_entropy_loss_accuracy
+    nn_model.set_optimizer(optimizer_cls=optimiser_class, **optimiser_parameters)
+    parametrize_model(nn_model, weight_model)
 
     parameter_log = {
         'dataset': dataset.__name__,
         'batch_size': batch_size,
         'is_cuda': is_cuda,
 
-        **model.hyperparameters(),
-
-        # 'norm_class_w': norm_class_w.__name__,
-        # 'precision_class_w': self.precision_class.__name__ if self.precision_class is not None else str(None),
-        # 'precision_w': str(precision_w),
-        # 'noise_class_w': add_gaussian_noise.__name__ if leakage_w is not None else str(None),
-        # 'leakage_w': str(leakage_w),
+        **nn_model.hyperparameters(),
+        **weight_model.hyperparameters(),
     }
 
     with open(log_file, "a+") as file:
         file.write(json.dumps(parameter_log, sort_keys=True, indent=2) + "\n\n")
-        file.write(str(model.optimizer) + "\n\n")
+        file.write(str(nn_model.optimizer) + "\n\n")
 
-        file.write(str(model) + "\n\n")
-        file.write(summary(model, input_size=tuple(input_shape[1:])) + "\n\n")
+        file.write(str(nn_model) + "\n\n")
+        file.write(str(weight_model) + "\n\n")
+        file.write(summary(nn_model, input_size=tuple(input_shape[1:])) + "\n\n")
+        file.write(summary(weight_model, input_size=tuple(input_shape[1:])) + "\n\n")
 
     data = next(iter(train_loader))[0]
-    data = data.to(model.device)
-    save_graph(path_join(paths.logs, paths.name), model(data), model.named_parameters())
-
-    # apply_fn = [normalize_parameter(norm_class_w), add_gaussian_noise(leakage_w, precision_w)]
-    apply_fn = None
+    data = data.to(nn_model.device)
+    save_graph(path_join(paths.logs, paths.name), nn_model(data), nn_model.named_parameters())
     for epoch in range(epochs):
-        train_loss, train_accuracy = model.train_on(train_loader, epoch=epoch, apply_fn=apply_fn)
-        test_loss, test_accuracy = model.test_on(test_loader, epoch=epoch)
+        train_loss, train_accuracy = nn_model.train_on(train_loader, epoch=epoch)
+        test_loss, test_accuracy = nn_model.test_on(test_loader, epoch=epoch)
 
         str_epoch = str(epoch + 1).zfill(math.ceil(math.log10(epochs)))
         print_str = f'({str_epoch})' \
@@ -234,7 +257,7 @@ def main(
             file.write(print_str)
 
         if TENSORBOARD and epoch == epochs:
-            model.tensorboard.tensorboard.add_hparams(
+            nn_model.tensorboard.tensorboard.add_hparams(
                 hparam_dict=parameter_log,
                 metric_dict={
                     "train_loss": train_loss,
@@ -250,7 +273,7 @@ if __name__ == '__main__':
     main(
         name="test",
         data_folder="C:/_data/cleo_test",
-        model_params={
+        nn_model_params={
             "num_layer": 2,
             "activation_class": ReLU,
             "approach": "default",
@@ -260,9 +283,13 @@ if __name__ == '__main__':
             "noise_class": None,
             "leakage": None,
         },
-        norm_class_w=None,
-        precision_w=None,
-        leakage_w=None,
+        weight_model_params={
+            "norm_class": None,
+            "precision_class": None,
+            "precision": None,
+            "noise_class": None,
+            "leakage": None,
+        },
         optimiser_class=optim.Adam,
         optimiser_parameters={},
         dataset=torchvision.datasets.MNIST,

@@ -5,7 +5,6 @@ import torch
 from torch.optim import Optimizer
 
 from nn.optimizer.PseudoOptimizer import PseudoOptimizer
-from nn.parameters.PseudoParameter import PseudoParameter
 from nn.parameters.ReducePrecisionParameter import ReducePrecisionParameter
 
 
@@ -33,7 +32,7 @@ class ReducePrecisionOptimizer(PseudoOptimizer):
         )
 
     @torch.no_grad()
-    def step_precision_parameter(self, parameter, group) -> Type[PseudoParameter]:
+    def step_precision_parameter(self, parameter, group):
         if group["weight_update_type"] == PrecisionUpdateTypes.WEIGHT_UPDATE:
             parameter.set_data(parameter.pseudo_tensor)
             return parameter
