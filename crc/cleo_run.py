@@ -39,8 +39,10 @@ LAYER_SIZES = {
 }
 
 
-def save_graph(filename, output, named_parameters):
-    make_dot(output, params=dict(named_parameters)).render(filename, format="svg", cleanup=True)
+def save_graph(filename, output, named_parameters=None):
+    if named_parameters is not None:
+        named_parameters = dict(named_parameters)
+    make_dot(output, params=named_parameters).render(filename, format="svg", cleanup=True)
 
 
 def cross_entropy_loss_accuracy(output, target):
@@ -115,7 +117,7 @@ class LinearModel(FullSequential):
         )
 
         if precision_class == ReducePrecision or precision_class == StochasticReducePrecision:
-            precision_class.parameter_class.convert_model(
+            precision_class.parameter_class.parametrize_model(
                 self,
                 precision=precision,
             )

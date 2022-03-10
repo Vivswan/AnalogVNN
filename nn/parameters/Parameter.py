@@ -1,18 +1,17 @@
 import torch
 from torch import nn
-from torch.nn import Parameter
 
 
-class BaseParameter(Parameter):
+class Parameter(nn.Parameter):
     def __new__(cls, data=None, requires_grad=True, *args, **kwargs):
-        return super(BaseParameter, cls).__new__(cls, data, requires_grad)
+        return super(Parameter, cls).__new__(cls, data, requires_grad)
 
     # noinspection PyUnusedLocal
     def __init__(self, data=None, requires_grad=True, *args, **kwargs):
-        super(BaseParameter, self).__init__()
+        super(Parameter, self).__init__()
 
     def __repr__(self):
-        return super(BaseParameter, self).__repr__()
+        return super(Parameter, self).__repr__()
 
     @classmethod
     def from_tensor(cls, tensor, *args, **kwargs):
