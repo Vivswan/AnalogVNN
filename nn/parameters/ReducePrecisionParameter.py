@@ -1,6 +1,4 @@
-import torch
-
-from nn.fn.reduce_precision import reduce_precision
+from nn.layers.ReducePrecision import ReducePrecision
 from nn.parameters.PseudoParameter import PseudoParameter
 
 
@@ -12,22 +10,13 @@ class ReducePrecisionParameter(PseudoParameter):
                  initialise_zero_pseudo=False):
         self.precision = precision
         self.divide = divide
-        super(ReducePrecisionParameter, self).__init__(data, requires_grad, initialise_zero_pseudo)
+        super(ReducePrecisionParameter, self).__init__(
+            data=data,
+            requires_grad=requires_grad,
+            transform=ReducePrecision(precision=precision, divide=divide),
+            initialise_zero_pseudo=initialise_zero_pseudo
+        )
 
     def __repr__(self):
         return f'ReducePrecisionParameter(precision: {self.precision}, divide:{self.divide}):\n' + super(
             ReducePrecisionParameter, self).__repr__()
-
-    @torch.no_grad()
-    def set_data(self, data=None, precision=None, divide=None):
-        if precision is None:
-            precision = self.precision
-        if divide is None:
-            divide = self.divide
-        self.data = reduce_precision(data, precision=precision, divide=divide)
-        return self
-
-
-if __name__ == '__main__':
-    p = ReducePrecisionParameter(data=torch.eye(2), precision=4, divide=0.1)
-    print(p)

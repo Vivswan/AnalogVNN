@@ -32,23 +32,23 @@ class ReducePrecisionOptimizer(PseudoOptimizer):
         )
 
     @torch.no_grad()
-    def step_precision_parameter(self, parameter, group):
+    def step_precision_parameter(self, parameter: ReducePrecisionParameter, group):
         if group["weight_update_type"] == PrecisionUpdateTypes.WEIGHT_UPDATE:
-            parameter.set_data(parameter.pseudo_tensor)
+            parameter.update()
             return parameter
 
         if group["weight_update_type"] == PrecisionUpdateTypes.FULL_WEIGHT_UPDATE:
-            parameter.set_data(parameter + (torch.sign(parameter.pseudo_tensor) * (1 / parameter.precision)))
-            parameter.pseudo_tensor.zero_()
+            parameter.set_data(parameter + (torch.sign(parameter.original) * (1 / parameter.precision)))
+            parameter.original.zero_()
             return parameter
 
-        if torch.any(torch.abs(parameter.pseudo_tensor) > 1 / parameter.precision):  # TODO
+        if torch.any(torch.abs(parameter.original) > 1 / parameter.precision):  # TODO
             if group["weight_update_type"] == PrecisionUpdateTypes.THRESHOLD_WEIGHT_UPDATE:
-                parameter.set_data(parameter + parameter.pseudo_tensor)
-                parameter.pseudo_tensor.zero_()
+                parameter.set_data(parameter + parameter.original)
+                parameter.original.zero_()
                 return parameter
 
             if group["weight_update_type"] == PrecisionUpdateTypes.THRESHOLD_FULL_WEIGHT_UPDATE:
-                parameter.set_data(parameter + (torch.sign(parameter.pseudo_tensor) * (1 / parameter.precision)))
-                parameter.pseudo_tensor.zero_()
+                parameter.set_data(parameter + (torch.sign(parameter.original) * (1 / parameter.precision)))
+                parameter.original.zero_()
                 return parameter

@@ -1,47 +1,41 @@
 import json
 import math
-from typing import Type, Union
+from typing import Type
 
 import numpy as np
-import torch
 import torchvision
 from torch import nn, optim
 from torch.nn import Flatten
 
 from dataloaders.load_vision_dataset import load_vision_dataset
 from nn.activations.Activation import Activation
-from nn.activations.Identity import Identity
 from nn.activations.ReLU import ReLU
-from nn.backward_pass.BackwardFunction import BackwardIdentity, BackwardUsingForward
+from nn.backward_pass.BackwardFunction import BackwardUsingForward
 from nn.layers.GaussianNoise import GaussianNoise
 from nn.layers.Linear import Linear, LinearBackpropagation
-from nn.layers.Normalize import Normalize
+from nn.layers.Normalize import *
 from nn.layers.ReducePrecision import ReducePrecision
 from nn.layers.StochasticReducePrecision import StochasticReducePrecision
 from nn.modules.FullSequential import FullSequential
 from nn.modules.Sequential import Sequential
-from nn.optimizer.BaseOptimizer import BaseOptimizer
-from nn.optimizer.IdentityOptimizer import IdentityOptimizer
+from nn.optimizer.PseudoOptimizer import PseudoOptimizer
 from nn.utils.is_using_cuda import get_device, is_using_cuda
-from nn.utils.make_dot import make_dot
-from nn.utils.parametrize_model import parametrize_model
 from nn.utils.summary import summary
 from utils.data_dirs import data_dirs
 from utils.helper_functions import pick_instanceof
 from utils.path_functions import path_join
+from utils.save_graph import save_graph
 
 TENSORBOARD = True
+NORM_CLASSES = [Clamp, L1Norm, L2Norm, L1NormW, L2NormW]
+RP_CLASSES = [ReducePrecision, StochasticReducePrecision]
+NOISE_CLASS = [GaussianNoise]
 LAYER_SIZES = {
+    1: [],
     2: [128],
     3: [256, 64],
     4: [256, 128, 64]
 }
-
-
-def save_graph(filename, output, named_parameters=None):
-    if named_parameters is not None:
-        named_parameters = dict(named_parameters)
-    make_dot(output, params=named_parameters).render(filename, format="svg", cleanup=True)
 
 
 def cross_entropy_loss_accuracy(output, target):
@@ -81,17 +75,17 @@ class LinearModel(FullSequential):
             activation_class.initialise_(linear_layer.weight)
 
             self.all_layers += [
-                norm_class() if norm_class is not None else Identity("Norm"),
-                precision_class(precision=precision) if precision_class is not None else Identity("Precision"),
-                noise_class(leakage=leakage, precision=precision) if noise_class is not None else Identity("Noise"),
+                # norm_class() if norm_class is not None else Identity("Norm"),
+                # precision_class(precision=precision) if precision_class is not None else Identity("Precision"),
+                # noise_class(leakage=leakage, precision=precision) if noise_class is not None else Identity("Noise"),
 
                 linear_layer,
 
-                noise_class(leakage=leakage, precision=precision) if noise_class is not None else Identity("Noise"),
-                norm_class() if norm_class is not None else Identity("Norm"),
-                precision_class(precision=precision) if precision_class is not None else Identity("Precision"),
+                # noise_class(leakage=leakage, precision=precision) if noise_class is not None else Identity("Noise"),
+                # norm_class() if norm_class is not None else Identity("Norm"),
+                # precision_class(precision=precision) if precision_class is not None else Identity("Precision"),
 
-                activation_class(),
+                # activation_class(),
             ]
 
         self.linear_layers = pick_instanceof(self.all_layers, Linear)
@@ -115,20 +109,18 @@ class LinearModel(FullSequential):
             *self.all_layers
         )
 
-    # @property
-    # def optimizer_superclass(self) -> Type[BaseOptimizer]:
-    #     if self.precision_class == ReducePrecision:
-    #         return ReducePrecisionOptimizer
-    #     elif self.precision_class == StochasticReducePrecision:
-    #         return StochasticReducePrecisionOptimizer
-    #     else:
-    #         return IdentityOptimizer
-
-    def set_optimizer(self, optimizer_cls, **optimiser_parameters):
-        self.optimizer = optimizer_cls(
-            params=self.parameters(),
-            **optimiser_parameters
-        )
+    def set_optimizer(self, optimizer_cls, super_optimizer_cls=None, param_sanitizer=None, **optimiser_parameters):
+        if super_optimizer_cls is not None:
+            self.optimizer = super_optimizer_cls(
+                optimizer_cls=optimizer_cls,
+                params=self.parameters() if param_sanitizer is None else param_sanitizer(self.parameters()),
+                **optimiser_parameters
+            )
+        else:
+            self.optimizer = optimizer_cls(
+                params=self.parameters() if param_sanitizer is None else param_sanitizer(self.parameters()),
+                **optimiser_parameters
+            )
         return self
 
     def hyperparameters(self):
@@ -139,10 +131,10 @@ class LinearModel(FullSequential):
             'layer_features_sizes': self.layer_features_sizes,
             'approach': self.approach,
             'activation_class': self.activation_class.__name__,
-            'norm_class_y': self.norm_class.__name__ if self.noise_class is not None else str(None),
+            'norm_class_y': self.norm_class.__name__ if self.norm_class is not None else str(None),
             'precision_class_y': self.precision_class.__name__ if self.precision_class is not None else str(None),
             'precision_y': str(self.precision),
-            'noise_class_y': self.noise_class.__name__ if self.precision_class is not None else str(None),
+            'noise_class_y': self.noise_class.__name__ if self.noise_class is not None else str(None),
             'leakage_y': str(self.leakage),
 
             'loss_class': self.loss_fn.__class__.__name__,
@@ -161,27 +153,36 @@ class WeightModel(Sequential):
             leakage: Union[float, None] = None,
     ):
         super(WeightModel, self).__init__()
+        self.backward.use_autograd_graph = True
         self.norm_class = norm_class
         self.precision_class = precision_class
         self.precision = precision
         self.noise_class = noise_class
         self.leakage = leakage
 
-        norm_layer = norm_class() if norm_class is not None else Identity("Norm")
-        precision_layer = precision_class(precision=precision) if precision_class is not None else Identity("Precision")
-        noise_layer = noise_class(leakage=leakage, precision=precision) if noise_class is not None else Identity(
-            "Noise")
+        self.layers = []
+        if norm_class is not None:
+            norm_layer = norm_class()
+            self.layers.append(norm_layer)
 
-        self.add_sequence(norm_layer, precision_layer, noise_layer)
+        if precision_class is not None:
+            precision_layer = precision_class(precision=precision)
+            self.layers.append(precision_layer)
+
+        if noise_class is not None:
+            noise_layer = noise_class(leakage=leakage, precision=precision)
+            self.layers.append(noise_layer)
+
+        self.add_sequence(*self.layers)
 
     def hyperparameters(self):
         return {
             'weight_model_class': self.__class__.__name__,
 
-            'norm_class_w': self.norm_class.__name__ if self.noise_class is not None else str(None),
+            'norm_class_w': self.norm_class.__name__ if self.norm_class is not None else str(None),
             'precision_class_w': self.precision_class.__name__ if self.precision_class is not None else str(None),
             'precision_w': str(self.precision),
-            'noise_class_w': self.noise_class.__name__ if self.precision_class is not None else str(None),
+            'noise_class_w': self.noise_class.__name__ if self.noise_class is not None else str(None),
             'leakage_w': str(self.leakage),
         }
 
@@ -217,8 +218,12 @@ def main(
     nn_model.compile(device=get_device(), layer_data=True)
     nn_model.loss_fn = nn.CrossEntropyLoss()
     nn_model.accuracy_fn = cross_entropy_loss_accuracy
-    nn_model.set_optimizer(optimizer_cls=optimiser_class, **optimiser_parameters)
-    parametrize_model(nn_model, weight_model)
+    PseudoOptimizer.parameter_type.convert_model(nn_model, transform=weight_model)
+    nn_model.set_optimizer(
+        optimizer_cls=optimiser_class,
+        super_optimizer_cls=PseudoOptimizer,
+        **optimiser_parameters
+    )
 
     parameter_log = {
         'dataset': dataset.__name__,
@@ -240,7 +245,7 @@ def main(
 
     data = next(iter(train_loader))[0]
     data = data.to(nn_model.device)
-    save_graph(path_join(paths.logs, paths.name), nn_model(data), nn_model.named_parameters())
+    save_graph(path_join(paths.logs, paths.name), nn_model(data, original_output=True), nn_model.named_parameters())
     for epoch in range(epochs):
         train_loss, train_accuracy = nn_model.train_on(train_loader, epoch=epoch)
         test_loss, test_accuracy = nn_model.test_on(test_loader, epoch=epoch)
@@ -274,7 +279,7 @@ if __name__ == '__main__':
         name="test",
         data_folder="C:/_data/cleo_test",
         nn_model_params={
-            "num_layer": 2,
+            "num_layer": 3,
             "activation_class": ReLU,
             "approach": "default",
             "norm_class": None,
@@ -284,9 +289,9 @@ if __name__ == '__main__':
             "leakage": None,
         },
         weight_model_params={
-            "norm_class": None,
-            "precision_class": None,
-            "precision": None,
+            "norm_class": Clamp,
+            "precision_class": ReducePrecision,
+            "precision": 2 ** 4,
             "noise_class": None,
             "leakage": None,
         },
@@ -294,5 +299,5 @@ if __name__ == '__main__':
         optimiser_parameters={},
         dataset=torchvision.datasets.MNIST,
         batch_size=128,
-        epochs=1
+        epochs=10
     )

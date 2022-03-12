@@ -35,6 +35,13 @@ class BaseOptimizer(Optimizer):
         defaults["optimizer_cls"] = optimizer_cls
         super(BaseOptimizer, self).__init__(params, defaults)
 
+    @staticmethod
+    def add_optimizer_to_param_group(param_group: dict) -> None:
+        class_parameters = {}
+        for parameter, value in inspect.signature(param_group['optimizer_cls']).parameters.items():
+            class_parameters[parameter] = param_group[parameter]
+        param_group['optimizer'] = param_group['optimizer_cls'](**class_parameters)
+
     @torch.no_grad()
     def step(self, closure=None, set_to_none: bool = False):
         loss = None
@@ -44,10 +51,7 @@ class BaseOptimizer(Optimizer):
 
         for group in self.param_groups:
             if 'optimizer' not in group:
-                class_parameters = {}
-                for parameter, value in inspect.signature(group['optimizer_cls']).parameters.items():
-                    class_parameters[parameter] = group[parameter]
-                group['optimizer'] = group['optimizer_cls'](**class_parameters)
+                self.add_optimizer_to_param_group(group)
 
             group['optimizer'].step()
 

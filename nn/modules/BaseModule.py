@@ -4,10 +4,10 @@ import torch
 from torch import nn, Tensor
 from torch.utils.data import DataLoader
 
-from nn.layers.BaseLayer import BaseLayer
 from nn.TensorboardModelLog import TensorboardModelLog
 from nn.backward_pass.BaseBackwardPass import BaseBackwardPass
 from nn.backward_pass.GraphBackwardPass import GraphBackwardPass
+from nn.layers.BaseLayer import BaseLayer
 from nn.test import test
 from nn.train import train
 from nn.utils.is_using_cuda import get_device
@@ -38,9 +38,9 @@ class BaseModule(nn.Module):
         self.accuracy_fn = None
         self.device = get_device()
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args, original_output=False, **kwargs):
         result = super(BaseModule, self).__call__(*args, **kwargs)
-        if self.training:
+        if self.training and not original_output:
             self.backward.set_inputs(*args)
             result = self.backward.set_output(result)
         return result
@@ -50,7 +50,7 @@ class BaseModule(nn.Module):
         self.to(device=device)
         self.device = device
 
-        for module in self.modules():
+        for module in self.children():
             if isinstance(module, BaseLayer):
                 module._parent_module_attr = lambda name: getattr(self, name) if hasattr(self, name) else None
 

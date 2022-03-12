@@ -27,8 +27,7 @@ class BaseLayer(nn.Module):
 
     def save_tensor(self, name: str, tensor: Tensor, attached=False):
         if isinstance(tensor, Tensor) and not attached:
-            tensor = tensor.clone()
-            tensor.detach_()
+            tensor = tensor.clone().detach()
             tensor.requires_grad = False
         self._saved_tensor[name] = tensor
         return tensor

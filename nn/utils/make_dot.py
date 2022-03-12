@@ -73,7 +73,10 @@ def make_dot(var, params=None, show_attrs=True, show_saved=True, max_attr_chars=
 
     if params is not None:
         assert all(isinstance(p, Tensor) for p in params.values())
-        param_map = {id(v): k for k, v in params.items()}
+        param_map = {}
+        for k, v in params.items():
+            param_map[id(v)] = k
+            param_map[id(v.data)] = k
     else:
         param_map = {}
 

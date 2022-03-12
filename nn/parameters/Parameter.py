@@ -8,7 +8,7 @@ class Parameter(nn.Parameter):
 
     # noinspection PyUnusedLocal
     def __init__(self, data=None, requires_grad=True, *args, **kwargs):
-        super(Parameter, self).__init__()
+        super().__init__()
 
     def __repr__(self):
         return super(Parameter, self).__repr__()
@@ -40,7 +40,7 @@ class Parameter(nn.Parameter):
                     cls.from_parameter(parameter=parameter, *args, **kwargs)
                 )
 
-            for module in model.modules():
+            for module in model.children():
                 if module == model:
                     continue
                 cls.convert_model(module, *args, **kwargs)
