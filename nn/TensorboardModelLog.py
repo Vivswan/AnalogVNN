@@ -16,7 +16,6 @@ class TensorboardModelLog:
         self.model = model
         self.tensorboard = None
         self.layer_data = True
-        self._added_graph = False
 
         if not os.path.exists(log_dir):
             os.mkdir(log_dir)
@@ -44,24 +43,34 @@ class TensorboardModelLog:
                 self.tensorboard.add_histogram(f"{idx}-{module}.weight", module.weight, epoch)
 
     def on_compile(self, layer_data=True):
-        self.tensorboard.add_text("str", re.sub("\n", "\n    ", "    " + str(self.model)))
         if self.layer_data:
             self.layer_data = layer_data
+
         if self.layer_data:
             self._add_layer_data(epoch=-1)
         return self
 
-    def add_graph(self, train_loader):
-        if not self._added_graph:
+    def add_graph(self, train_loader, model=None):
+        if model is None:
+            model = self.model
+
+        if not getattr(self.tensorboard, f"_added_graph_{id(model)}", False):
+            # print(f"_added_graph_{id(model)}", model.__class__.__name__)
             for batch_idx, (data, target) in enumerate(train_loader):
                 input_size = tuple(list(data.shape)[1:])
                 batch_size = data.shape[1]
-                self.tensorboard.add_text("summary",
-                                          re.sub("\n", "\n    ", "    " + summary(self.model, input_size=input_size)))
-                self.tensorboard.add_graph(self.model,
-                                           torch.zeros(tuple([batch_size] + list(input_size))).to(self.model.device))
+                self.tensorboard.add_text(
+                    f"str ({model.__class__.__name__})",
+                    re.sub("\n", "\n    ", "    " + str(model))
+                )
+                self.tensorboard.add_text(
+                    f"summary ({model.__class__.__name__})",
+                    re.sub("\n", "\n    ", "    " + summary(model, input_size=input_size))
+                )
+                self.tensorboard.add_graph(model, torch.zeros(tuple([batch_size] + list(input_size))).to(model.device))
                 break
-        self._added_graph = True
+
+            setattr(self.tensorboard, f"_added_graph_{id(model)}", True)
 
     def register_training(self, epoch, train_loss, train_accuracy):
         self.tensorboard.add_scalar('Loss/train', train_loss, epoch)

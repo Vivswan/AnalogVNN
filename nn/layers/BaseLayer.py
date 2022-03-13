@@ -1,5 +1,6 @@
 from typing import Union, Type
 
+import torch
 from torch import nn, Tensor
 
 
@@ -25,12 +26,18 @@ class BaseLayer(nn.Module):
                 self.set_backward_module(i)
         return self
 
+    @torch.no_grad()
     def save_tensor(self, name: str, tensor: Tensor, attached=False):
-        if isinstance(tensor, Tensor) and not attached:
-            tensor = tensor.clone().detach()
-            tensor.requires_grad = False
-        self._saved_tensor[name] = tensor
-        return tensor
+        if not self.training:
+            return
+
+        if not isinstance(tensor, Tensor):
+            raise Exception("Not a tensor")
+        if attached:
+            self._saved_tensor[name] = tensor
+        else:
+            self._saved_tensor[name] = tensor.clone()
+        return self._saved_tensor[name]
 
     def save_x(self, x: Tensor, attached=False):
         return self.save_tensor("input", x, attached=attached)

@@ -15,18 +15,17 @@ class BackwardWrapper(BaseLayer, BackwardFunction):
         self.output = None
 
     def forward(self, x: Tensor):
-        if not self._parent_module_attr("use_autograd_graph"):
-            x = self.save_x(x)
-            x.requires_grad = True
+        if self._parent_module_attr("use_autograd_graph") or not self.training:
             y = self._layer(x)
-            self.save_y(y, attached=True)
         else:
-            y = self._layer(x)
+            x_dash = self.save_x(x)
+            x_dash.requires_grad = True
+            y = self._layer(x_dash)
+            self.save_y(y, attached=True)
         return y
 
     def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
         self.y.backward(gradient=grad_output)
-        print(self.x.grad)
         return self.x.grad
 
 

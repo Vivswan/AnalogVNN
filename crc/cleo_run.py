@@ -9,8 +9,10 @@ from torch.nn import Flatten
 
 from dataloaders.load_vision_dataset import load_vision_dataset
 from nn.activations.Activation import Activation
+from nn.activations.Identity import Identity
 from nn.activations.ReLU import ReLU
 from nn.backward_pass.BackwardFunction import BackwardUsingForward
+from nn.layers.BackwardWrapper import BackwardWrapper
 from nn.layers.GaussianNoise import GaussianNoise
 from nn.layers.Linear import Linear, LinearBackpropagation
 from nn.layers.Normalize import *
@@ -75,17 +77,17 @@ class LinearModel(FullSequential):
             activation_class.initialise_(linear_layer.weight)
 
             self.all_layers += [
-                # norm_class() if norm_class is not None else Identity("Norm"),
-                # precision_class(precision=precision) if precision_class is not None else Identity("Precision"),
-                # noise_class(leakage=leakage, precision=precision) if noise_class is not None else Identity("Noise"),
+                norm_class() if norm_class is not None else Identity("Norm"),
+                precision_class(precision=precision) if precision_class is not None else Identity("Precision"),
+                noise_class(leakage=leakage, precision=precision) if noise_class is not None else Identity("Noise"),
 
                 linear_layer,
 
-                # noise_class(leakage=leakage, precision=precision) if noise_class is not None else Identity("Noise"),
-                # norm_class() if norm_class is not None else Identity("Norm"),
-                # precision_class(precision=precision) if precision_class is not None else Identity("Precision"),
+                noise_class(leakage=leakage, precision=precision) if noise_class is not None else Identity("Noise"),
+                norm_class() if norm_class is not None else Identity("Norm"),
+                precision_class(precision=precision) if precision_class is not None else Identity("Precision"),
 
-                # activation_class(),
+                activation_class(),
             ]
 
         self.linear_layers = pick_instanceof(self.all_layers, Linear)
@@ -104,8 +106,7 @@ class LinearModel(FullSequential):
             [i.use(BackwardUsingForward) for i in self.norm_layers]
 
         self.add_sequence(
-            Flatten(start_dim=1),
-            self.backward.STOP,
+            BackwardWrapper(Flatten(start_dim=1)),
             *self.all_layers
         )
 
@@ -153,27 +154,20 @@ class WeightModel(Sequential):
             leakage: Union[float, None] = None,
     ):
         super(WeightModel, self).__init__()
-        self.backward.use_autograd_graph = True
         self.norm_class = norm_class
         self.precision_class = precision_class
         self.precision = precision
         self.noise_class = noise_class
         self.leakage = leakage
 
-        self.layers = []
-        if norm_class is not None:
-            norm_layer = norm_class()
-            self.layers.append(norm_layer)
+        self.norm_layer = norm_class() if norm_class is not None else Identity(name="Norm")
+        self.precision_layer = precision_class(precision=precision) if precision_class is not None else Identity(
+            name="Precision")
+        self.noise_layer = noise_class(leakage=leakage, precision=precision) if noise_class is not None else Identity(
+            name="Noise")
 
-        if precision_class is not None:
-            precision_layer = precision_class(precision=precision)
-            self.layers.append(precision_layer)
-
-        if noise_class is not None:
-            noise_layer = noise_class(leakage=leakage, precision=precision)
-            self.layers.append(noise_layer)
-
-        self.add_sequence(*self.layers)
+        self.eval()
+        self.add_sequence(self.norm_layer, self.precision_layer, self.noise_layer)
 
     def hyperparameters(self):
         return {
@@ -186,6 +180,11 @@ class WeightModel(Sequential):
             'leakage_w': str(self.leakage),
         }
 
+    # def forward(self, x: Tensor):
+    #     x = self.norm_layer(x)
+    #     x = self.precision_layer(x)
+    #     x = self.noise_layer(x)
+    #     return x
 
 def main(
         name, data_folder, nn_model_params, weight_model_params,
@@ -220,8 +219,8 @@ def main(
     nn_model.accuracy_fn = cross_entropy_loss_accuracy
     PseudoOptimizer.parameter_type.convert_model(nn_model, transform=weight_model)
     nn_model.set_optimizer(
-        optimizer_cls=optimiser_class,
         super_optimizer_cls=PseudoOptimizer,
+        optimizer_cls=optimiser_class,
         **optimiser_parameters
     )
 
@@ -245,10 +244,22 @@ def main(
 
     data = next(iter(train_loader))[0]
     data = data.to(nn_model.device)
-    save_graph(path_join(paths.logs, paths.name), nn_model(data, original_output=True), nn_model.named_parameters())
+    nn_model.eval()
+    save_graph(path_join(paths.logs, f"{paths.name}_nn_model"), nn_model(data), nn_model.named_parameters())
+    save_graph(path_join(paths.logs, f"{paths.name}_weight_model"), weight_model(data), nn_model.named_parameters())
+    nn_model.tensorboard.add_graph(train_loader)
+    nn_model.tensorboard.add_graph(train_loader, model=weight_model)
     for epoch in range(epochs):
         train_loss, train_accuracy = nn_model.train_on(train_loader, epoch=epoch)
         test_loss, test_accuracy = nn_model.test_on(test_loader, epoch=epoch)
+        # for layer in nn_model.linear_layers:
+        #     print(
+        #         layer,
+        #         float(torch.max(torch.max(torch.max(torch.abs(layer.weight))))),
+        #         float(torch.max(torch.max(torch.max(torch.abs(layer.bias))))),
+        #         float(torch.max(torch.max(torch.max(torch.abs(layer.weight.original))))),
+        #         float(torch.max(torch.max(torch.max(torch.abs(layer.bias.original))))),
+        #     )
 
         str_epoch = str(epoch + 1).zfill(math.ceil(math.log10(epochs)))
         print_str = f'({str_epoch})' \
@@ -298,6 +309,6 @@ if __name__ == '__main__':
         optimiser_class=optim.Adam,
         optimiser_parameters={},
         dataset=torchvision.datasets.MNIST,
-        batch_size=128,
+        batch_size=1280,
         epochs=10
     )

@@ -38,9 +38,9 @@ class BaseModule(nn.Module):
         self.accuracy_fn = None
         self.device = get_device()
 
-    def __call__(self, *args, original_output=False, **kwargs):
+    def __call__(self, *args, **kwargs):
         result = super(BaseModule, self).__call__(*args, **kwargs)
-        if self.training and not original_output:
+        if self.training:
             self.backward.set_inputs(*args)
             result = self.backward.set_output(result)
         return result
@@ -103,6 +103,7 @@ class BaseModule(nn.Module):
             raise Exception("model is not complied yet")
 
         train_loss, train_accuracy = train(self, train_loader, epoch, apply_fn)
+        # train_loss, train_accuracy = 0, 0
 
         if self.tensorboard is not None:
             self.tensorboard.add_graph(train_loader)

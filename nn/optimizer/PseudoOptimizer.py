@@ -30,7 +30,7 @@ class PseudoOptimizer(BaseOptimizer):
         class_parameters = {}
         for parameter, value in inspect.signature(param_group['optimizer_cls']).parameters.items():
             class_parameters[parameter] = param_group[parameter]
-        class_parameters["params"] = param_group['parameter_class'].sanitize_parameters_list(param_group['params'])
+        class_parameters["params"] = param_group['parameter_class'].sanitize_parameters(param_group['params'])
         param_group['optimizer'] = param_group['optimizer_cls'](**class_parameters)
 
     @torch.no_grad()

@@ -4,10 +4,14 @@ import numpy as np
 import torch
 import torch.nn as nn
 
+from nn.utils.is_using_cuda import get_device
+
 
 def summary(model: nn.Module, input_size, include_self=False):
+    # training_status = model.training
+    # model.train(True)
     result = ""
-    device = model.device
+    device = getattr(model, "device", get_device())
 
     def register_hook(module):
 
@@ -109,4 +113,6 @@ def summary(model: nn.Module, input_size, include_self=False):
     result += f"Params size (KB): {total_params_size:0.2f}\n"
     result += f"Estimated Total Size (KB): {total_size:0.2f}\n"
     result += ("-" * line_size) + "\n"
+
+    # model.train(training_status)
     return result
