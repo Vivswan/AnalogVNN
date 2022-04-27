@@ -15,7 +15,7 @@ class DataPaths:
     logs: str
 
 
-def data_dirs(path, name=None):
+def data_dirs(path, name=None, tensorboard=True, model=False):
     timestamp = str(int(time.time()))
     name = timestamp + ("" if name is None else ("_" + name))
 
@@ -37,14 +37,17 @@ def data_dirs(path, name=None):
     models_path = path_join(path, f"models/{name}")
     tensorboard_path = path_join(path, f"tensorboard/{name}")
 
-    os.mkdir(models_path)
-    os.mkdir(tensorboard_path)
+    if tensorboard:
+        os.mkdir(tensorboard_path)
+    if model:
+        os.mkdir(models_path)
+
     return DataPaths(
         name=name,
         models=models_path,
         tensorboard=tensorboard_path,
         dataset=dataset_path,
-        logs=logs_path
+        logs=logs_path,
     )
 
 

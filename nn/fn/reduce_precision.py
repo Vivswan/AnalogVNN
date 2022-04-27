@@ -5,6 +5,7 @@ from nn.utils.types import TENSOR_OPERABLE
 
 
 def reduce_precision(x: Tensor, precision: TENSOR_OPERABLE, divide: TENSOR_OPERABLE) -> Tensor:
+    x = x if isinstance(x, Tensor) else torch.tensor(x, requires_grad=False)
     g: Tensor = x * precision
     f = torch.sign(g) * torch.maximum(
         torch.floor(torch.abs(g)),

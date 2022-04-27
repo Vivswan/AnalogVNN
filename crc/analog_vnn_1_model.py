@@ -1,43 +1,108 @@
+import dataclasses
+import hashlib
 import json
 import math
+from dataclasses import dataclass
 from typing import Type
 
 import numpy as np
+import torch.backends.cudnn
 import torchvision
 from torch import nn, optim
 from torch.nn import Flatten
+from torch.optim import Optimizer
+from torchvision.datasets import VisionDataset
 
 from dataloaders.load_vision_dataset import load_vision_dataset
 from nn.activations.Activation import Activation
 from nn.activations.Identity import Identity
-from nn.activations.ReLU import ReLU
 from nn.backward_pass.BackwardFunction import BackwardUsingForward
 from nn.layers.BackwardWrapper import BackwardWrapper
-from nn.layers.GaussianNoise import GaussianNoise
 from nn.layers.Linear import Linear, LinearBackpropagation
 from nn.layers.Normalize import *
 from nn.layers.ReducePrecision import ReducePrecision
 from nn.layers.StochasticReducePrecision import StochasticReducePrecision
+from nn.layers.noise.GaussianNoise import GaussianNoise
 from nn.modules.FullSequential import FullSequential
 from nn.modules.Sequential import Sequential
 from nn.optimizer.PseudoOptimizer import PseudoOptimizer
-from nn.utils.is_using_cuda import get_device, is_using_cuda
+from nn.utils.is_cpu_cuda import is_cpu_cuda
 from nn.utils.summary import summary
 from utils.data_dirs import data_dirs
 from utils.helper_functions import pick_instanceof
 from utils.path_functions import path_join
 from utils.save_graph import save_graph
 
-TENSORBOARD = True
-NORM_CLASSES = [Clamp, L1Norm, L2Norm, L1NormW, L2NormW]
-RP_CLASSES = [ReducePrecision, StochasticReducePrecision]
-NOISE_CLASS = [GaussianNoise]
 LAYER_SIZES = {
     1: [],
     2: [128],
     3: [256, 64],
     4: [256, 128, 64]
 }
+
+
+@dataclass
+class RunParameters:
+    name: Union[None, str] = None
+    data_folder: Union[None, str] = None
+
+    num_layer: Union[None, int] = 1
+    activation_class: Union[None, Type[Activation]] = None
+    norm_class: Union[None, Type[Normalize]] = None
+    approach: Union[None, str] = "default"
+    precision_class: Type[BaseLayer] = None
+    precision: Union[None, int] = None
+    noise_class: Type[BaseLayer] = None
+    leakage: Union[None, float] = None
+
+    w_norm_class: Union[None, Type[Normalize]] = None
+    w_precision_class: Type[BaseLayer] = None
+    w_precision: Union[None, int] = None
+    w_noise_class: Type[BaseLayer] = None
+    w_leakage: Union[None, float] = None
+
+    optimiser_class: Type[Optimizer] = optim.Adam
+    optimiser_parameters: dict = None
+    dataset: Type[VisionDataset] = torchvision.datasets.MNIST
+    batch_size: int = 1280
+    epochs: int = 10
+
+    device: Union[None, torch.device] = None
+    test_run: bool = False
+    tensorboard: bool = True
+
+    def __init__(self):
+        self.optimiser_parameters = {}
+
+    @property
+    def nn_model_params(self):
+        return {
+            "num_layer": self.num_layer,
+            "activation_class": self.activation_class,
+            "norm_class": self.norm_class,
+            "approach": self.approach,
+            "precision_class": self.precision_class,
+            "precision": self.precision,
+            "noise_class": self.noise_class,
+            "leakage": self.leakage,
+        }
+
+    @property
+    def weight_model_params(self):
+        return {
+            "norm_class": self.w_norm_class,
+            "precision_class": self.w_precision_class,
+            "precision": self.w_precision,
+            "noise_class": self.w_noise_class,
+            "leakage": self.w_leakage,
+        }
+
+    @property
+    def json(self):
+        return json.loads(json.dumps(dataclasses.asdict(self), default=str))
+
+    def __repr__(self):
+        return f"RunParameters({json.dumps(self.json)})"
 
 
 def cross_entropy_loss_accuracy(output, target):
@@ -74,7 +139,8 @@ class LinearModel(FullSequential):
         for i in range(1, len(layer_features_sizes)):
             linear_layer = Linear(in_features=layer_features_sizes[i - 1], out_features=layer_features_sizes[i])
             linear_layer.use(LinearBackpropagation)
-            activation_class.initialise_(linear_layer.weight)
+            if activation_class is not None:
+                activation_class.initialise_(linear_layer.weight)
 
             self.all_layers += [
                 norm_class() if norm_class is not None else Identity("Norm"),
@@ -87,7 +153,7 @@ class LinearModel(FullSequential):
                 norm_class() if norm_class is not None else Identity("Norm"),
                 precision_class(precision=precision) if precision_class is not None else Identity("Precision"),
 
-                activation_class(),
+                activation_class() if activation_class is not None else Identity("Activation"),
             ]
 
         self.linear_layers = pick_instanceof(self.all_layers, Linear)
@@ -131,7 +197,7 @@ class LinearModel(FullSequential):
             'num_layer': self.num_layer,
             'layer_features_sizes': self.layer_features_sizes,
             'approach': self.approach,
-            'activation_class': self.activation_class.__name__,
+            'activation_class': self.activation_class.__name__ if self.activation_class is not None else str(None),
             'norm_class_y': self.norm_class.__name__ if self.norm_class is not None else str(None),
             'precision_class_y': self.precision_class.__name__ if self.precision_class is not None else str(None),
             'precision_y': str(self.precision),
@@ -180,88 +246,99 @@ class WeightModel(Sequential):
             'leakage_w': str(self.leakage),
         }
 
-    # def forward(self, x: Tensor):
-    #     x = self.norm_layer(x)
-    #     x = self.precision_layer(x)
-    #     x = self.noise_layer(x)
-    #     return x
 
-def main(
-        name, data_folder, nn_model_params, weight_model_params,
-        optimiser_class, optimiser_parameters,
-        dataset, batch_size, epochs
-):
-    device, is_cuda = is_using_cuda()
-    torch.manual_seed(0)
-    print()
-    print(device, name)
+def run_main_model(parameters: RunParameters):
+    torch.backends.cudnn.benchmark = True
 
-    paths = data_dirs(data_folder, name=name)
+    if parameters.device is not None:
+        is_cpu_cuda.set_device(parameters.device)
+    device, is_cuda = is_cpu_cuda.is_using_cuda()
+    parameters.device = device
+
+    if parameters.data_folder is None:
+        raise Exception("data_folder is None")
+
+    if parameters.name is None:
+        parameters.name = hashlib.sha256(str(parameters).encode("utf-8")).hexdigest()
+
+    print(parameters)
+    print(parameters.device, parameters.name)
+
+    # return
+
+    paths = data_dirs(parameters.data_folder, name=parameters.name)
     log_file = path_join(paths.logs, f"{paths.name}_logs.txt")
 
+    print(f"Loading Data...")
     train_loader, test_loader, input_shape, classes = load_vision_dataset(
-        dataset=dataset,
+        dataset=parameters.dataset,
         path=paths.dataset,
-        batch_size=batch_size,
+        batch_size=parameters.batch_size,
         is_cuda=is_cuda
     )
 
-    nn_model_params["layer_features_sizes"] = [int(np.prod(input_shape[1:]))] + LAYER_SIZES[
-        nn_model_params["num_layer"]] + [len(classes)]
+    nn_model_params = parameters.nn_model_params
+    weight_model_params = parameters.weight_model_params
+    nn_model_params["layer_features_sizes"] = [int(np.prod(input_shape[1:]))] + LAYER_SIZES[parameters.num_layer] + [
+        len(classes)]
     del nn_model_params["num_layer"]
+
+    print(f"Creating Models...")
     nn_model = LinearModel(**nn_model_params)
     weight_model = WeightModel(**weight_model_params)
-    if TENSORBOARD:
+    if parameters.tensorboard:
         nn_model.create_tensorboard(paths.tensorboard)
 
-    nn_model.compile(device=get_device(), layer_data=True)
+    nn_model.compile(device=device, layer_data=True)
     nn_model.loss_fn = nn.CrossEntropyLoss()
     nn_model.accuracy_fn = cross_entropy_loss_accuracy
     PseudoOptimizer.parameter_type.convert_model(nn_model, transform=weight_model)
     nn_model.set_optimizer(
         super_optimizer_cls=PseudoOptimizer,
-        optimizer_cls=optimiser_class,
-        **optimiser_parameters
+        optimizer_cls=parameters.optimiser_class,
+        **parameters.optimiser_parameters
     )
 
     parameter_log = {
-        'dataset': dataset.__name__,
-        'batch_size': batch_size,
+        'dataset': parameters.dataset.__name__,
+        'batch_size': parameters.batch_size,
         'is_cuda': is_cuda,
 
         **nn_model.hyperparameters(),
         **weight_model.hyperparameters(),
     }
 
+    print(f"Creating Log File...")
     with open(log_file, "a+") as file:
+        file.write(json.dumps(parameters.json, sort_keys=True, indent=2) + "\n\n")
         file.write(json.dumps(parameter_log, sort_keys=True, indent=2) + "\n\n")
         file.write(str(nn_model.optimizer) + "\n\n")
 
         file.write(str(nn_model) + "\n\n")
         file.write(str(weight_model) + "\n\n")
         file.write(summary(nn_model, input_size=tuple(input_shape[1:])) + "\n\n")
-        file.write(summary(weight_model, input_size=tuple(input_shape[1:])) + "\n\n")
+        file.write(summary(weight_model, input_size=(1, 1)) + "\n\n")
 
-    data = next(iter(train_loader))[0]
-    data = data.to(nn_model.device)
-    nn_model.eval()
-    save_graph(path_join(paths.logs, f"{paths.name}_nn_model"), nn_model(data), nn_model.named_parameters())
-    save_graph(path_join(paths.logs, f"{paths.name}_weight_model"), weight_model(data), nn_model.named_parameters())
+    nn_model.tensorboard.tensorboard.add_text("parameters", json.dumps(parameters.json, sort_keys=True, indent=2))
+    data: Tensor = next(iter(train_loader))[0]
+
+    print(f"Saving Graphs...")
+    save_graph(path_join(paths.logs, f"{paths.name}_nn_model"), nn_model, data)
+    save_graph(path_join(paths.logs, f"{paths.name}_weight_model"), weight_model, torch.ones((1, 1)))
     nn_model.tensorboard.add_graph(train_loader)
-    nn_model.tensorboard.add_graph(train_loader, model=weight_model)
-    for epoch in range(epochs):
-        train_loss, train_accuracy = nn_model.train_on(train_loader, epoch=epoch)
-        test_loss, test_accuracy = nn_model.test_on(test_loader, epoch=epoch)
-        # for layer in nn_model.linear_layers:
-        #     print(
-        #         layer,
-        #         float(torch.max(torch.max(torch.max(torch.abs(layer.weight))))),
-        #         float(torch.max(torch.max(torch.max(torch.abs(layer.bias))))),
-        #         float(torch.max(torch.max(torch.max(torch.abs(layer.weight.original))))),
-        #         float(torch.max(torch.max(torch.max(torch.abs(layer.bias.original))))),
-        #     )
+    # nn_model.tensorboard.add_graph(train_loader, model=weight_model)
 
-        str_epoch = str(epoch + 1).zfill(math.ceil(math.log10(epochs)))
+    print(f"Starting Training...")
+    for epoch in range(parameters.epochs):
+        train_loss, train_accuracy = nn_model.train_on(
+            train_loader,
+            epoch=epoch,
+            test_run=parameters.test_run,
+            parameters_to_apply_fn=[PseudoOptimizer.parameter_type.update_params]
+        )
+        test_loss, test_accuracy = nn_model.test_on(test_loader, epoch=epoch, test_run=parameters.test_run)
+
+        str_epoch = str(epoch + 1).zfill(math.ceil(math.log10(parameters.epochs)))
         print_str = f'({str_epoch})' \
                     f' Training Loss: {train_loss:.4f},' \
                     f' Training Accuracy: {100. * train_accuracy:.0f}%,' \
@@ -272,7 +349,7 @@ def main(
         with open(log_file, "a+") as file:
             file.write(print_str)
 
-        if TENSORBOARD and epoch == epochs:
+        if parameters.tensorboard and epoch == parameters.epochs:
             nn_model.tensorboard.tensorboard.add_hparams(
                 hparam_dict=parameter_log,
                 metric_dict={
@@ -282,33 +359,10 @@ def main(
                     "test_accuracy": test_accuracy,
                 }
             )
+
+        if parameters.test_run:
+            break
+
+    with open(log_file, "a+") as file:
+        file.write("Run Completed Successfully...")
     print()
-
-
-if __name__ == '__main__':
-    main(
-        name="test",
-        data_folder="C:/_data/cleo_test",
-        nn_model_params={
-            "num_layer": 3,
-            "activation_class": ReLU,
-            "approach": "default",
-            "norm_class": None,
-            "precision_class": None,
-            "precision": None,
-            "noise_class": None,
-            "leakage": None,
-        },
-        weight_model_params={
-            "norm_class": Clamp,
-            "precision_class": ReducePrecision,
-            "precision": 2 ** 4,
-            "noise_class": None,
-            "leakage": None,
-        },
-        optimiser_class=optim.Adam,
-        optimiser_parameters={},
-        dataset=torchvision.datasets.MNIST,
-        batch_size=1280,
-        epochs=10
-    )

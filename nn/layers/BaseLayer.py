@@ -99,3 +99,15 @@ class BackwardFunction:
     @property
     def y(self):
         return self.get_parameter("output")
+
+    @staticmethod
+    def set_grad_of(tensor: Tensor, grad: Tensor):
+        if tensor is None or tensor.requires_grad is False:
+            return
+
+        if tensor.grad is None:
+            tensor.grad = grad
+        else:
+            tensor.grad += grad
+
+        return tensor.grad

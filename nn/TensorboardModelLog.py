@@ -14,7 +14,7 @@ class TensorboardModelLog:
 
     def __init__(self, model, log_dir: str):
         self.model = model
-        self.tensorboard = None
+        self.tensorboard: SummaryWriter = None
         self.layer_data = True
 
         if not os.path.exists(log_dir):

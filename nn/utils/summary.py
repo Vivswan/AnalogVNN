@@ -4,17 +4,16 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from nn.utils.is_using_cuda import get_device
+from nn.utils.is_cpu_cuda import is_cpu_cuda
 
 
 def summary(model: nn.Module, input_size, include_self=False):
     # training_status = model.training
     # model.train(True)
     result = ""
-    device = getattr(model, "device", get_device())
+    device = is_cpu_cuda.get_module_device(model)
 
     def register_hook(module):
-
         def hook(module, input, output):
             class_name = str(module.__class__).split(".")[-1].split("'")[0]
 

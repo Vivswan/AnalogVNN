@@ -1,9 +1,10 @@
 from torch.utils.data import DataLoader
 
 
-def train(model, train_loader: DataLoader, epoch=None, apply_fn=None):
-    if apply_fn is None:
-        apply_fn = []
+def train(model, train_loader: DataLoader, epoch=None, apply_to_parameters_fn=None, parameters_to_apply_fn=None,
+          test_run=False):
+    if apply_to_parameters_fn is None:
+        apply_to_parameters_fn = []
     model.train()
     total_loss = 0.0
     total_accuracy = 0
@@ -25,10 +26,18 @@ def train(model, train_loader: DataLoader, epoch=None, apply_fn=None):
         output = model.output(data)
         loss, accuracy = model.loss(output, target)
 
+        for i in apply_to_parameters_fn:
+            model.apply_to_parameters(i)
+        for i in parameters_to_apply_fn:
+            i(model.parameters())
+
         model.backward()
         model.optimizer.step()
-        for i in apply_fn:
+
+        for i in apply_to_parameters_fn:
             model.apply_to_parameters(i)
+        for i in parameters_to_apply_fn:
+            i(model.parameters())
 
         # print statistics
         total_loss += loss.item() * len(data)
@@ -44,6 +53,9 @@ def train(model, train_loader: DataLoader, epoch=None, apply_fn=None):
                 f'\tLoss: {total_loss / total_size:.6f}'
                 f'\tAccuracy: {total_accuracy / total_size * 100:.2f}%'
             )
+
+        if test_run:
+            break
 
     total_loss /= total_size
     total_accuracy /= total_size

@@ -17,10 +17,10 @@ from torch import nn
 from torch.utils.data import DataLoader
 
 from dataloaders.load_vision_dataset import load_vision_dataset
-from nn.layers.GaussianNoise import GaussianNoise
 from nn.layers.Normalize import Clamp, Clamp01
 from nn.layers.ReducePrecision import ReducePrecision
-from nn.utils.is_using_cuda import get_device, is_cuda
+from nn.layers.noise.GaussianNoise import GaussianNoise
+from nn.utils.is_cpu_cuda import is_cpu_cuda
 
 
 def collect_parameters_to_json(path, destination=None):
@@ -274,7 +274,7 @@ def create_line_figure(json_file_path, order_by, size_factor=2.85):
 
 
 def calculate_snr_signal(signal, noise_signal):
-    t2 = torch.tensor(2, device=get_device())
+    t2 = torch.tensor(2, device=is_cpu_cuda.get_device())
     s = torch.sum(torch.pow(signal, t2))
     n = torch.sum(torch.pow(torch.abs(signal) - torch.abs(noise_signal), t2))
     return s / n
@@ -324,7 +324,7 @@ def calculate_snr(leakage, precision, dataset):
     rp = ReducePrecision(precision=precision)
     gn = GaussianNoise(leakage=leakage, precision=precision)
     cl = Clamp01()
-    de = get_device()
+    de = is_cpu_cuda.get_device()
 
     average_response_analog = []
     average_response_digital = []
@@ -346,9 +346,9 @@ def calculate_snr(leakage, precision, dataset):
     if torch_dataset is not None:
         train_loader, test_loader, input_shape, classes = load_vision_dataset(
             dataset=torch_dataset,
-            path="_data",
+            path="../_data",
             batch_size=128,
-            is_cuda=is_cuda()
+            is_cuda=is_cpu_cuda.is_cuda()
         )
 
     def run_calculate(loader):

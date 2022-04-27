@@ -6,7 +6,6 @@ from torch import nn, optim
 from nn.layers.Linear import Linear
 from nn.parameters.Parameter import Parameter
 from nn.parameters.Tensor import Tensor
-from nn.utils.is_using_cuda import get_device
 from nn.utils.types import TENSOR_CALLABLE
 
 
@@ -115,7 +114,7 @@ class ParameterizedParameter(Parameter, Parameterization):
 
 
 if __name__ == '__main__':
-    device = get_device()
+    device = "cuda"
 
 
     class Double(nn.Module):

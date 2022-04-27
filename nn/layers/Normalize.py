@@ -4,9 +4,8 @@ from typing import Union
 import torch
 from torch import Tensor
 
-from nn.layers.BaseLayer import BaseLayer
 from nn.backward_pass.BackwardFunction import BackwardIdentity
-from nn.utils.is_using_cuda import get_device
+from nn.layers.BaseLayer import BaseLayer
 
 
 class Normalize(BaseLayer, BackwardIdentity, ABC):
@@ -25,7 +24,7 @@ class L1Norm(Normalize):
     def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
         x = self.get_tensor("input")
         norm = self.get_tensor("norm")
-        grad = (torch.div(torch.ones_like(x, device=get_device()).T, norm)).T - (
+        grad = (torch.div(torch.ones_like(x, device=grad_output.device).T, norm)).T - (
             torch.div(2 * torch.pow(x, 2).T, torch.pow(norm, 2))).T
         return grad_output * grad
 
@@ -43,7 +42,7 @@ class L2Norm(Normalize):
     def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
         x = self.get_tensor("input")
         norm = self.get_tensor("norm")
-        grad = (torch.div(torch.ones_like(x, device=get_device()).T, norm)).T - (
+        grad = (torch.div(torch.ones_like(x, device=grad_output.device).T, norm)).T - (
             torch.div(torch.pow(x, 2).T, torch.pow(norm, 2.5))).T
         return grad_output * grad
 

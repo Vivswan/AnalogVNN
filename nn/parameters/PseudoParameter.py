@@ -1,7 +1,7 @@
 import torch
 from torch import nn, optim
 
-from nn.layers.GaussianNoise import GaussianNoise
+from nn.layers.noise.GaussianNoise import GaussianNoise
 from nn.optimizer.BaseOptimizer import set_grad_zero
 from nn.parameters.Parameter import Parameter
 from nn.parameters.Tensor import Tensor
@@ -20,9 +20,9 @@ class PseudoParameter(Parameter):
         self.grad_hook = None
         self.initialise_zero_pseudo = initialise_zero_pseudo
         self._transform: TENSOR_CALLABLE = PseudoParameter.identity if transform is None else transform
-        self.initialise(data)
+        self._initialise(data)
 
-    def initialise(self, data):
+    def _initialise(self, data):
         if self.initialise_zero_pseudo:
             self.original = torch.zeros_like(data, requires_grad=False)
         else:

@@ -10,7 +10,7 @@ from nn.backward_pass.GraphBackwardPass import GraphBackwardPass
 from nn.layers.BaseLayer import BaseLayer
 from nn.test import test
 from nn.train import train
-from nn.utils.is_using_cuda import get_device
+from nn.utils.is_cpu_cuda import is_cpu_cuda
 
 
 class BaseModule(nn.Module):
@@ -25,7 +25,7 @@ class BaseModule(nn.Module):
         self._compiled = False
         self._output_hook = None
 
-        self.tensorboard = None
+        self.tensorboard: TensorboardModelLog = None
         if tensorboard_log_dir is not None:
             self.create_tensorboard(tensorboard_log_dir)
 
@@ -36,7 +36,7 @@ class BaseModule(nn.Module):
         self.optimizer = None
         self.loss_fn = None
         self.accuracy_fn = None
-        self.device = get_device()
+        self.device = is_cpu_cuda.get_device()
 
     def __call__(self, *args, **kwargs):
         result = super(BaseModule, self).__call__(*args, **kwargs)
@@ -45,10 +45,12 @@ class BaseModule(nn.Module):
             result = self.backward.set_output(result)
         return result
 
-    def compile(self, device=get_device(), layer_data=True):
+    def compile(self, device=None, layer_data=True):
+        if device is not None:
+            self.device = device
+
         self.backward.compile()
-        self.to(device=device)
-        self.device = device
+        self.to(device=self.device)
 
         for module in self.children():
             if isinstance(module, BaseLayer):
@@ -86,24 +88,16 @@ class BaseModule(nn.Module):
 
     def apply_to_parameters(self: nn.Module, layer: Union[BaseLayer, Callable], requires_grad=True):
         with torch.no_grad():
-            if isinstance(layer, BaseLayer):
-                layer.train()
             for p in self.parameters():
                 if requires_grad and not p.requires_grad:
                     continue
-                if isinstance(layer, BaseLayer):
-                    p.data = layer.forward(p.data)
-                else:
-                    layer(p)
+                p.data = layer(p.data)
 
-    def train_on(self, train_loader: DataLoader, epoch: int = None, apply_fn=None):
-        if apply_fn is None:
-            apply_fn = []
+    def train_on(self, train_loader: DataLoader, epoch: int = None, *args, **kwargs):
         if self._compiled is False:
             raise Exception("model is not complied yet")
 
-        train_loss, train_accuracy = train(self, train_loader, epoch, apply_fn)
-        # train_loss, train_accuracy = 0, 0
+        train_loss, train_accuracy = train(self, train_loader, epoch, *args, **kwargs)
 
         if self.tensorboard is not None:
             self.tensorboard.add_graph(train_loader)
@@ -111,11 +105,11 @@ class BaseModule(nn.Module):
 
         return train_loss, train_accuracy
 
-    def test_on(self, test_loader: DataLoader, epoch: int = None):
+    def test_on(self, test_loader: DataLoader, epoch: int = None, *args, **kwargs):
         if self._compiled is False:
             raise Exception("model is not complied yet")
 
-        test_loss, test_accuracy = test(self, test_loader)
+        test_loss, test_accuracy = test(self, test_loader, *args, **kwargs)
 
         if self.tensorboard is not None:
             self.tensorboard.add_graph(test_loader)

@@ -6,11 +6,10 @@ from torch import nn, Tensor
 
 from nn.backward_pass.BackwardFunction import BackwardFunction
 from nn.layers.BaseLayer import BaseLayer
-from nn.utils.is_using_cuda import get_device
 from utils.helper_functions import to_matrix
 
 
-def generate_random_weight(mean, std, size, device=get_device()):
+def generate_random_weight(mean, std, size, device):
     tensor = None
     while tensor is None:
         try:
@@ -37,11 +36,8 @@ class LinearBackpropagation(BackwardFunction):
         weight = to_matrix(self.weight if weight is None else weight)
         grad_input = grad_output @ weight
 
-        if self.weight.requires_grad:
-            self.weight.grad = grad_output.t() @ to_matrix(self.x)
-        if self.bias is not None and self.bias.requires_grad:
-            self.bias.grad = grad_output.sum(0)
-
+        self.set_grad_of(self.weight, torch.mm(grad_output.t(), self.x))
+        self.set_grad_of(self.bias, grad_output.sum(0))
         return grad_input
 
 
@@ -83,11 +79,8 @@ class LinearDirectFeedforwardAlignment(LinearFeedforwardAlignment):
     def backward(self, grad_output: Union[None, Tensor], weight: Union[None, Tensor] = None) -> Union[None, Tensor]:
         grad_output = to_matrix(grad_output)
 
-        if self.weight.requires_grad:
-            self.weight.grad = grad_output.t() @ to_matrix(self.x)
-        if self.bias is not None and self.bias.requires_grad:
-            self.bias.grad = grad_output.sum(0)
-
+        self.set_grad_of(self.weight, grad_output.t() @ to_matrix(self.x))
+        self.set_grad_of(self.bias, grad_output.sum(0))
         return grad_output
 
 

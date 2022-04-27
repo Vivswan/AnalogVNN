@@ -5,7 +5,6 @@ import torch
 from torch import Tensor, nn
 
 from nn.activations.Activation import Activation
-from nn.utils.is_using_cuda import get_device
 
 
 class PReLU(Activation):
@@ -15,11 +14,11 @@ class PReLU(Activation):
     def __init__(self, alpha: float):
         super(PReLU, self).__init__()
         self.alpha = nn.Parameter(torch.tensor(alpha), requires_grad=False)
-        self.zero = torch.tensor(0, device=get_device(), requires_grad=False)
+        self._zero = nn.Parameter(torch.tensor(0), requires_grad=False)
 
     def forward(self, x: Tensor) -> Tensor:
         self.save_tensor("input", x)
-        return torch.minimum(self.zero, x) * self.alpha + torch.maximum(self.zero, x)
+        return torch.minimum(self._zero, x) * self.alpha + torch.maximum(self._zero, x)
 
     def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
         x = self.get_tensor("input")
@@ -28,11 +27,11 @@ class PReLU(Activation):
 
     @staticmethod
     def initialise(tensor: Tensor) -> Tensor:
-        return nn.init.xavier_uniform(tensor, gain=nn.init.calculate_gain('leaky_relu', param=float(self.alpha)))
+        return nn.init.kaiming_uniform(tensor, a=math.sqrt(5), nonlinearity="leaky_relu")
 
     @staticmethod
     def initialise_(tensor: Tensor) -> Tensor:
-        return nn.init.xavier_uniform_(tensor, gain=nn.init.calculate_gain('leaky_relu', param=float(self.alpha)))
+        return nn.init.kaiming_uniform_(tensor, a=math.sqrt(5), nonlinearity="leaky_relu")
 
 
 class ReLU(PReLU):
@@ -51,11 +50,3 @@ class ReLU(PReLU):
 class LeakyReLU(PReLU):
     def __init__(self):
         super(LeakyReLU, self).__init__(alpha=0.01)
-
-    @staticmethod
-    def initialise(tensor: Tensor) -> Tensor:
-        return nn.init.kaiming_uniform(tensor, a=math.sqrt(5), nonlinearity="leaky_relu")
-
-    @staticmethod
-    def initialise_(tensor: Tensor) -> Tensor:
-        return nn.init.kaiming_uniform_(tensor, a=math.sqrt(5), nonlinearity="leaky_relu")

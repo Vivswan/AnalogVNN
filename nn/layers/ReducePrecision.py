@@ -1,9 +1,9 @@
 import torch
 from torch import nn, Tensor
 
-from nn.layers.BaseLayer import BaseLayer
 from nn.backward_pass.BackwardFunction import BackwardIdentity
 from nn.fn.reduce_precision import reduce_precision
+from nn.layers.BaseLayer import BaseLayer
 
 
 class ReducePrecision(BaseLayer, BackwardIdentity):
@@ -11,7 +11,7 @@ class ReducePrecision(BaseLayer, BackwardIdentity):
     precision: nn.Parameter
     divide: nn.Parameter
 
-    def __init__(self, precision: int = 8, divide: float = 0.5):
+    def __init__(self, precision: int = None, divide: float = 0.5):
         super(ReducePrecision, self).__init__()
         if precision < 1:
             raise ValueError(f"precision has to be more than 0, but got {precision}")
@@ -26,8 +26,16 @@ class ReducePrecision(BaseLayer, BackwardIdentity):
         self.divide = nn.Parameter(torch.tensor(divide), requires_grad=False)
 
     @property
-    def step_size(self) -> float:
+    def step_width(self) -> float:
         return 1 / self.precision
+
+    @property
+    def bit_precision(self):
+        return torch.log2(self.precision + 1)
+
+    @staticmethod
+    def get_precision(bit_precision):
+        return 2 ** bit_precision - 1
 
     def extra_repr(self) -> str:
         return f'precision={self.precision}, divide={self.divide}'

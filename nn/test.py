@@ -2,7 +2,7 @@ import torch
 from torch.utils.data import DataLoader
 
 
-def test(model, test_loader: DataLoader):
+def test(model, test_loader: DataLoader, test_run=False):
     model.eval()
     total_loss = 0
     total_accuracy = 0
@@ -18,6 +18,9 @@ def test(model, test_loader: DataLoader):
             total_loss += loss.item() * len(data)
             total_accuracy += accuracy * len(data)
             total_size += len(data)
+
+            if test_run:
+                break
 
     total_loss /= total_size
     total_accuracy /= total_size
