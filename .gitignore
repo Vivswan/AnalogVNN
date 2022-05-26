@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 
 _run_files/
+_crc_slurm/
 _results/
 _data/
 .idea

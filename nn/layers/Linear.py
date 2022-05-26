@@ -9,18 +9,6 @@ from nn.layers.BaseLayer import BaseLayer
 from utils.helper_functions import to_matrix
 
 
-def generate_random_weight(mean, std, size, device):
-    tensor = None
-    while tensor is None:
-        try:
-            tensor = torch.normal(mean=mean, std=std, size=size, device=device)
-            torch.linalg.pinv(tensor)
-        except:
-            pass
-    tensor.requires_grad = False
-    return tensor
-
-
 class LinearBackpropagation(BackwardFunction):
     @property
     def weight(self):
@@ -39,77 +27,6 @@ class LinearBackpropagation(BackwardFunction):
         self.set_grad_of(self.weight, torch.mm(grad_output.t(), self.x))
         self.set_grad_of(self.bias, grad_output.sum(0))
         return grad_input
-
-
-class LinearFeedforwardAlignment(LinearBackpropagation):
-    def __init__(self, layer):
-        super(LinearFeedforwardAlignment, self).__init__(layer)
-        self.mean: float = 0
-        self.std: float = 1.
-        self.is_fixed: bool = True
-        self._fixed_weight = None
-
-    def reset_parameters(self):
-        super(LinearFeedforwardAlignment, self).reset_parameters()
-        self._fixed_weight = None
-
-    def backward(self, grad_output: Union[None, Tensor], weight: Union[None, Tensor] = None) -> Union[None, Tensor]:
-        if weight is None:
-            if not self.is_fixed or self._fixed_weight is None:
-                self._fixed_weight = generate_random_weight(mean=self.mean, std=self.std, size=self.weight.size(),
-                                                            device=grad_output.device)
-            weight = self._fixed_weight
-
-        return super(LinearFeedforwardAlignment, self).backward(grad_output, weight)
-
-
-class LinearDirectFeedforwardAlignment(LinearFeedforwardAlignment):
-    def pre_backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
-        grad_output = to_matrix(grad_output)
-
-        size = (grad_output.size()[1], self.weight.size()[0])
-
-        if not self.is_fixed or self._fixed_weight is None:
-            self._fixed_weight = generate_random_weight(mean=self.mean, std=self.std, size=size,
-                                                        device=grad_output.device)
-
-        grad_output = grad_output @ self._fixed_weight
-        return grad_output
-
-    def backward(self, grad_output: Union[None, Tensor], weight: Union[None, Tensor] = None) -> Union[None, Tensor]:
-        grad_output = to_matrix(grad_output)
-
-        self.set_grad_of(self.weight, grad_output.t() @ to_matrix(self.x))
-        self.set_grad_of(self.bias, grad_output.sum(0))
-        return grad_output
-
-
-class LinearWeightFeedforwardAlignment(LinearFeedforwardAlignment):
-    def previous_layer(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
-        grad_output = to_matrix(grad_output)
-
-        size = (grad_output.size()[1], self.weight.size()[0])
-
-        if self._fixed_weight is None:
-            self._fixed_weight = generate_random_weight(size, device=grad_output.device)
-
-        if self.is_fixed:
-            weight = self._fixed_weight
-        else:
-            weight = generate_random_weight(size, device=grad_output.device)
-
-        grad_output = grad_output @ weight
-        return grad_output
-
-    def backward(self, grad_output: Union[None, Tensor], weight: Union[None, Tensor] = None) -> Union[None, Tensor]:
-        grad_output = to_matrix(grad_output)
-
-        if self.weight.requires_grad:
-            self.weight.grad = grad_output.t() @ to_matrix(self.x)
-        if self.bias is not None and self.bias.requires_grad:
-            self.bias.grad = grad_output.sum(0)
-
-        return grad_output
 
 
 class Linear(BaseLayer):
@@ -136,6 +53,7 @@ class Linear(BaseLayer):
         else:
             self.register_parameter('bias', None)
 
+        self.use(LinearBackpropagation)
         self.reset_parameters()
 
     def reset_parameters(self) -> None:

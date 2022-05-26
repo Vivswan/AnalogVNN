@@ -1,4 +1,4 @@
-from nn.layers.ReducePrecision import ReducePrecision
+from nn.layers.functionals.ReducePrecision import ReducePrecision
 from nn.parameters.PseudoParameter import PseudoParameter
 
 

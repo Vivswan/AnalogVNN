@@ -17,8 +17,8 @@ from torch import nn
 from torch.utils.data import DataLoader
 
 from dataloaders.load_vision_dataset import load_vision_dataset
-from nn.layers.Normalize import Clamp, Clamp01
-from nn.layers.ReducePrecision import ReducePrecision
+from nn.layers.functionals.Normalize import Clamp, Clamp01
+from nn.layers.functionals.ReducePrecision import ReducePrecision
 from nn.layers.noise.GaussianNoise import GaussianNoise
 from nn.utils.is_cpu_cuda import is_cpu_cuda
 
@@ -195,10 +195,10 @@ def create_violin_figure(json_file_path, order_by, size_factor=2.85, int_index=F
     # plt.title(json_file_path.name)
     fig.tight_layout()
     plt.show()
-    fig.savefig(f'_data/{timestamp}_{json_file_path.name.replace(".json", "")}_{"_".join(order_by)}_image.svg',
-                dpi=fig.dpi, transparent=True)
-    fig.savefig(f'_data/{timestamp}_{json_file_path.name.replace(".json", "")}_{"_".join(order_by)}_image.png',
-                dpi=fig.dpi, transparent=True)
+    # fig.savefig(f'_data/{timestamp}_{json_file_path.name.replace(".json", "")}_{"_".join(order_by)}_image.svg',
+    #             dpi=fig.dpi, transparent=True)
+    # fig.savefig(f'_data/{timestamp}_{json_file_path.name.replace(".json", "")}_{"_".join(order_by)}_image.png',
+    #             dpi=fig.dpi, transparent=True)
     close('all')
 
 
@@ -266,10 +266,10 @@ def create_line_figure(json_file_path, order_by, size_factor=2.85):
     # plt.title(json_file_path.name)
     fig.tight_layout()
     plt.show()
-    fig.savefig(f'_data/{timestamp}_{json_file_path.name.replace(".json", "")}_{order_by}_image.svg',
-                dpi=fig.dpi)
-    fig.savefig(f'_data/{timestamp}_{json_file_path.name.replace(".json", "")}_{order_by}_image.png',
-                dpi=fig.dpi)
+    # fig.savefig(f'_data/{timestamp}_{json_file_path.name.replace(".json", "")}_{order_by}_image.svg',
+    #             dpi=fig.dpi)
+    # fig.savefig(f'_data/{timestamp}_{json_file_path.name.replace(".json", "")}_{order_by}_image.png',
+    #             dpi=fig.dpi)
     close('all')
 
 
@@ -494,15 +494,15 @@ def create_scatter_figure(json_file_path, size_factor=2.85):
 
     fig.tight_layout()
     plt.show()
-    fig.savefig(f'_data/{timestamp}_{json_file_path.name.replace(".json", "")}_snr_image.svg',
-                dpi=fig.dpi, transparent=True)
-    fig.savefig(f'_data/{timestamp}_{json_file_path.name.replace(".json", "")}_snr_image.png',
-                dpi=fig.dpi, transparent=True)
+    # fig.savefig(f'{timestamp}_{json_file_path.name.replace(".json", "")}_snr_image.svg',
+    #             dpi=fig.dpi, transparent=True)
+    # fig.savefig(f'{timestamp}_{json_file_path.name.replace(".json", "")}_snr_image.png',
+    #             dpi=fig.dpi, transparent=True)
     close('all')
 
 
 if __name__ == '__main__':
-    data_folder = Path("C:/_data")
+    data_folder = Path("C:/X/hyperparameter json")
     timestamp = int(time.time())
 
     norm_order_by = ("norm_class_w", "norm_class_y")
@@ -517,8 +517,8 @@ if __name__ == '__main__':
     #     ("tensorboard_cleo_run_1_data.json", "norm_class_w", (aa*2, aa/1.75)),
     #     ("tensorboard_cleo_run_3_data.json", "leakage_w", (aa*2, aa/1.75)),
     #
-    #     ("tensorboard_cleo_run_2_data.json", ("precision_w", "precision_class"), (aa*1.75, aa*1.25)),
-    #     # ("tensorboard_cleo_run_2S_F_data.json", precision_order_by, (aa*2, aa/2), True),
+    #     ("tensorboard_cleo_run_2_data.json", ("precision_w", "precision_class"), (aa * 1.75, aa * 1.25)),
+    #     # ("tensorboard_cleo_run_2S_F_data.json", precision_order_by, (aa * 2, aa/2), True),
     #
     #     # ("tensorboard_cleo_run_3_data.json", ("leakage_w", "precision_w"), (4, 2), True),
     #
@@ -526,7 +526,7 @@ if __name__ == '__main__':
     # ]:
     #     create_violin_figure(data_folder.joinpath(i[0]), *i[1:])
 
-    # create_line_figure(data_folder.joinpath("tensorboard_cleo_run_3_data.json"), ("leakage_w", "precision_w"))
+    create_line_figure(data_folder.joinpath("tensorboard_cleo_run_3_data.json"), ("leakage_w", "precision_w"))
     aa = 1.75
     create_scatter_figure(data_folder.joinpath("tensorboard_cleo_run_3_data.json"), (1 * aa, 1 * aa))
 

@@ -1,4 +1,5 @@
 import argparse
+import json
 
 import torchvision
 from torch import optim
@@ -9,15 +10,17 @@ from nn.activations.Gaussian import GeLU
 from nn.activations.ReLU import ReLU, LeakyReLU
 from nn.activations.SiLU import SiLU
 from nn.activations.Tanh import Tanh
-from nn.layers.Normalize import *
-from nn.layers.ReducePrecision import ReducePrecision
-from nn.layers.StochasticReducePrecision import StochasticReducePrecision
+from nn.layers.functionals.Normalize import *
+from nn.layers.functionals.ReducePrecision import ReducePrecision
+from nn.layers.functionals.StochasticReducePrecision import StochasticReducePrecision
 from nn.layers.noise.GaussianNoise import GaussianNoise
+from nn.layers.noise.PoissonNoise import PoissonNoise
 from utils.path_functions import get_relative_path
 
 full_parameters_list = {
     "nn_model_params": {
-        "num_layer": [1, 2, 3, 4],
+        "num_conv_layer": [0, 3],
+        "num_linear_layer": [1, 2, 3],
         "activation_class": [None, ReLU, LeakyReLU, Tanh, ELU, SiLU, GeLU],
 
         "norm_class": [None, Clamp, L1Norm, L2Norm, L1NormW, L2NormW],
@@ -26,7 +29,7 @@ full_parameters_list = {
         "precision_class": [None, ReducePrecision, StochasticReducePrecision],
         "precision": [2 ** 2, 2 ** 4, 2 ** 6],
 
-        "noise_class": [None, GaussianNoise],
+        "noise_class": [None, GaussianNoise, PoissonNoise],
         "leakage": [0.25, 0.5, 0.75],
     },
     "weight_model_params": {
@@ -35,12 +38,17 @@ full_parameters_list = {
         "precision_class": [None, ReducePrecision, StochasticReducePrecision],
         "precision": [2 ** 2, 2 ** 4, 2 ** 6],
 
-        "noise_class": [None, GaussianNoise],
+        "noise_class": [None, GaussianNoise, PoissonNoise],
         "leakage": [0.25, 0.5, 0.75],
     },
     "optimiser_class": optim.Adam,
     "optimiser_parameters": {},
-    "dataset": [torchvision.datasets.MNIST, torchvision.datasets.FashionMNIST],
+    "dataset": [
+        torchvision.datasets.MNIST,
+        torchvision.datasets.FashionMNIST,
+        torchvision.datasets.CIFAR10,
+        # torchvision.datasets.CIFAR100,
+    ],
     "batch_size": 1280,
     "epochs": 10,
     "test_run": False,
@@ -94,8 +102,10 @@ def run_main(kwargs):
     __select_class(parameters, 'w_precision_class', full_parameters_list["weight_model_params"]["precision_class"])
     __select_class(parameters, 'w_noise_class', full_parameters_list["weight_model_params"]["noise_class"])
 
-    if parameters.num_layer not in full_parameters_list["nn_model_params"]["num_layer"]:
-        raise Exception(f'num_layer must be in {full_parameters_list["nn_model_params"]["num_layer"]}')
+    if parameters.num_conv_layer not in full_parameters_list["nn_model_params"]["num_conv_layer"]:
+        raise Exception(f'num_conv_layer must be in {full_parameters_list["nn_model_params"]["num_conv_layer"]}')
+    if parameters.num_linear_layer not in full_parameters_list["nn_model_params"]["num_linear_layer"]:
+        raise Exception(f'num_linear_layer must be in {full_parameters_list["nn_model_params"]["num_linear_layer"]}')
     if parameters.approach not in full_parameters_list["nn_model_params"]["approach"]:
         raise Exception(f'approach must be in {full_parameters_list["nn_model_params"]["approach"]}')
 
@@ -105,7 +115,7 @@ def run_main(kwargs):
     __check(parameters, "precision_class", "precision", full_parameters_list["nn_model_params"]["precision"])
     __check(parameters, "noise_class", "leakage", full_parameters_list["nn_model_params"]["leakage"])
     __check(parameters, "w_precision_class", "w_precision", full_parameters_list["weight_model_params"]["precision"])
-    __check(parameters, "w_noise_class", "w_leakage", full_parameters_list["weight_model_params"]["precision"])
+    __check(parameters, "w_noise_class", "w_leakage", full_parameters_list["weight_model_params"]["leakage"])
 
     # print(parameters)
     run_main_model(parameters)
@@ -114,8 +124,10 @@ def run_main(kwargs):
 def parser_run_main(main_file=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("--name", type=str, default=None)
-    parser.add_argument("--data_folder", type=str, default="../_results")
-    parser.add_argument("--num_layer", type=int, default=3)
+    parser.add_argument("--timestamp", type=str, default=None)
+    parser.add_argument("--data_folder", type=str, required=True)
+    parser.add_argument("--num_conv_layer", type=int, required=True)
+    parser.add_argument("--num_linear_layer", type=int, required=True)
     parser.add_argument("--activation_class", type=str, default=None)
 
     parser.add_argument("--norm_class", type=str, default=None)
@@ -132,11 +144,17 @@ def parser_run_main(main_file=None):
     parser.add_argument("--w_leakage", type=float, default=None)
 
     parser.add_argument("--dataset", type=str, default="MNIST")
-
-    parser.add_argument("--test_run", type=bool, default=False)
     parser.add_argument("--device", type=str, default=None)
-    parser.add_argument("--tensorboard", type=str, default=True)
+
+    parser.add_argument("--test_run", action='store_true')
+    parser.set_defaults(test_run=False)
+    parser.add_argument("--tensorboard", action='store_true')
+    parser.set_defaults(tensorboard=False)
+    parser.add_argument("--save_data", action='store_true')
+    parser.set_defaults(save_data=False)
     kwargs = vars(parser.parse_known_args()[0])
+    print(json.dumps(kwargs))
+    print()
 
     if main_file is None:
         main_file = __file__

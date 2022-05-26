@@ -9,14 +9,17 @@ from utils.path_functions import path_join
 @dataclass
 class DataPaths:
     name: str
-    models: str
+    model_data: str
     tensorboard: str
     dataset: str
     logs: str
+    timestamp: str
 
 
-def data_dirs(path, name=None, tensorboard=True, model=False):
-    timestamp = str(int(time.time()))
+def data_dirs(path, name=None, timestamp=None, tensorboard=True):
+    if timestamp is None:
+        timestamp = str(int(time.time()))
+
     name = timestamp + ("" if name is None else ("_" + name))
 
     dataset_path = path_join(path, "datasets")
@@ -39,15 +42,17 @@ def data_dirs(path, name=None, tensorboard=True, model=False):
 
     if tensorboard:
         os.mkdir(tensorboard_path)
-    if model:
+
+    if models_path:
         os.mkdir(models_path)
 
     return DataPaths(
         name=name,
-        models=models_path,
+        model_data=models_path,
         tensorboard=tensorboard_path,
         dataset=dataset_path,
         logs=logs_path,
+        timestamp=timestamp,
     )
 
 

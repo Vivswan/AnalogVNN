@@ -5,7 +5,7 @@ from nn.layers.noise.GaussianNoise import GaussianNoise
 from nn.optimizer.BaseOptimizer import set_grad_zero
 from nn.parameters.Parameter import Parameter
 from nn.parameters.Tensor import Tensor
-from nn.utils.types import TENSOR_CALLABLE
+from nn.utils.common_types import TENSOR_CALLABLE
 
 
 class PseudoParameter(Parameter):

@@ -11,7 +11,7 @@ from matplotlib import pyplot as plt
 from scipy import integrate
 from scipy.io import savemat
 
-from nn.layers.ReducePrecision import ReducePrecision
+from nn.layers.functionals.ReducePrecision import ReducePrecision
 from nn.layers.noise.GaussianNoise import GaussianNoise
 from nn.layers.noise.LaplacianNoise import LaplacianNoise
 from nn.layers.noise.PoissonNoise import PoissonNoise

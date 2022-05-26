@@ -1,17 +1,20 @@
 import argparse
+import copy
 import hashlib
 import inspect
 import itertools
 import os
+import shutil
 import subprocess
+import time
 from collections import OrderedDict
-from multiprocessing import Pool
+from multiprocessing.pool import ThreadPool
 from pathlib import Path
 
 import torchvision
 
 from crc.analog_vnn_1 import full_parameters_list
-from nn.layers.Normalize import *
+from nn.layers.functionals.Normalize import *
 
 
 def prepare_data_folder(folder_path):
@@ -44,10 +47,11 @@ def prepare_data_folder(folder_path):
 def run_command(command):
     data_folder, command = command
     runtime = Path(data_folder).joinpath("runtime")
-    filename = "std_"
-    # filename += str(int(time.time())) + "_"
-    filename += hashlib.sha256(str(command).encode("utf-8")).hexdigest()
+    hash_id = hashlib.sha256(str(command).encode("utf-8")).hexdigest()
+    timestamp = f"{int(time.time() * 1000)}"
+    filename = f"{timestamp}_{hash_id}"
     out_file = runtime.joinpath(f"{filename}.log")
+    command += f" --timestamp {timestamp} --name {hash_id}"
 
     with open(out_file, "w+") as out:
         out.write(command + "\n")
@@ -77,7 +81,17 @@ def parameter_checkers(parameters):
     return True
 
 
-def create_command_list(data_folder, combination_dict, test_run=False):
+def create_command_list(data_folder, combination_dict, extra_arg="", select=""):
+    if len(select) > 0:
+        for parameter in select.split(","):
+            parameter = parameter.strip()
+            key, value = parameter.split(":")
+            values = combination_dict[key]
+            for v in values:
+                if value in str(v):
+                    combination_dict[key] = [v]
+                    break
+
     combinations = list(itertools.product(*list(combination_dict.values())))
     command_list = []
     for c in combinations:
@@ -87,8 +101,6 @@ def create_command_list(data_folder, combination_dict, test_run=False):
             continue
 
         command_str = f'python main.py --data_folder "{data_folder}"'
-        if test_run:
-            command_str += " --test_run true"
         for key, value in command_dict.items():
             if value is None:
                 continue
@@ -99,35 +111,38 @@ def create_command_list(data_folder, combination_dict, test_run=False):
             else:
                 command_str += f' --{key} {value}'
 
+        command_str += f" {extra_arg}"
         command_list.append(command_str)
     return command_list
 
 
-def run_combination_1(data_folder, test_run=False):
+def run_combination_1(data_folder, extra_arg="", select=""):
     combination_dict = OrderedDict({
         "dataset": full_parameters_list["dataset"],
 
-        "num_layer": full_parameters_list["nn_model_params"]["num_layer"],
+        "num_conv_layer": full_parameters_list["nn_model_params"]["num_conv_layer"],
+        "num_linear_layer": full_parameters_list["nn_model_params"]["num_linear_layer"],
         "activation_class": full_parameters_list["nn_model_params"]["activation_class"],
         "norm_class": full_parameters_list["nn_model_params"]["norm_class"],
         "approach": full_parameters_list["nn_model_params"]["approach"],
 
         "w_norm_class": full_parameters_list["weight_model_params"]["norm_class"],
     })
-    return create_command_list(data_folder, combination_dict, test_run)
+    return create_command_list(data_folder, combination_dict, extra_arg=extra_arg, select=select)
 
 
-def run_combination_2(data_folder, test_run=False):
-    activation_class = full_parameters_list["nn_model_params"]["activation_class"]
+def run_combination_2(data_folder, extra_arg="", select=""):
+    activation_class = copy.deepcopy(full_parameters_list["nn_model_params"]["activation_class"])
     activation_class.remove(None)
-    norm_class = [Clamp, L2Norm]
-    precision_class = full_parameters_list["nn_model_params"]["precision_class"]
+    precision_class = copy.deepcopy(full_parameters_list["nn_model_params"]["precision_class"])
     precision_class.remove(None)
+    norm_class = [Clamp, L2Norm]
 
     combination_dict = OrderedDict({
         "dataset": full_parameters_list["dataset"],
 
-        "num_layer": full_parameters_list["nn_model_params"]["num_layer"],
+        "num_conv_layer": full_parameters_list["nn_model_params"]["num_conv_layer"],
+        "num_linear_layer": full_parameters_list["nn_model_params"]["num_linear_layer"],
         "activation_class": activation_class,
         "norm_class": norm_class,
         "precision_class": precision_class,
@@ -137,37 +152,169 @@ def run_combination_2(data_folder, test_run=False):
         "w_precision_class": precision_class,
         "w_precision": full_parameters_list["weight_model_params"]["precision"],
     })
-    return create_command_list(data_folder, combination_dict, test_run)
+    return create_command_list(data_folder, combination_dict, extra_arg=extra_arg, select=select)
+
+
+def run_combination_3(data_folder, extra_arg="", select=""):
+    activation_class = copy.deepcopy(full_parameters_list["nn_model_params"]["activation_class"])
+    activation_class.remove(None)
+    precision_class = copy.deepcopy(full_parameters_list["nn_model_params"]["precision_class"])
+    precision_class.remove(None)
+    norm_class = [Clamp]
+    noise_class = copy.deepcopy(full_parameters_list["nn_model_params"]["noise_class"])
+    noise_class.remove(None)
+
+    combination_dict = OrderedDict({
+        "dataset": full_parameters_list["dataset"],
+
+        "num_conv_layer": full_parameters_list["nn_model_params"]["num_conv_layer"],
+        "num_linear_layer": full_parameters_list["nn_model_params"]["num_linear_layer"],
+        "activation_class": activation_class,
+        "norm_class": norm_class,
+        "precision_class": precision_class,
+        "precision": full_parameters_list["nn_model_params"]["precision"],
+        "noise_class": noise_class,
+        "leakage": full_parameters_list["nn_model_params"]["leakage"],
+
+        "w_norm_class": norm_class,
+        "w_precision_class": precision_class,
+        "w_precision": full_parameters_list["weight_model_params"]["precision"],
+        "w_noise_class": noise_class,
+        "w_leakage": full_parameters_list["weight_model_params"]["leakage"],
+    })
+    return create_command_list(data_folder, combination_dict, extra_arg=extra_arg, select=select)
+
+
+RUN_UNDER_12_LIST = {
+    "1lm": (run_combination_1, "num_conv_layer:0,dataset:MNIST"),
+    "1cm": (run_combination_1, "num_conv_layer:3,dataset:MNIST"),
+    "1lf": (run_combination_1, "num_conv_layer:0,dataset:FashionMNIST"),
+    "1cf": (run_combination_1, "num_conv_layer:3,dataset:FashionMNIST"),
+    "1lc": (run_combination_1, "num_conv_layer:0,dataset:CIFAR10"),
+    "1cc": (run_combination_1, "num_conv_layer:3,dataset:CIFAR10"),
+
+    "2lm": (run_combination_2, "num_conv_layer:0,dataset:MNIST"),
+    "2cm": (run_combination_2, "num_conv_layer:3,dataset:MNIST"),
+    "2lf": (run_combination_2, "num_conv_layer:0,dataset:FashionMNIST"),
+    "2cf": (run_combination_2, "num_conv_layer:3,dataset:FashionMNIST"),
+    "2lc": (run_combination_2, "num_conv_layer:0,dataset:CIFAR10"),
+    "2cc": (run_combination_2, "num_conv_layer:3,dataset:CIFAR10"),
+
+    "3lmgr": (run_combination_3,
+              "num_conv_layer:0,dataset:MNIST,noise_class:GaussianNoise,w_noise_class:GaussianNoise,precision_class:ReducePrecision,w_precision_class:ReducePrecision"),
+    "3cmgr": (run_combination_3,
+              "num_conv_layer:3,dataset:MNIST,noise_class:GaussianNoise,w_noise_class:GaussianNoise,precision_class:ReducePrecision,w_precision_class:ReducePrecision"),
+    "3lfgr": (run_combination_3,
+              "num_conv_layer:0,dataset:FashionMNIST,noise_class:GaussianNoise,w_noise_class:GaussianNoise,precision_class:ReducePrecision,w_precision_class:ReducePrecision"),
+    "3cfgr": (run_combination_3,
+              "num_conv_layer:3,dataset:FashionMNIST,noise_class:GaussianNoise,w_noise_class:GaussianNoise,precision_class:ReducePrecision,w_precision_class:ReducePrecision"),
+    "3lcgr": (run_combination_3,
+              "num_conv_layer:0,dataset:CIFAR10,noise_class:GaussianNoise,w_noise_class:GaussianNoise,precision_class:ReducePrecision,w_precision_class:ReducePrecision"),
+    "3ccgr": (run_combination_3,
+              "num_conv_layer:3,dataset:CIFAR10,noise_class:GaussianNoise,w_noise_class:GaussianNoise,precision_class:ReducePrecision,w_precision_class:ReducePrecision"),
+
+    "3lmgs": (run_combination_3,
+              "num_conv_layer:0,dataset:MNIST,noise_class:GaussianNoise,w_noise_class:GaussianNoise,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"),
+    "3cmgs": (run_combination_3,
+              "num_conv_layer:3,dataset:MNIST,noise_class:GaussianNoise,w_noise_class:GaussianNoise,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"),
+    "3lfgs": (run_combination_3,
+              "num_conv_layer:0,dataset:FashionMNIST,noise_class:GaussianNoise,w_noise_class:GaussianNoise,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"),
+    "3cfgs": (run_combination_3,
+              "num_conv_layer:3,dataset:FashionMNIST,noise_class:GaussianNoise,w_noise_class:GaussianNoise,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"),
+    "3lcgs": (run_combination_3,
+              "num_conv_layer:0,dataset:CIFAR10,noise_class:GaussianNoise,w_noise_class:GaussianNoise,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"),
+    "3ccgs": (run_combination_3,
+              "num_conv_layer:3,dataset:CIFAR10,noise_class:GaussianNoise,w_noise_class:GaussianNoise,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"),
+
+    "3lmpr": (run_combination_3,
+              "num_conv_layer:0,dataset:MNIST,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:ReducePrecision,w_precision_class:ReducePrecision"),
+    "3cmpr": (run_combination_3,
+              "num_conv_layer:3,dataset:MNIST,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:ReducePrecision,w_precision_class:ReducePrecision"),
+    "3lfpr": (run_combination_3,
+              "num_conv_layer:0,dataset:FashionMNIST,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:ReducePrecision,w_precision_class:ReducePrecision"),
+    "3cfpr": (run_combination_3,
+              "num_conv_layer:3,dataset:FashionMNIST,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:ReducePrecision,w_precision_class:ReducePrecision"),
+    "3lcpr": (run_combination_3,
+              "num_conv_layer:0,dataset:CIFAR10,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:ReducePrecision,w_precision_class:ReducePrecision"),
+    "3ccpr": (run_combination_3,
+              "num_conv_layer:3,dataset:CIFAR10,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:ReducePrecision,w_precision_class:ReducePrecision"),
+
+    "3lmps": (run_combination_3,
+              "num_conv_layer:0,dataset:MNIST,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"),
+    "3cmps": (run_combination_3,
+              "num_conv_layer:3,dataset:MNIST,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"),
+    "3lfps": (run_combination_3,
+              "num_conv_layer:0,dataset:FashionMNIST,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"),
+    "3cfps": (run_combination_3,
+              "num_conv_layer:3,dataset:FashionMNIST,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"),
+    "3lcps": (run_combination_3,
+              "num_conv_layer:0,dataset:CIFAR10,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"),
+    "3ccps": (run_combination_3,
+              "num_conv_layer:3,dataset:CIFAR10,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"),
+}
 
 
 def run_combination_main():
-    list_combination_fn = [run_combination_1, run_combination_2]
-
     parser = argparse.ArgumentParser()
     parser.add_argument("--num_process", type=int, required=True)
     parser.add_argument("--data_folder", type=str, required=True)
-    parser.add_argument("--run_combination", type=int, required=True)
-    parser.add_argument("--test_run", type=bool, default=False)
-    kwargs = vars(parser.parse_known_args()[0])
+    parser.add_argument("--select", type=str, default="")
+    parser.add_argument("--run_combination", type=str, required=True)
+    parser.add_argument("--single_run", action='store_true')
+    parser.set_defaults(single_run=False)
+    all_arguments = parser.parse_known_args()
+    print(all_arguments)
 
-    print(f"test_run: {kwargs['test_run']}")
+    kwargs = vars(all_arguments[0])
+    extra_arg = ""
+    for i in all_arguments[1]:
+        if " " in i:
+            extra_arg += f' "{i}"'
+        else:
+            extra_arg += f' {i}'
+
     print(f"num_process: {kwargs['num_process']}")
     print(f"data_folder: {kwargs['data_folder']}")
     print(f"run_combination: {kwargs['run_combination']}")
     prepare_data_folder(kwargs['data_folder'])
 
-    command_list = list_combination_fn[kwargs['run_combination'] - 1](kwargs['data_folder'], kwargs["test_run"])
-    TOTAL_COUNT = len(command_list)
-    print(f"number of combinations: {TOTAL_COUNT}")
+    select = RUN_UNDER_12_LIST[kwargs['run_combination']][1]
+    if len(kwargs['select']) > 0:
+        select += "," + kwargs['select']
+
+    command_list = RUN_UNDER_12_LIST[kwargs['run_combination']][0](kwargs['data_folder'], extra_arg, select)
+    print(f"number of combinations: {len(command_list)}")
     print()
     print()
 
-    # for i in command_list:
-    #     print(i)
     command_list = [(kwargs['data_folder'], x) for x in command_list]
-    with Pool(kwargs["num_process"]) as pool:
+    # print(len(command_list))
+    if kwargs["single_run"]:
+        command_list = command_list[:kwargs["num_process"]]
+
+    with ThreadPool(kwargs["num_process"]) as pool:
         pool.map(run_command, command_list)
 
 
+def create_slurm_scripts():
+    shutil.rmtree("_crc_slurm")
+    os.mkdir("_crc_slurm")
+    with open("run_analogvnn_$$$.slurm", "r") as file:
+        text = file.read()
+
+    for i in RUN_UNDER_12_LIST:
+        with open(f"_crc_slurm/run_analogvnn_{i}.slurm", "w") as file:
+            file.write(text.replace("$$$", i))
+
+    with open(f"_crc_slurm/_run.sh", "w") as file:
+        for i in RUN_UNDER_12_LIST:
+            file.write(f"sbatch run_analogvnn_{i}.slurm\n")
+
+
 if __name__ == '__main__':
+    # create_slurm_scripts()
+    for name, value in RUN_UNDER_12_LIST.items():
+        size = len(value[0]('', '', value[1]))
+        print(f"{name}: {size}, {size * 0.0046296}")
+    print()
     run_combination_main()

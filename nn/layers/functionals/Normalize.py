@@ -15,7 +15,10 @@ class Normalize(BaseLayer, BackwardIdentity, ABC):
 class L1Norm(Normalize):
     def forward(self, x: Tensor):
         self.save_tensor("input", x)
-        norm = torch.norm(x, 1, -1)
+        norm = x
+        if len(x.shape) > 1:
+            norm = torch.flatten(norm, start_dim=1)
+        norm = torch.norm(norm, 1, -1)
         norm = torch.clamp(norm, min=1e-4)
         self.save_tensor("norm", norm)
         x = torch.div(x.T, norm).T
@@ -32,7 +35,10 @@ class L1Norm(Normalize):
 class L2Norm(Normalize):
     def forward(self, x: Tensor):
         self.save_tensor("input", x)
-        norm = torch.norm(x, 2, -1)
+        norm = x
+        if len(x.shape) > 1:
+            norm = torch.flatten(norm, start_dim=1)
+        norm = torch.norm(norm, 2, -1)
         norm = torch.clamp(norm, min=1e-4)
         self.save_tensor("norm", norm)
 

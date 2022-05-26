@@ -7,8 +7,8 @@ from torch import Tensor
 
 from nn.backward_pass.BackwardFunction import BackwardIdentity
 from nn.layers.BaseLayer import BaseLayer
+from nn.utils.common_types import TENSOR_OPERABLE
 from nn.utils.to_tensor_parameter import to_nongrad_parameter, to_float_tensor
-from nn.utils.types import TENSOR_OPERABLE
 
 
 class GaussianNoise(BaseLayer, BackwardIdentity):
@@ -25,7 +25,7 @@ class GaussianNoise(BaseLayer, BackwardIdentity):
         if std is not None and precision is not None and leakage is not None:
             raise ValueError("only 2 out of 3 arguments are needed (std, precision, leakage)")
 
-        if std is None or (precision is None and leakage is None):
+        if not (std is None or (precision is None and leakage is None)):
             raise ValueError("Invalid arguments not found: std or (leakage and precision)")
 
         self.std, self.leakage, self.precision = to_float_tensor(

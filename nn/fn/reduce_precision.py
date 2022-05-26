@@ -1,7 +1,7 @@
 import torch
 from torch import Tensor
 
-from nn.utils.types import TENSOR_OPERABLE
+from nn.utils.common_types import TENSOR_OPERABLE
 
 
 def reduce_precision(x: Tensor, precision: TENSOR_OPERABLE, divide: TENSOR_OPERABLE) -> Tensor:

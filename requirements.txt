@@ -1,10 +1,10 @@
 pytorch
-torchvision~=0.11.3
+torchvision>=0.11.3
 tensorboard>=2.8.0
 tensorflow>=2.7.0
 torchviz>=0.0.2
 dataclasses>=0.6
-numpy>=1.21.0
+numpy
 matplotlib>=3.4.2
 tabulate
 pillow>=8.4.0

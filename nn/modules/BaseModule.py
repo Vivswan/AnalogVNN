@@ -17,7 +17,7 @@ class BaseModule(nn.Module):
     __constants__ = ['in_features', 'device']
 
     device: torch.device
-    tensorboard: Union[None, TensorboardModelLog]
+    # tensorboard: Union[None, TensorboardModelLog]
 
     def __init__(self, tensorboard_log_dir=None, backward_class: Type[BaseBackwardPass] = GraphBackwardPass):
         super(BaseModule, self).__init__()
@@ -25,7 +25,7 @@ class BaseModule(nn.Module):
         self._compiled = False
         self._output_hook = None
 
-        self.tensorboard: TensorboardModelLog = None
+        self.tensorboard = None
         if tensorboard_log_dir is not None:
             self.create_tensorboard(tensorboard_log_dir)
 

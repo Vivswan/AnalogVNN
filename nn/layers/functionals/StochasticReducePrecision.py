@@ -1,9 +1,9 @@
 import torch
 from torch import nn, Tensor
 
-from nn.layers.BaseLayer import BaseLayer
 from nn.backward_pass.BackwardFunction import BackwardIdentity
 from nn.fn.reduce_precision import stochastic_reduce_precision
+from nn.layers.BaseLayer import BaseLayer
 
 
 class StochasticReducePrecision(BaseLayer, BackwardIdentity):

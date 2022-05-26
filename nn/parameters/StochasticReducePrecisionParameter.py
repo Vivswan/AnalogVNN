@@ -1,4 +1,4 @@
-from nn.layers.StochasticReducePrecision import StochasticReducePrecision
+from nn.layers.functionals.StochasticReducePrecision import StochasticReducePrecision
 from nn.parameters.PseudoParameter import PseudoParameter
 
 
