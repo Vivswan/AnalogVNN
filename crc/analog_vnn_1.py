@@ -1,10 +1,16 @@
 import argparse
+import dataclasses
 import json
+from dataclasses import dataclass
+from typing import Type
 
 import torchvision
 from torch import optim
+from torch.optim import Optimizer
+from torchvision.datasets import VisionDataset
 
-from crc.analog_vnn_1_model import RunParameters, run_main_model
+from crc.analog_vnn_1_model import run_main_model
+from nn.activations.Activation import Activation
 from nn.activations.ELU import ELU
 from nn.activations.Gaussian import GeLU
 from nn.activations.ReLU import ReLU, LeakyReLU
@@ -53,6 +59,85 @@ full_parameters_list = {
     "epochs": 10,
     "test_run": False,
 }
+
+LINEAR_LAYER_SIZES = {
+    1: [],
+    2: [64],
+    3: [128, 64],
+    4: [256, 128, 64]
+}
+CONV_LAYER_SIZES = {
+    0: [],
+    3: [(1, 32, (3, 3)), (32, 64, (3, 3)), (64, 64, (3, 3))],
+}
+
+
+@dataclass
+class RunParameters:
+    name: Union[None, str] = None
+    data_folder: Union[None, str] = None
+
+    num_conv_layer: Union[None, int] = 0
+    num_linear_layer: Union[None, int] = 1
+    activation_class: Union[None, Type[Activation]] = None
+    norm_class: Union[None, Type[Normalize]] = None
+    approach: Union[None, str] = "default"
+    precision_class: Type[BaseLayer] = None
+    precision: Union[None, int] = None
+    noise_class: Type[BaseLayer] = None
+    leakage: Union[None, float] = None
+
+    w_norm_class: Union[None, Type[Normalize]] = None
+    w_precision_class: Type[BaseLayer] = None
+    w_precision: Union[None, int] = None
+    w_noise_class: Type[BaseLayer] = None
+    w_leakage: Union[None, float] = None
+
+    optimiser_class: Type[Optimizer] = optim.Adam
+    optimiser_parameters: dict = None
+    dataset: Type[VisionDataset] = torchvision.datasets.MNIST
+    batch_size: int = 128
+    epochs: int = 10
+
+    device: Union[None, torch.device] = None
+    test_run: bool = False
+    tensorboard: bool = False
+    save_data: bool = True
+    timestamp: str = None
+
+    def __init__(self):
+        self.optimiser_parameters = {}
+
+    @property
+    def nn_model_params(self):
+        return {
+            "num_conv_layer": self.num_conv_layer,
+            "num_linear_layer": self.num_linear_layer,
+            "activation_class": self.activation_class,
+            "norm_class": self.norm_class,
+            "approach": self.approach,
+            "precision_class": self.precision_class,
+            "precision": self.precision,
+            "noise_class": self.noise_class,
+            "leakage": self.leakage,
+        }
+
+    @property
+    def weight_model_params(self):
+        return {
+            "norm_class": self.w_norm_class,
+            "precision_class": self.w_precision_class,
+            "precision": self.w_precision,
+            "noise_class": self.w_noise_class,
+            "leakage": self.w_leakage,
+        }
+
+    @property
+    def json(self):
+        return json.loads(json.dumps(dataclasses.asdict(self), default=str))
+
+    def __repr__(self):
+        return f"RunParameters({json.dumps(self.json)})"
 
 
 def __select_class(main_object, name, class_list):
@@ -144,6 +229,7 @@ def parser_run_main(main_file=None):
     parser.add_argument("--w_leakage", type=float, default=None)
 
     parser.add_argument("--dataset", type=str, default="MNIST")
+    # parser.add_argument("--epochs", type=int, default=10)
     parser.add_argument("--device", type=str, default=None)
 
     parser.add_argument("--test_run", action='store_true')

@@ -73,9 +73,6 @@ class ConvLinearModel(FullSequential):
             self.all_layers.append(BackwardWrapper(conv_layer))
             temp_x = conv_layer(temp_x)
 
-            if activation_class is not None:
-                self.all_layers.append(activation_class())
-
             if i < len(conv_features_sizes) - 1:
                 max_pool = nn.MaxPool2d(2, 2)
                 self.all_layers.append(BackwardWrapper(max_pool))

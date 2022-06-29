@@ -2,6 +2,7 @@ import math
 from numbers import Real
 from typing import Union
 
+import scipy.special
 import torch
 from torch import Tensor
 
@@ -25,8 +26,17 @@ class GaussianNoise(BaseLayer, BackwardIdentity):
         if std is not None and precision is not None and leakage is not None:
             raise ValueError("only 2 out of 3 arguments are needed (std, precision, leakage)")
 
-        if not (std is None or (precision is None and leakage is None)):
-            raise ValueError("Invalid arguments not found: std or (leakage and precision)")
+        if std is None and precision is None and leakage is None:
+            raise ValueError("only 2 out of 3 arguments are needed (std, precision, leakage)")
+
+        if std is None and precision is None:
+            raise ValueError("only 2 out of 3 arguments are needed (std, precision, leakage)")
+
+        if precision is None and leakage is None:
+            raise ValueError("only 2 out of 3 arguments are needed (std, precision, leakage)")
+
+        if leakage is None and std is None:
+            raise ValueError("only 2 out of 3 arguments are needed (std, precision, leakage)")
 
         self.std, self.leakage, self.precision = to_float_tensor(
             std, leakage, precision
@@ -47,11 +57,11 @@ class GaussianNoise(BaseLayer, BackwardIdentity):
 
     @staticmethod
     def calc_std(leakage, precision):
-        return 1 / (2 * precision * torch.erfinv(1 - leakage) * math.sqrt(2))
+        return 1 / (2 * precision * scipy.special.erfinv(1 - leakage) * math.sqrt(2))
 
     @staticmethod
     def calc_precision(std, leakage):
-        return 1 / (2 * std * torch.erfinv(1 - leakage) * math.sqrt(2))
+        return 1 / (2 * std * scipy.special.erfinv(1 - leakage) * math.sqrt(2))
 
     @staticmethod
     def calc_leakage(std, precision):
@@ -97,5 +107,12 @@ class GaussianNoise(BaseLayer, BackwardIdentity):
 
 
 if __name__ == '__main__':
-    g = GaussianNoise(std=0.1, precision=2 ** 0)
-    print(g.leakage)
+    print(f"leakage=0.25 , precision=2**2 : {GaussianNoise.calc_std(leakage=0.25, precision=2 ** 2)}")
+    print(f"leakage=0.50 , precision=2**2 : {GaussianNoise.calc_std(leakage=0.50, precision=2 ** 2)}")
+    print(f"leakage=0.75 , precision=2**2 : {GaussianNoise.calc_std(leakage=0.75, precision=2 ** 2)}")
+    print(f"leakage=0.25 , precision=2**4 : {GaussianNoise.calc_std(leakage=0.25, precision=2 ** 4)}")
+    print(f"leakage=0.50 , precision=2**4 : {GaussianNoise.calc_std(leakage=0.50, precision=2 ** 4)}")
+    print(f"leakage=0.75 , precision=2**4 : {GaussianNoise.calc_std(leakage=0.75, precision=2 ** 4)}")
+    print(f"leakage=0.25 , precision=2**6 : {GaussianNoise.calc_std(leakage=0.25, precision=2 ** 6)}")
+    print(f"leakage=0.50 , precision=2**6 : {GaussianNoise.calc_std(leakage=0.50, precision=2 ** 6)}")
+    print(f"leakage=0.75 , precision=2**6 : {GaussianNoise.calc_std(leakage=0.75, precision=2 ** 6)}")

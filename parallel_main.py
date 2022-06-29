@@ -49,9 +49,21 @@ def run_command(command):
     runtime = Path(data_folder).joinpath("runtime")
     hash_id = hashlib.sha256(str(command).encode("utf-8")).hexdigest()
     timestamp = f"{int(time.time() * 1000)}"
+
+    if "--timestamp" not in command:
+        command += f" --timestamp {timestamp}"
+    else:
+        timestamp = command.split("--timestamp")[-1]
+        timestamp = timestamp.strip().split(" ")[0]
+
+    if "--name" not in command:
+        command += f" --name {hash_id}"
+    else:
+        hash_id = command.split("--name")[-1]
+        hash_id = hash_id.strip().split(" ")[0]
+
     filename = f"{timestamp}_{hash_id}"
     out_file = runtime.joinpath(f"{filename}.log")
-    command += f" --timestamp {timestamp} --name {hash_id}"
 
     with open(out_file, "w+") as out:
         out.write(command + "\n")
@@ -288,7 +300,6 @@ def run_combination_main():
     print()
 
     command_list = [(kwargs['data_folder'], x) for x in command_list]
-    # print(len(command_list))
     if kwargs["single_run"]:
         command_list = command_list[:kwargs["num_process"]]
 
@@ -313,8 +324,8 @@ def create_slurm_scripts():
 
 if __name__ == '__main__':
     # create_slurm_scripts()
-    for name, value in RUN_UNDER_12_LIST.items():
-        size = len(value[0]('', '', value[1]))
-        print(f"{name}: {size}, {size * 0.0046296}")
-    print()
+    # for name, value in RUN_UNDER_12_LIST.items():
+    #     size = len(value[0]('', '', value[1]))
+    #     print(f"{name}: {size}, {size * 0.0046296}")
+    # print()
     run_combination_main()

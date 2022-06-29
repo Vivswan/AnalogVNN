@@ -1,5 +1,6 @@
 import csv
 import json
+import math
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Callable
@@ -166,50 +167,60 @@ def create_normal_snr():
     })
 
 
-def main(std=0.1, precision=2):
+def main(std=0.1, precision=3):
     is_cpu_cuda.set_device('cpu')
 
-    # xlim = [-1.01, 1.01]
-    # ylim = [-1.5, 1.5]
+    xlim = [-1.01, 1.01]
+    ylim = [-1.5, 1.5]
 
-    num_line = torch.Tensor(np.linspace(-1, 1, 1000))
-    # reduce_precision = ReducePrecision(precision=precision)(num_line)
+    num_line = torch.Tensor(np.linspace(-1, 1, 500))
+    reduce_precision = ReducePrecision(precision=precision)(num_line)
 
-    # sp = [3, 3]
-    # fig, axes = plt.subplots(nrows=sp[0], ncols=sp[1])
-    # fig.set_size_inches(14, 11)
-    # fig.set_dpi(200)
-    #
-    # plot_x = num_line.tolist()
-    # plt.subplot(*sp, 2)
-    # plt.scatter(plot_x, reduce_precision.tolist(), label="reduce_precision", color="#ff0000", s=2)
-    # plt.gca().set_xlim(xlim)
-    # plt.gca().set_ylim(ylim)
-    # plt.title(f"Reduce Precision (p: {precision} = {math.log2(precision):0.3f} bits)")
-    #
-    # plt.subplot(*sp, 4)
-    # plt.gca().set_xlim(xlim)
-    # plt.gca().set_ylim(ylim)
-    # plt.title(f"Normal")
-    #
-    # plt.subplot(*sp, 5)
-    # plt.gca().set_xlim(xlim)
-    # plt.gca().set_ylim(ylim)
-    # plt.title(f"Possion (scale: {std})")
-    #
-    # plt.subplot(*sp, 6)
-    # plt.gca().set_xlim(xlim)
-    # plt.gca().set_ylim(ylim)
-    # plt.title(f"Normal + Poisson")
+    sp = [3, 3]
+    fig, axes = plt.subplots(nrows=sp[0], ncols=sp[1])
+    # fig.set_size_inches(4.0, 4.0)
+    fig.set_size_inches(6, 6)
+    fig.set_dpi(200)
+
+    plot_x = num_line.tolist()
+    plt.subplot(*sp, 1)
+    plt.plot(plot_x, plot_x, color="#ff0000")
+    plt.gca().set_xlim(xlim)
+    plt.gca().set_ylim(ylim)
+    plt.subplot(*sp, 3)
+    plt.plot(plot_x, (np.array(plot_x) * 1.5).tolist(), color="#ff0000")
+    plt.gca().set_xlim(xlim)
+    plt.gca().set_ylim(ylim)
+
+    plt.subplot(*sp, 2)
+    plt.plot(plot_x, reduce_precision.tolist(), label="reduce_precision", color="#ff0000")
+    plt.gca().set_xlim(xlim)
+    plt.gca().set_ylim(ylim)
+    plt.title(f"Reduce Precision (p: {precision} = {math.log2(precision):0.3f} bits)")
+
+    plt.subplot(*sp, 4)
+    plt.gca().set_xlim(xlim)
+    plt.gca().set_ylim(ylim)
+    plt.title(f"Normal")
+
+    plt.subplot(*sp, 5)
+    plt.gca().set_xlim(xlim)
+    plt.gca().set_ylim(ylim)
+    plt.title(f"Possion (scale: {std})")
+
+    plt.subplot(*sp, 6)
+    plt.gca().set_xlim(xlim)
+    plt.gca().set_ylim(ylim)
+    plt.title(f"Normal + Poisson")
 
     uniform_avg = CalculateRespondsAverages()
     normal_avg = CalculateRespondsAverages()
     poisson_avg = CalculateRespondsAverages()
     laplace_avg = CalculateRespondsAverages()
-    # normal_poisson_avg = CalculateRespondsAverages()
+    normal_poisson_avg = CalculateRespondsAverages()
 
     un = UniformNoise(leakage=std, precision=precision)
-    gn = GaussianNoise(std=std, precision=precision)
+    gn = GaussianNoise(leakage=std, precision=precision)
     pn = PoissonNoise(scale=1 / std, precision=precision)
     ln = LaplacianNoise(scale=1 / std, precision=precision)
     for i in range(1000):
@@ -217,46 +228,46 @@ def main(std=0.1, precision=2):
         normal_noise = calculate(num_line, precision, gn)
         poisson_noise = calculate(num_line, precision, pn)
         laplace_noise = calculate(num_line, precision, ln)
-        # normal_poisson_noise = calculate(
-        #     num_line, precision,
-        #     lambda x: normal_noise.func(poisson_noise.func(x))
-        # )
+        normal_poisson_noise = calculate(
+            num_line, precision,
+            lambda x: normal_noise.func(poisson_noise.func(x))
+        )
 
         uniform_avg.append_response(uniform_noise)
         normal_avg.append_response(normal_noise)
         poisson_avg.append_response(poisson_noise)
         laplace_avg.append_response(laplace_noise)
-        # normal_poisson_avg.append_response(normal_poisson_noise)
+        normal_poisson_avg.append_response(normal_poisson_noise)
 
-        # if i < 5:
-        #     plt.subplot(*sp, 4)
-        #     plt.scatter(plot_x, normal_noise.noise_rp.tolist(), color="#ff00000f", s=2)
-        #
-        #     plt.subplot(*sp, 5)
-        #     plt.scatter(plot_x, poisson_noise.noise_rp.tolist(), color="#ff00000f", s=2)
-        #
-        #     plt.subplot(*sp, 6)
-        #     plt.scatter(plot_x, normal_poisson_noise.noise_rp.tolist(), color="#ff00000f", s=2)
-        #
-        #     plt.subplot(*sp, 7)
-        #     plt.scatter(plot_x, normal_noise.rp_noise_rp.tolist(), color="#ff00000f", s=2)
-        #
-        #     plt.subplot(*sp, 8)
-        #     plt.scatter(plot_x, poisson_noise.rp_noise_rp.tolist(), color="#ff00000f", s=2)
-        #
-        #     plt.subplot(*sp, 9)
-        #     plt.scatter(plot_x, normal_poisson_noise.rp_noise_rp.tolist(), color="#ff00000f", s=2)
+        if i < 5:
+            plt.subplot(*sp, 4)
+            plt.scatter(plot_x, normal_noise.noise_rp.tolist(), color="#ff00000f", s=2)
+
+            plt.subplot(*sp, 5)
+            plt.scatter(plot_x, poisson_noise.noise_rp.tolist(), color="#ff00000f", s=2)
+
+            plt.subplot(*sp, 6)
+            plt.scatter(plot_x, normal_poisson_noise.noise_rp.tolist(), color="#ff00000f", s=2)
+
+            plt.subplot(*sp, 7)
+            plt.scatter(plot_x, normal_noise.rp_noise_rp.tolist(), color="#ff00000f", s=2)
+
+            plt.subplot(*sp, 8)
+            plt.scatter(plot_x, poisson_noise.rp_noise_rp.tolist(), color="#ff00000f", s=2)
+
+            plt.subplot(*sp, 9)
+            plt.scatter(plot_x, normal_poisson_noise.rp_noise_rp.tolist(), color="#ff00000f", s=2)
 
     print(f"std: {std:0.4f}, precision: {precision}")
     print(f"uniform_expected: {un.leakage:0.4f}, {uniform_avg}")
     print(f"normal_expected: {gn.leakage:0.4f}, {normal_avg}")
     print(f"poisson_expected: {pn.leakage:0.4f}, {poisson_avg}")
     print(f"laplace_expected: {ln.leakage:0.4f}, {laplace_avg}")
-    # print(f"normal_poisson_avg: {normal_poisson_avg}")
-
-    # fig.tight_layout()
-    # plt.show()
-    # fig.savefig('image.svg', dpi=fig.dpi)
+    print(f"normal_poisson_avg: {normal_poisson_avg}")
+    #
+    fig.tight_layout()
+    plt.show()
+    fig.savefig('C:/X/image.svg', dpi=fig.dpi)
     print()
 
 
@@ -483,8 +494,8 @@ def plot_layer_leakage():
 
 
 if __name__ == '__main__':
-    # main()
+    main()
     # plot_and_integrate()
     # plot_poisson_leakage()
     # plot_normal_leakage()
-    plot_layer_leakage()
+    # plot_layer_leakage()
