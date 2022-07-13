@@ -205,64 +205,106 @@ RUN_UNDER_12_LIST = {
     "1lc": (run_combination_1, "num_conv_layer:0,dataset:CIFAR10"),
     "1cc": (run_combination_1, "num_conv_layer:3,dataset:CIFAR10"),
 
-    "2lm": (run_combination_2, "num_conv_layer:0,dataset:MNIST"),
-    "2cm": (run_combination_2, "num_conv_layer:3,dataset:MNIST"),
-    "2lf": (run_combination_2, "num_conv_layer:0,dataset:FashionMNIST"),
-    "2cf": (run_combination_2, "num_conv_layer:3,dataset:FashionMNIST"),
-    "2lc": (run_combination_2, "num_conv_layer:0,dataset:CIFAR10"),
-    "2cc": (run_combination_2, "num_conv_layer:3,dataset:CIFAR10"),
+    "2lml": (run_combination_2, "num_conv_layer:0,dataset:MNIST,norm_class:L2Norm"),
+    "2cml": (run_combination_2, "num_conv_layer:3,dataset:MNIST,norm_class:L2Norm"),
+    "2lfl": (run_combination_2, "num_conv_layer:0,dataset:FashionMNIST,norm_class:L2Norm"),
+    "2cfl": (run_combination_2, "num_conv_layer:3,dataset:FashionMNIST,norm_class:L2Norm"),
+    "2lcl": (run_combination_2, "num_conv_layer:0,dataset:CIFAR10,norm_class:L2Norm"),
+    "2ccl": (run_combination_2, "num_conv_layer:3,dataset:CIFAR10,norm_class:L2Norm"),
+    "2lmc": (run_combination_2, "num_conv_layer:0,dataset:MNIST,norm_class:Clamp"),
+    "2cmc": (run_combination_2, "num_conv_layer:3,dataset:MNIST,norm_class:Clamp"),
+    "2lfc": (run_combination_2, "num_conv_layer:0,dataset:FashionMNIST,norm_class:Clamp"),
+    "2cfc": (run_combination_2, "num_conv_layer:3,dataset:FashionMNIST,norm_class:Clamp"),
+    "2lcc": (run_combination_2, "num_conv_layer:0,dataset:CIFAR10,norm_class:Clamp"),
+    "2ccc": (run_combination_2, "num_conv_layer:3,dataset:CIFAR10,norm_class:Clamp"),
 
-    "3lmgr": (run_combination_3,
-              "num_conv_layer:0,dataset:MNIST,noise_class:GaussianNoise,w_noise_class:GaussianNoise,precision_class:ReducePrecision,w_precision_class:ReducePrecision"),
-    "3cmgr": (run_combination_3,
-              "num_conv_layer:3,dataset:MNIST,noise_class:GaussianNoise,w_noise_class:GaussianNoise,precision_class:ReducePrecision,w_precision_class:ReducePrecision"),
-    "3lfgr": (run_combination_3,
-              "num_conv_layer:0,dataset:FashionMNIST,noise_class:GaussianNoise,w_noise_class:GaussianNoise,precision_class:ReducePrecision,w_precision_class:ReducePrecision"),
-    "3cfgr": (run_combination_3,
-              "num_conv_layer:3,dataset:FashionMNIST,noise_class:GaussianNoise,w_noise_class:GaussianNoise,precision_class:ReducePrecision,w_precision_class:ReducePrecision"),
-    "3lcgr": (run_combination_3,
-              "num_conv_layer:0,dataset:CIFAR10,noise_class:GaussianNoise,w_noise_class:GaussianNoise,precision_class:ReducePrecision,w_precision_class:ReducePrecision"),
-    "3ccgr": (run_combination_3,
-              "num_conv_layer:3,dataset:CIFAR10,noise_class:GaussianNoise,w_noise_class:GaussianNoise,precision_class:ReducePrecision,w_precision_class:ReducePrecision"),
+    "3glmr": (
+        run_combination_3,
+        "noise_class:GaussianNoise,w_noise_class:GaussianNoise,"
+        "num_conv_layer:0,dataset:MNIST,precision_class:ReducePrecision,w_precision_class:ReducePrecision"
+    ),
+    "3gcmr": (
+        run_combination_3,
+        "noise_class:GaussianNoise,w_noise_class:GaussianNoise,"
+        "num_conv_layer:3,dataset:MNIST,precision_class:ReducePrecision,w_precision_class:ReducePrecision"
+    ),
+    "3glfr": (
+        run_combination_3,
+        "noise_class:GaussianNoise,w_noise_class:GaussianNoise,"
+        "num_conv_layer:0,dataset:FashionMNIST,precision_class:ReducePrecision,w_precision_class:ReducePrecision"
+    ),
+    "3gcfr": (
+        run_combination_3,
+        "noise_class:GaussianNoise,w_noise_class:GaussianNoise,"
+        "num_conv_layer:3,dataset:FashionMNIST,precision_class:ReducePrecision,w_precision_class:ReducePrecision"
+    ),
+    "3glcr": (
+        run_combination_3,
+        "noise_class:GaussianNoise,w_noise_class:GaussianNoise,"
+        "num_conv_layer:0,dataset:CIFAR10,precision_class:ReducePrecision,w_precision_class:ReducePrecision"
+    ),
+    "3gccr": (
+        run_combination_3,
+        "noise_class:GaussianNoise,w_noise_class:GaussianNoise,"
+        "num_conv_layer:3,dataset:CIFAR10,precision_class:ReducePrecision,w_precision_class:ReducePrecision"
+    ),
 
-    "3lmgs": (run_combination_3,
-              "num_conv_layer:0,dataset:MNIST,noise_class:GaussianNoise,w_noise_class:GaussianNoise,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"),
-    "3cmgs": (run_combination_3,
-              "num_conv_layer:3,dataset:MNIST,noise_class:GaussianNoise,w_noise_class:GaussianNoise,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"),
-    "3lfgs": (run_combination_3,
-              "num_conv_layer:0,dataset:FashionMNIST,noise_class:GaussianNoise,w_noise_class:GaussianNoise,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"),
-    "3cfgs": (run_combination_3,
-              "num_conv_layer:3,dataset:FashionMNIST,noise_class:GaussianNoise,w_noise_class:GaussianNoise,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"),
-    "3lcgs": (run_combination_3,
-              "num_conv_layer:0,dataset:CIFAR10,noise_class:GaussianNoise,w_noise_class:GaussianNoise,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"),
-    "3ccgs": (run_combination_3,
-              "num_conv_layer:3,dataset:CIFAR10,noise_class:GaussianNoise,w_noise_class:GaussianNoise,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"),
+    "3glms": (
+        run_combination_3,
+        "noise_class:GaussianNoise,w_noise_class:GaussianNoise,"
+        "num_conv_layer:0,dataset:MNIST,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"
+    ),
+    "3gcms": (
+        run_combination_3,
+        "noise_class:GaussianNoise,w_noise_class:GaussianNoise,"
+        "num_conv_layer:3,dataset:MNIST,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"
+    ),
+    "3glfs": (
+        run_combination_3,
+        "noise_class:GaussianNoise,w_noise_class:GaussianNoise,"
+        "num_conv_layer:0,dataset:FashionMNIST,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"
+    ),
+    "3gcfs": (
+        run_combination_3,
+        "noise_class:GaussianNoise,w_noise_class:GaussianNoise,"
+        "num_conv_layer:3,dataset:FashionMNIST,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"
+    ),
+    "3glcs": (
+        run_combination_3,
+        "noise_class:GaussianNoise,w_noise_class:GaussianNoise,"
+        "num_conv_layer:0,dataset:CIFAR10,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"
+    ),
+    "3gccs": (
+        run_combination_3,
+        "noise_class:GaussianNoise,w_noise_class:GaussianNoise,"
+        "num_conv_layer:3,dataset:CIFAR10,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"
+    ),
 
-    "3lmpr": (run_combination_3,
-              "num_conv_layer:0,dataset:MNIST,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:ReducePrecision,w_precision_class:ReducePrecision"),
-    "3cmpr": (run_combination_3,
-              "num_conv_layer:3,dataset:MNIST,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:ReducePrecision,w_precision_class:ReducePrecision"),
-    "3lfpr": (run_combination_3,
-              "num_conv_layer:0,dataset:FashionMNIST,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:ReducePrecision,w_precision_class:ReducePrecision"),
-    "3cfpr": (run_combination_3,
-              "num_conv_layer:3,dataset:FashionMNIST,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:ReducePrecision,w_precision_class:ReducePrecision"),
-    "3lcpr": (run_combination_3,
-              "num_conv_layer:0,dataset:CIFAR10,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:ReducePrecision,w_precision_class:ReducePrecision"),
-    "3ccpr": (run_combination_3,
-              "num_conv_layer:3,dataset:CIFAR10,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:ReducePrecision,w_precision_class:ReducePrecision"),
+    # "3lmpr": (run_combination_3,
+    #           "num_conv_layer:0,dataset:MNIST,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:ReducePrecision,w_precision_class:ReducePrecision"),
+    # "3cmpr": (run_combination_3,
+    #           "num_conv_layer:3,dataset:MNIST,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:ReducePrecision,w_precision_class:ReducePrecision"),
+    # "3lfpr": (run_combination_3,
+    #           "num_conv_layer:0,dataset:FashionMNIST,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:ReducePrecision,w_precision_class:ReducePrecision"),
+    # "3cfpr": (run_combination_3,
+    #           "num_conv_layer:3,dataset:FashionMNIST,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:ReducePrecision,w_precision_class:ReducePrecision"),
+    # "3lcpr": (run_combination_3,
+    #           "num_conv_layer:0,dataset:CIFAR10,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:ReducePrecision,w_precision_class:ReducePrecision"),
+    # "3ccpr": (run_combination_3,
+    #           "num_conv_layer:3,dataset:CIFAR10,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:ReducePrecision,w_precision_class:ReducePrecision"),
 
-    "3lmps": (run_combination_3,
-              "num_conv_layer:0,dataset:MNIST,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"),
-    "3cmps": (run_combination_3,
-              "num_conv_layer:3,dataset:MNIST,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"),
-    "3lfps": (run_combination_3,
-              "num_conv_layer:0,dataset:FashionMNIST,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"),
-    "3cfps": (run_combination_3,
-              "num_conv_layer:3,dataset:FashionMNIST,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"),
-    "3lcps": (run_combination_3,
-              "num_conv_layer:0,dataset:CIFAR10,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"),
-    "3ccps": (run_combination_3,
-              "num_conv_layer:3,dataset:CIFAR10,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"),
+    # "3lmps": (run_combination_3,
+    #           "num_conv_layer:0,dataset:MNIST,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"),
+    # "3cmps": (run_combination_3,
+    #           "num_conv_layer:3,dataset:MNIST,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"),
+    # "3lfps": (run_combination_3,
+    #           "num_conv_layer:0,dataset:FashionMNIST,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"),
+    # "3cfps": (run_combination_3,
+    #           "num_conv_layer:3,dataset:FashionMNIST,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"),
+    # "3lcps": (run_combination_3,
+    #           "num_conv_layer:0,dataset:CIFAR10,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"),
+    # "3ccps": (run_combination_3,
+    #           "num_conv_layer:3,dataset:CIFAR10,noise_class:PoissonNoise,w_noise_class:GaussianNoise,precision_class:StochasticReducePrecision,w_precision_class:StochasticReducePrecision"),
 }
 
 
@@ -323,9 +365,9 @@ def create_slurm_scripts():
 
 
 if __name__ == '__main__':
-    # create_slurm_scripts()
-    # for name, value in RUN_UNDER_12_LIST.items():
-    #     size = len(value[0]('', '', value[1]))
-    #     print(f"{name}: {size}, {size * 0.0046296}")
-    # print()
-    run_combination_main()
+    create_slurm_scripts()
+    for name, value in RUN_UNDER_12_LIST.items():
+        size = len(value[0]('', '', value[1]))
+        print(f"{name}: {size}, {size * 0.01080530071}")
+    print()
+    # run_combination_main()

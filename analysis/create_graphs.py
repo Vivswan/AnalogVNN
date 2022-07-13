@@ -285,8 +285,8 @@ def create_line_figure(data_path, x_axis, y_axis, subsection=None, colorbar=None
 
     color_map = "Set2"
     if colorbar is not None:
-        # color_map = seaborn.color_palette("flare", len(set(plot_data["hue"])), as_cmap=True)
-        color_map = seaborn.dark_palette("#69d", n_colors=len(set(plot_data["hue"])), reverse=True, as_cmap=True)
+        color_map = seaborn.color_palette("flare", len(set(plot_data["hue"])), as_cmap=True)
+        # color_map = seaborn.dark_palette("#69d", n_colors=len(set(plot_data["hue"])), reverse=True, as_cmap=True)
         norm = matplotlib.colors.Normalize(vmin=min(plot_data["hue"]), vmax=max(plot_data["hue"]))
         scalar_map = plt.cm.ScalarMappable(cmap=color_map, norm=norm)
         cbar = plt.colorbar(scalar_map)
@@ -322,14 +322,15 @@ def create_line_figure_max(data_path, x_axis, y_axis, subsection=None, colorbar=
 
     color_map = "Set2"
     if colorbar is not None:
-        # color_map = seaborn.color_palette("flare", len(set(plot_data["hue"])), as_cmap=True)
-        color_map = seaborn.dark_palette("#69d", n_colors=len(set(plot_data["hue"])), reverse=True, as_cmap=True)
+        color_map = seaborn.color_palette("flare", len(set(plot_data["hue"])), as_cmap=True)
+        # color_map = seaborn.dark_palette("#69d", n_colors=len(set(plot_data["hue"])), reverse=True, as_cmap=True)
         norm = matplotlib.colors.Normalize(vmin=min(plot_data["hue"]), vmax=max(plot_data["hue"]))
         scalar_map = plt.cm.ScalarMappable(cmap=color_map, norm=norm)
         cbar = plt.colorbar(scalar_map)
         cbar.ax.set_ylabel(to_title_case(colorbar))
 
     g = seaborn.lineplot(**plot_data, palette=color_map, linewidth=1, ci=1)
+    # g.set(yscale="log")
 
     plot_data["data_path"] = data_path
     plot_data["prefix"] = "lm"
@@ -525,9 +526,9 @@ def create_runs_line_figures():
 
 if __name__ == '__main__':
     location = "C:/_data/_json"
-    compile_data(f"{location}/analog_vnn_run_1")
-    compile_data(f"{location}/analog_vnn_run_2")
-    compile_data(f"{location}/analog_vnn_run_3")
+    # compile_data(f"{location}/analog_vnn_run_1")
+    # compile_data(f"{location}/analog_vnn_run_2")
+    # compile_data(f"{location}/analog_vnn_run_3")
     # create_runs_violin_figures()
     # create_runs_line_figures()
     # create_violin_figure(f"{location}/analog_vnn_run_1.json", "parameter_log.norm_class_w", "test_accuracy", size_factor=(3, 1.5))
@@ -586,4 +587,58 @@ if __name__ == '__main__':
     #     size_factor=(2.5, 2)
     # )
 
+    # create_line_figure_max(
+    #     f"{location}/analog_vnn_run_2.json",
+    #     "bit_precision_w",
+    #     "test_accuracy",
+    #     # colorbar="std_y",
+    #     subsection="parameter_log.dataset",
+    #     size_factor=(2.5, 2)
+    # )
+
+    create_line_figure_max(
+        f"{location}/analog_vnn_run_3.json",
+        "parameter_log.num_linear_layer",
+        "test_accuracy",
+        colorbar="parameter_log.num_conv_layer",
+        subsection="parameter_log.dataset",
+        size_factor=(2.5, 2),
+        filters={
+            "bit_precision_w": 6.0,
+            "bit_precision_y": 6.0,
+        }
+    )
+
+    create_line_figure_max(
+        f"{location}/analog_vnn_run_3.json",
+        "bit_precision_w",
+        "test_accuracy",
+        colorbar="parameter_log.num_linear_layer",
+        subsection="parameter_log.dataset",
+        size_factor=(2.5, 2),
+        filters={
+            "parameter_log.num_conv_layer": 0
+        }
+    )
+
+    # create_line_figure_max(
+    #     f"{location}/analog_vnn_run_3.json",
+    #     "parameter_log.leakage_w",
+    #     "test_accuracy",
+    #     colorbar="parameter_log.leakage_y",
+    #     subsection="parameter_log.dataset",
+    #     size_factor=(2.5, 2),
+    #     filters={
+    #         "bit_precision_y": 2.0,
+    #         "bit_precision_w": 2.0,
+    #     }
+    # )
+    # create_line_figure_max(
+    #     f"{location}/analog_vnn_run_3.json",
+    #     "parameter_log.leakage_w",
+    #     "test_accuracy",
+    #     colorbar="bit_precision_w",
+    #     subsection="parameter_log.dataset",
+    #     size_factor=(2.5, 2),
+    # )
     # calculate_max_accuracy(f"{location}/analog_vnn_run_3.json", "parameter_log.dataset")

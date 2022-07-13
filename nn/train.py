@@ -1,8 +1,14 @@
 from torch.utils.data import DataLoader
 
 
-def train(model, train_loader: DataLoader, epoch=None, apply_to_parameters_fn=None, parameters_to_apply_fn=None,
-          test_run=False):
+def train(
+        model,
+        train_loader: DataLoader,
+        epoch=None,
+        apply_to_parameters_fn=None,
+        parameters_to_apply_fn=None,
+        test_run=False
+):
     if apply_to_parameters_fn is None:
         apply_to_parameters_fn = []
     model.train()

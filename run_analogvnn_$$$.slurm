@@ -9,7 +9,7 @@
 #SBATCH --cluster=gpu
 #SBATCH --partition=power9
 #SBATCH --gres=gpu:1
-#SBATCH --time=24:00:00
+#SBATCH --time=2-00:00:00
 #SBATCH --chdir="/ihome/nyoungblood/vis77"
 
 source ~/.bashrc
@@ -87,7 +87,7 @@ run_on_exit(){
   echo "####################################### Exit Began #######################################"
   rm -rf "${SlurmScratchDirectory}/_results/datasets/"
   cd "${SLURM_SCRATCH}" || exit
-  tar -czvf "${SlurmScratchName}.tar.gz" "${SlurmScratchName}"
+  tar -czf "${SlurmScratchName}.tar.gz" "${SlurmScratchName}"
   mv "slurm_${SLURM_JOB_NAME}_${SLURM_JOBID}.tar.gz" "${StorageDirectory}"
 
   echo ""
@@ -105,7 +105,6 @@ run_on_exit(){
   echo ""
 }
 trap run_on_exit EXIT
-#trap run_on_exit FAIL
 
 cd "${SlurmScratchDirectory}" || exit
 

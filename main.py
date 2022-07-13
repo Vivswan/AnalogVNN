@@ -1,4 +1,4 @@
-from crc.analog_vnn_1 import parser_run_main
+from crc.analog_vnn_1 import parser_run_analogvnn1
 
 if __name__ == '__main__':
-    parser_run_main(__file__)
+    parser_run_analogvnn1(__file__)

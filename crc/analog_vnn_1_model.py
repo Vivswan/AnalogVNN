@@ -1,12 +1,18 @@
+import dataclasses
 import hashlib
 import json
 import math
-from typing import Type
+from dataclasses import dataclass
+from typing import Type, List
 
 import torch.backends.cudnn
-from torch import nn
+import torchvision
+from torch import nn, optim
 from torch.nn import Flatten
+from torch.optim import Optimizer
+from torchvision.datasets import VisionDataset
 
+from crc._common import pick_instanceof_module
 from dataloaders.load_vision_dataset import load_vision_dataset
 from nn.activations.Activation import Activation
 from nn.backward_pass.BackwardFunction import BackwardUsingForward
@@ -22,9 +28,88 @@ from nn.optimizer.PseudoOptimizer import PseudoOptimizer
 from nn.utils.is_cpu_cuda import is_cpu_cuda
 from nn.utils.summary import summary
 from utils.data_dirs import data_dirs
-from utils.helper_functions import pick_instanceof
 from utils.path_functions import path_join
 from utils.save_graph import save_graph
+
+LINEAR_LAYER_SIZES = {
+    1: [],
+    2: [64],
+    3: [128, 64],
+    4: [256, 128, 64]
+}
+CONV_LAYER_SIZES = {
+    0: [],
+    3: [(1, 32, (3, 3)), (32, 64, (3, 3)), (64, 64, (3, 3))],
+}
+
+
+@dataclass
+class RunParametersAnalogVNN1:
+    name: Union[None, str] = None
+    data_folder: Union[None, str] = None
+
+    num_conv_layer: Union[None, int] = 0
+    num_linear_layer: Union[None, int] = 1
+    activation_class: Union[None, Type[Activation]] = None
+    norm_class: Union[None, Type[Normalize]] = None
+    approach: Union[None, str] = "default"
+    precision_class: Type[BaseLayer] = None
+    precision: Union[None, int] = None
+    noise_class: Type[BaseLayer] = None
+    leakage: Union[None, float] = None
+
+    w_norm_class: Union[None, Type[Normalize]] = None
+    w_precision_class: Type[BaseLayer] = None
+    w_precision: Union[None, int] = None
+    w_noise_class: Type[BaseLayer] = None
+    w_leakage: Union[None, float] = None
+
+    optimiser_class: Type[Optimizer] = optim.Adam
+    optimiser_parameters: dict = None
+    dataset: Type[VisionDataset] = torchvision.datasets.MNIST
+    batch_size: int = 128
+    epochs: int = 10
+
+    device: Union[None, torch.device] = None
+    test_logs: bool = False
+    test_run: bool = False
+    tensorboard: bool = False
+    save_data: bool = True
+    timestamp: str = None
+
+    def __init__(self):
+        self.optimiser_parameters = {}
+
+    @property
+    def nn_model_params(self):
+        return {
+            "num_conv_layer": self.num_conv_layer,
+            "num_linear_layer": self.num_linear_layer,
+            "activation_class": self.activation_class,
+            "norm_class": self.norm_class,
+            "approach": self.approach,
+            "precision_class": self.precision_class,
+            "precision": self.precision,
+            "noise_class": self.noise_class,
+            "leakage": self.leakage,
+        }
+
+    @property
+    def weight_model_params(self):
+        return {
+            "norm_class": self.w_norm_class,
+            "precision_class": self.w_precision_class,
+            "precision": self.w_precision,
+            "noise_class": self.w_noise_class,
+            "leakage": self.w_leakage,
+        }
+
+    @property
+    def json(self):
+        return json.loads(json.dumps(dataclasses.asdict(self), default=str))
+
+    def __repr__(self):
+        return f"RunParameters({json.dumps(self.json)})"
 
 
 def cross_entropy_loss_accuracy(output, target):
@@ -63,23 +148,23 @@ class ConvLinearModel(FullSequential):
 
         temp_x = torch.zeros(input_shape, requires_grad=False)
 
-        self.all_layers = []
+        self.all_layers: List[nn.Module] = []
         for i in range(len(conv_features_sizes)):
             conv_layer = nn.Conv2d(
                 in_channels=conv_features_sizes[i][0],
                 out_channels=conv_features_sizes[i][1],
                 kernel_size=conv_features_sizes[i][2]
             )
+
+            self.add_doa_layers()
             self.all_layers.append(BackwardWrapper(conv_layer))
+            self.add_aod_layers()
+
             temp_x = conv_layer(temp_x)
 
-            if activation_class is not None:
-                self.all_layers.append(activation_class())
-
-            if i < len(conv_features_sizes) - 1:
-                max_pool = nn.MaxPool2d(2, 2)
-                self.all_layers.append(BackwardWrapper(max_pool))
-                temp_x = max_pool(temp_x)
+            max_pool = nn.MaxPool2d(2, 2)
+            self.all_layers.append(BackwardWrapper(max_pool))
+            temp_x = max_pool(temp_x)
 
         flatten = Flatten(start_dim=1)
         self.all_layers.append(BackwardWrapper(flatten))
@@ -92,32 +177,17 @@ class ConvLinearModel(FullSequential):
             if activation_class is not None:
                 activation_class.initialise_(linear_layer.weight)
 
-            if norm_class is not None:
-                self.all_layers.append(norm_class())
-            if precision_class is not None:
-                self.all_layers.append(precision_class(precision=precision))
-            if noise_class is not None:
-                self.all_layers.append(noise_class(leakage=leakage, precision=precision))
-
+            self.add_doa_layers()
             self.all_layers.append(linear_layer)
+            self.add_aod_layers()
 
-            if noise_class is not None:
-                self.all_layers.append(noise_class(leakage=leakage, precision=precision))
-            if norm_class is not None:
-                self.all_layers.append(norm_class())
-            if precision_class is not None:
-                self.all_layers.append(precision_class(precision=precision))
-
-            if activation_class is not None:
-                self.all_layers.append(activation_class())
-
-        self.conv2d_layers = pick_instanceof(self.all_layers, nn.Conv2d)
-        self.max_pool2d_layers = pick_instanceof(self.all_layers, nn.MaxPool2d)
-        self.linear_layers = pick_instanceof(self.all_layers, Linear)
-        self.activation_layers = pick_instanceof(self.all_layers, activation_class)
-        self.norm_layers = pick_instanceof(self.all_layers, norm_class)
-        self.precision_layers = pick_instanceof(self.all_layers, precision_class)
-        self.noise_layers = pick_instanceof(self.all_layers, noise_class)
+        self.conv2d_layers = pick_instanceof_module(self.all_layers, nn.Conv2d)
+        self.max_pool2d_layers = pick_instanceof_module(self.all_layers, nn.MaxPool2d)
+        self.linear_layers = pick_instanceof_module(self.all_layers, Linear)
+        self.activation_layers = pick_instanceof_module(self.all_layers, activation_class)
+        self.norm_layers = pick_instanceof_module(self.all_layers, norm_class)
+        self.precision_layers = pick_instanceof_module(self.all_layers, precision_class)
+        self.noise_layers = pick_instanceof_module(self.all_layers, noise_class)
 
         if approach == "default":
             pass
@@ -129,6 +199,25 @@ class ConvLinearModel(FullSequential):
             [i.use(BackwardUsingForward) for i in self.norm_layers]
 
         self.add_sequence(*self.all_layers)
+
+    def add_doa_layers(self):
+        if self.norm_class is not None:
+            self.all_layers.append(self.norm_class())
+        if self.precision_class is not None:
+            self.all_layers.append(self.precision_class(precision=self.precision))
+        if self.noise_class is not None:
+            self.all_layers.append(self.noise_class(leakage=self.leakage, precision=self.precision))
+
+    def add_aod_layers(self):
+        if self.noise_class is not None:
+            self.all_layers.append(self.noise_class(leakage=self.leakage, precision=self.precision))
+        if self.norm_class is not None:
+            self.all_layers.append(self.norm_class())
+        if self.precision_class is not None:
+            self.all_layers.append(self.precision_class(precision=self.precision))
+
+        if self.activation_class is not None:
+            self.all_layers.append(self.activation_class())
 
     def set_optimizer(self, optimizer_cls, super_optimizer_cls=None, param_sanitizer=None, **optimiser_parameters):
         if super_optimizer_cls is not None:
@@ -208,7 +297,7 @@ class WeightModel(Sequential):
         }
 
 
-def run_main_model(parameters: RunParameters):
+def run_analog_vnn1_model(parameters: RunParametersAnalogVNN1):
     torch.backends.cudnn.benchmark = True
 
     if parameters.device is not None:
@@ -309,13 +398,20 @@ def run_main_model(parameters: RunParameters):
 
     print(f"Starting Training...")
     for epoch in range(parameters.epochs):
+        if parameters.test_logs:
+            break
+
         train_loss, train_accuracy = nn_model.train_on(
             train_loader,
             epoch=epoch,
             test_run=parameters.test_run,
             parameters_to_apply_fn=[PseudoOptimizer.parameter_type.update_params]
         )
-        test_loss, test_accuracy = nn_model.test_on(test_loader, epoch=epoch, test_run=parameters.test_run)
+        test_loss, test_accuracy = nn_model.test_on(
+            test_loader,
+            epoch=epoch,
+            test_run=parameters.test_run
+        )
 
         loss_accuracy["train_loss"].append(train_loss)
         loss_accuracy["train_accuracy"].append(train_accuracy)

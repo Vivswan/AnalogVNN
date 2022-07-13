@@ -10,5 +10,8 @@ tabulate
 pillow>=8.4.0
 graphviz~=2.38
 python-graphviz
-scipy~=1.8.0
+scipy
 seaborn~=0.11.2
+
+conda install python-graphviz graphviz numpy matplotlib tabulate pillow scipy seaborn
+pip install tensorflow tensorboard torchviz
