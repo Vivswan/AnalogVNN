@@ -216,17 +216,19 @@ def main(std=0.1, precision=3):
     uniform_avg = CalculateRespondsAverages()
     normal_avg = CalculateRespondsAverages()
     poisson_avg = CalculateRespondsAverages()
+    poisson_ones_avg = CalculateRespondsAverages()
     laplace_avg = CalculateRespondsAverages()
     normal_poisson_avg = CalculateRespondsAverages()
 
     un = UniformNoise(leakage=std, precision=precision)
     gn = GaussianNoise(leakage=std, precision=precision)
-    pn = PoissonNoise(scale=1 / std, precision=precision)
+    pn = PoissonNoise(max_leakage=0.1, precision=precision)
     ln = LaplacianNoise(scale=1 / std, precision=precision)
     for i in range(1000):
         uniform_noise = calculate(num_line, precision, un)
         normal_noise = calculate(num_line, precision, gn)
         poisson_noise = calculate(num_line, precision, pn)
+        poisson_noise_ones = calculate(torch.ones_like(num_line), precision, pn)
         laplace_noise = calculate(num_line, precision, ln)
         normal_poisson_noise = calculate(
             num_line, precision,
@@ -236,6 +238,7 @@ def main(std=0.1, precision=3):
         uniform_avg.append_response(uniform_noise)
         normal_avg.append_response(normal_noise)
         poisson_avg.append_response(poisson_noise)
+        poisson_ones_avg.append_response(poisson_noise_ones)
         laplace_avg.append_response(laplace_noise)
         normal_poisson_avg.append_response(normal_poisson_noise)
 
@@ -258,16 +261,27 @@ def main(std=0.1, precision=3):
             plt.subplot(*sp, 9)
             plt.scatter(plot_x, normal_poisson_noise.rp_noise_rp.tolist(), color="#ff00000f", s=2)
 
+    plt.subplot(*sp, 7)
+    plt.gca().set_xlim(xlim)
+    plt.gca().set_ylim(ylim)
+    plt.subplot(*sp, 8)
+    plt.gca().set_xlim(xlim)
+    plt.gca().set_ylim(ylim)
+    plt.subplot(*sp, 9)
+    plt.gca().set_xlim(xlim)
+    plt.gca().set_ylim(ylim)
+
     print(f"std: {std:0.4f}, precision: {precision}")
     print(f"uniform_expected: {un.leakage:0.4f}, {uniform_avg}")
     print(f"normal_expected: {gn.leakage:0.4f}, {normal_avg}")
     print(f"poisson_expected: {pn.leakage:0.4f}, {poisson_avg}")
+    print(f"poisson_ones_expected: {pn.max_leakage:0.4f}, {poisson_ones_avg}")
     print(f"laplace_expected: {ln.leakage:0.4f}, {laplace_avg}")
     print(f"normal_poisson_avg: {normal_poisson_avg}")
     #
     fig.tight_layout()
     plt.show()
-    fig.savefig('C:/X/image.svg', dpi=fig.dpi)
+    fig.savefig('C:/_data/image.svg', dpi=fig.dpi)
     print()
 
 

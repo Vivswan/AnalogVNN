@@ -2,7 +2,7 @@ import argparse
 from multiprocessing.pool import ThreadPool
 from pathlib import Path
 
-from parallel_main import run_command, prepare_data_folder
+from parallel_analogvnn1 import run_command, prepare_data_folder
 
 
 def run_failed_combinations():

@@ -86,22 +86,29 @@ def list_failed(runtime_dir):
 
     if len(failed_list) > 0:
         for filename, command in failed_list:
-            print(f"Failed {runtime_dir} :: {filename} :: {command}")
+            # print(f"Failed {runtime_dir} :: {filename} :: {command}")
+            print(f"!!! {runtime_dir}")
 
 
 def data_from_models(models_dir: Path, destination: Path = None):
     if destination is None:
         destination = models_dir
 
-    if not destination.is_dir():
-        destination.mkdir()
+    # if not destination.is_dir():
+    #     destination.mkdir()
+    if not models_dir.exists():
+        print(f"!!! {models_dir}")
+        return
 
-    for run in os.listdir(models_dir):
+    for run in next(os.walk(models_dir))[1]:
         data = {
             "str_weight_model": None,
             "str_nn_model": None,
+
+            "parameters_json": None,
             "parameter_log": None,
             "loss_accuracy": None,
+
             "hyperparameters_weight_model": None,
             "hyperparameters_nn_model": None,
         }
@@ -110,11 +117,19 @@ def data_from_models(models_dir: Path, destination: Path = None):
 
         looking_for = list(data.keys())
         for i in run_files:
+            if len(looking_for) == 0:
+                break
+
             for j in looking_for:
                 if j in str(i):
                     data[j] = i
                     looking_for.remove(j)
                     break
+
+        if len(looking_for) > 0:
+            print(f"Not Found {looking_for}")
+            print(f"!!! {models_dir}")
+            continue
 
         for key, value in data.items():
             data[key] = torch.load(run_dir.joinpath(value))
@@ -126,23 +141,36 @@ def data_from_models(models_dir: Path, destination: Path = None):
             file.write(json.dumps(data))
 
 
-def parse_data(directory_path, destination_path=None):
-    directory_path = Path(directory_path)
-    if destination_path is not None:
-        destination_path = Path(destination_path)
+def parse_data(input_path, output_path=None, multiple=False):
+    input_path = Path(input_path)
+    output_path = output_path or input_path.joinpath("json")
+    output_path = Path(output_path)
 
-    if not directory_path.is_dir():
-        raise Exception(f'"{directory_path}" is not a directory or does not exists.')
+    if not input_path.is_dir():
+        raise Exception(f'"{input_path}" is not a directory or does not exists.')
 
-    list_failed(directory_path.joinpath("runtime"))
-    # data_from_tensorboard(directory_path.joinpath("tensorboard"), directory_path.joinpath("json"))
-    data_from_models(directory_path.joinpath("models"), destination_path or directory_path.joinpath("json"))
+    if multiple:
+        all_input_path = [input_path.joinpath(x) for x in (next(os.walk(input_path))[1])]
+    else:
+        all_input_path = [input_path]
+
+    for dir_path in all_input_path:
+        print(f"Processing {dir_path}")
+
+        if not dir_path.joinpath("runtime").exists():
+            dir_path = dir_path.joinpath("_results")
+
+        # list_failed(dir_path.joinpath("runtime"))
+        # data_from_tensorboard(dir_path.joinpath("tensorboard"), output_path)
+        data_from_models(dir_path.joinpath("models"), output_path)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", type=str, required=True)
     parser.add_argument("--output", type=str, default=None)
+    parser.add_argument("--multiple", action='store_true')
+    parser.set_defaults(multiple=False)
     all_arguments = parser.parse_known_args()
     kwargs = vars(all_arguments[0])
-    parse_data(kwargs["source"], kwargs['output'])
+    parse_data(kwargs["source"], kwargs['output'], kwargs['multiple'])

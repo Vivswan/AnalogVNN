@@ -1,22 +1,23 @@
 #!/bin/bash
-#SBATCH --job-name=analog_vnn_run_combination_$$$
+#SBATCH --job-name=run_@@@RunScript@@@_@@@run_combination@@@
 #SBATCH --output=slurm_%x_%A.out
 #SBATCH --mail-user=vis77@pitt.edu
 #SBATCH --mail-type=ALL
 #SBATCH --nodes=1
 #SBATCH --tasks-per-node=1
-#SBATCH --cpus-per-task=32
+#SBATCH --cpus-per-task=@@@cpu@@@
 #SBATCH --cluster=gpu
-#SBATCH --partition=power9
+#SBATCH --partition=@@@partition@@@
 #SBATCH --gres=gpu:1
-#SBATCH --time=2-00:00:00
+#SBATCH --time=@@@time@@@
 #SBATCH --chdir="/ihome/nyoungblood/vis77"
+#SBATCH --requeue
+@@@extra@@@
 
 source ~/.bashrc
 
-VideoMemoryRequired=1800
 RunDirectoryLocation=$HOME/Vivswan-AnalogVNN
-RunScript=parallel_main.py
+RunScript=@@@RunScript@@@.py
 CondaEnv="${HOME}"/storage/envs/AnalogVNN_"${CPU_ARCHITECTURE}"_3.7
 
 StorageDirectory="${HOME}/storage/"
@@ -24,24 +25,6 @@ StorageDirectory="${HOME}/storage/"
 
 cd ~ || exit
 conda activate $CondaEnv
-
-if [[ $SLURM_JOB_PARTITION = "a100" ]]; then
-  (( NumberProcesses=40536/$VideoMemoryRequired ))
-elif [[ $SLURM_JOB_PARTITION = "gtx1080" ]]; then
-  (( NumberProcesses=8119/$VideoMemoryRequired ))
-elif [[ $SLURM_JOB_PARTITION = "power9" ]]; then
-  (( NumberProcesses=32510/$VideoMemoryRequired ))
-elif [[ $SLURM_JOB_PARTITION = "titanx" ]]; then
-  (( NumberProcesses=12212/$VideoMemoryRequired ))
-elif [[ $SLURM_JOB_PARTITION = "v100" ]]; then
-  (( NumberProcesses=32510/$VideoMemoryRequired ))
-elif [[ $SLURM_JOB_PARTITION = "k40" ]]; then
-  (( NumberProcesses=6144 ))
-elif [[ $SLURM_JOB_PARTITION = "scavenger" ]]; then
-  (( NumberProcesses=32510/$VideoMemoryRequired ))
-else
-  NumberProcesses=1
-fi
 
 echo ""
 echo "####################################### nvidia-smi #######################################"
@@ -88,7 +71,7 @@ run_on_exit(){
   rm -rf "${SlurmScratchDirectory}/_results/datasets/"
   cd "${SLURM_SCRATCH}" || exit
   tar -czf "${SlurmScratchName}.tar.gz" "${SlurmScratchName}"
-  mv "slurm_${SLURM_JOB_NAME}_${SLURM_JOBID}.tar.gz" "${StorageDirectory}"
+  mv       "${SlurmScratchName}.tar.gz" "${StorageDirectory}"
 
   echo ""
   echo "####################################### Billing #######################################"
@@ -112,12 +95,12 @@ echo ""
 echo "####################################### Variables #######################################"
 echo ""
 echo "CPU_ARCHITECTURE = ${CPU_ARCHITECTURE}"
-echo "VideoMemoryRequired = ${VideoMemoryRequired}"
-echo "NumberProcesses = ${NumberProcesses}"
+echo "SlurmScratchName = ${SlurmScratchName}"
 echo "StorageDirectory = ${StorageDirectory}"
 echo "SlurmScratchDirectory = ${SlurmScratchDirectory}"
 echo "RunDirectoryLocation = ${RunDirectoryLocation}"
 echo "RunScript = ${RunScript}"
+echo "Array ID = ${SLURM_ARRAY_TASK_ID}"
 echo "CondaEnv = ${CondaEnv}"
 echo "which conda = $( which conda )"
 echo "which python = $( which python )"
@@ -133,10 +116,11 @@ echo "####################################### Main Program: Starting ###########
 echo ""
 
 # time \
-python3 $RunScript \
---num_process $NumberProcesses \
+srun python3 $RunScript \
+--memory_required @@@VideoMemoryRequired@@@ \
 --data_folder ./_results \
---run_combination $$$ \
+--run_combination @@@run_combination@@@ \
+--cuda_memory @@@cuda_memory@@@ \
 --tensorboard \
 --save_data \
 #--single_run
