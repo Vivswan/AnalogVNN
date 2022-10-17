@@ -1,5 +1,5 @@
 Welcome to AnalogVNN's documentation!
-===================================
+=====================================
 
 **AnalogVNN** is a simulation framework built on PyTorch which can simulate the effects of
 analog components like optoelectronic noise, limited precision, and signal normalization
