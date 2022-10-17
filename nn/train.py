@@ -34,16 +34,16 @@ def train(
 
         for i in apply_to_parameters_fn:
             model.apply_to_parameters(i)
-        # for i in parameters_to_apply_fn:
-        #     i(model.parameters())
+        for i in parameters_to_apply_fn:
+            i(model.parameters())
 
         model.backward()
         model.optimizer.step()
 
         for i in apply_to_parameters_fn:
             model.apply_to_parameters(i)
-        # for i in parameters_to_apply_fn:
-        #     i(model.parameters())
+        for i in parameters_to_apply_fn:
+            i(model.parameters())
 
         # print statistics
         total_loss += loss.item() * len(data)
