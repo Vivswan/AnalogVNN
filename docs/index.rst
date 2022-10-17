@@ -9,3 +9,20 @@ digital neural network models to their analog counterparts with just a few lines
 code, taking full advantage of the open-source optimization, deep learning, and GPU
 acceleration libraries available through PyTorch.
 
+Table of contents
+_________________
+
+.. toctree::
+   :maxdepth: 2
+
+   install
+   tutorial
+
+.. only:: html
+
+   Indices and tables
+   ==================
+
+   * :ref:`genindex`
+   * :ref:`modindex`
+   * :ref:`search`
