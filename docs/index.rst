@@ -13,7 +13,7 @@ Table of contents
 _________________
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    install
    tutorial
