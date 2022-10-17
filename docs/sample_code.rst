@@ -6,21 +6,16 @@ Sample code for 3 layered linear photonic analog neural network with 4-bit preci
 
 .. code-block:: python
 
-    from typing import Type, List
-
     import torch.backends.cudnn
     import torchvision
-    from torch import optim
-    from torch.nn import Flatten
+    from torch import optim, nn
 
     from dataloaders.load_vision_dataset import load_vision_dataset
-    from nn.activations.Activation import Activation
     from nn.activations.Gaussian import GeLU
     from nn.layers.Linear import Linear
     from nn.layers.functionals.BackwardWrapper import BackwardWrapper
-    from nn.layers.functionals.Normalize import *
+    from nn.layers.functionals.Normalize import Clamp
     from nn.layers.functionals.ReducePrecision import ReducePrecision
-    from nn.layers.functionals.StochasticReducePrecision import StochasticReducePrecision
     from nn.layers.noise.GaussianNoise import GaussianNoise
     from nn.modules.FullSequential import FullSequential
     from nn.modules.Sequential import Sequential
@@ -35,15 +30,7 @@ Sample code for 3 layered linear photonic analog neural network with 4-bit preci
 
 
     class LinearModel(FullSequential):
-        def __init__(
-                self,
-                activation_class: Type[Activation],
-                norm_class: Type[Normalize] = None,
-                precision_class: Type[Union[ReducePrecision, StochasticReducePrecision]] = None,
-                precision: Union[int, None] = None,
-                noise_class: Type[Union[GaussianNoise]] = None,
-                leakage: Union[float, None] = None,
-        ):
+        def __init__(self, activation_class, norm_class, precision_class, precision, noise_class, leakage):
             super(LinearModel, self).__init__()
 
             self.activation_class = activation_class
@@ -53,8 +40,8 @@ Sample code for 3 layered linear photonic analog neural network with 4-bit preci
             self.noise_class = noise_class
             self.leakage = leakage
 
-            self.all_layers: List[nn.Module] = []
-            self.all_layers.append(BackwardWrapper(Flatten(start_dim=1)))
+            self.all_layers = []
+            self.all_layers.append(BackwardWrapper(nn.Flatten(start_dim=1)))
             self.add_layer(Linear(in_features=28 * 28, out_features=256))
             self.add_layer(Linear(in_features=256, out_features=128))
             self.add_layer(Linear(in_features=128, out_features=10))
@@ -62,73 +49,28 @@ Sample code for 3 layered linear photonic analog neural network with 4-bit preci
             self.add_sequence(*self.all_layers)
 
         def add_layer(self, layer):
-            self.add_doa_layers()
+            self.all_layers.append(self.norm_class())
+            self.all_layers.append(self.precision_class(precision=self.precision))
+            self.all_layers.append(self.noise_class(leakage=self.leakage, precision=self.precision))
             self.all_layers.append(layer)
-            self.add_aod_layers()
+            self.all_layers.append(self.noise_class(leakage=self.leakage, precision=self.precision))
+            self.all_layers.append(self.norm_class())
+            self.all_layers.append(self.precision_class(precision=self.precision))
+            self.all_layers.append(self.activation_class())
             self.activation_class.initialise_(layer.weight)
-
-        def add_doa_layers(self):
-            if self.norm_class is not None:
-                self.all_layers.append(self.norm_class())
-            if self.precision_class is not None:
-                self.all_layers.append(self.precision_class(precision=self.precision))
-            if self.noise_class is not None:
-                self.all_layers.append(self.noise_class(leakage=self.leakage, precision=self.precision))
-
-        def add_aod_layers(self):
-            if self.noise_class is not None:
-                self.all_layers.append(self.noise_class(leakage=self.leakage, precision=self.precision))
-            if self.norm_class is not None:
-                self.all_layers.append(self.norm_class())
-            if self.precision_class is not None:
-                self.all_layers.append(self.precision_class(precision=self.precision))
-
-            if self.activation_class is not None:
-                self.all_layers.append(self.activation_class())
-
-        def set_optimizer(self, optimizer_cls, super_optimizer_cls=None, param_sanitizer=None, **optimiser_parameters):
-            if super_optimizer_cls is not None:
-                self.optimizer = super_optimizer_cls(
-                    optimizer_cls=optimizer_cls,
-                    params=self.parameters() if param_sanitizer is None else param_sanitizer(self.parameters()),
-                    **optimiser_parameters
-                )
-            else:
-                self.optimizer = optimizer_cls(
-                    params=self.parameters() if param_sanitizer is None else param_sanitizer(self.parameters()),
-                    **optimiser_parameters
-                )
-            return self
 
 
     class WeightModel(Sequential):
-        def __init__(
-                self,
-                norm_class: Type[Normalize] = None,
-                precision_class: Type[Union[ReducePrecision, StochasticReducePrecision]] = None,
-                precision: Union[int, None] = None,
-                noise_class: Type[Union[GaussianNoise]] = None,
-                leakage: Union[float, None] = None,
-        ):
+        def __init__(self, norm_class, precision_class, precision, noise_class, leakage):
             super(WeightModel, self).__init__()
-            self.norm_class = norm_class
-            self.precision_class = precision_class
-            self.precision = precision
-            self.noise_class = noise_class
-            self.leakage = leakage
-
             self.all_layers = []
 
-            if norm_class is not None:
-                self.all_layers.append(norm_class())
-            if precision_class is not None:
-                self.all_layers.append(precision_class(precision=precision))
-            if noise_class is not None:
-                self.all_layers.append(noise_class(leakage=leakage, precision=precision))
+            self.all_layers.append(norm_class())
+            self.all_layers.append(precision_class(precision=precision))
+            self.all_layers.append(noise_class(leakage=leakage, precision=precision))
 
             self.eval()
-            if len(self.all_layers) > 0:
-                self.add_sequence(*self.all_layers)
+            self.add_sequence(*self.all_layers)
 
 
     def run_linear3_model():
@@ -150,14 +92,14 @@ Sample code for 3 layered linear photonic analog neural network with 4-bit preci
             activation_class=GeLU,
             norm_class=Clamp,
             precision_class=ReducePrecision,
-            precision=2**4,
+            precision=2 ** 4,
             noise_class=GaussianNoise,
             leakage=0.2
         )
         weight_model = WeightModel(
             norm_class=Clamp,
             precision_class=ReducePrecision,
-            precision=2**4,
+            precision=2 ** 4,
             noise_class=GaussianNoise,
             leakage=0.2
         )
@@ -170,9 +112,9 @@ Sample code for 3 layered linear photonic analog neural network with 4-bit preci
         weight_model.to(device=device)
 
         PseudoOptimizer.parameter_type.convert_model(nn_model, transform=weight_model)
-        nn_model.set_optimizer(
-            super_optimizer_cls=PseudoOptimizer,
+        nn_model.optimizer = PseudoOptimizer(
             optimizer_cls=optim.Adam,
+            params=nn_model.parameters(),
         )
 
         print(f"Starting Training...")
