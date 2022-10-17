@@ -9,11 +9,16 @@ digital neural network models to their analog counterparts with just a few lines
 code, taking full advantage of the open-source optimization, deep learning, and GPU
 acceleration libraries available through PyTorch.
 
+Citing AnalogVNN
+_________________
+We would appreciate if you cite the following paper in your publications for which you used AnalogVNN:
+coming soon...
+
 Table of contents
 _________________
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    install
    tutorial
