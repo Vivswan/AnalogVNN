@@ -1,9 +1,8 @@
 import torch
-from torch import nn
+from torch import nn, Tensor
 
 from nn.optimizer.BaseOptimizer import set_grad_zero
 from nn.parameters.Parameter import Parameter
-from nn.parameters.Tensor import Tensor
 from nn.utils.common_types import TENSOR_CALLABLE
 
 

@@ -23,7 +23,8 @@ _________________
    install
    sample_code
    tutorial
-   features
+   inter_workings
+   extra_classes
 
 .. only:: html
 
