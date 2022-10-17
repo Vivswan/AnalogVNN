@@ -162,11 +162,13 @@ Sample code for 3 layered linear photonic analog neural network:
             leakage=0.2
         )
 
-        nn_model.compile(device=device, layer_data=True)
         nn_model.loss_fn = nn.CrossEntropyLoss()
         nn_model.accuracy_fn = cross_entropy_loss_accuracy
+
+        nn_model.compile(device=device)
         nn_model.to(device=device)
         weight_model.to(device=device)
+
         PseudoOptimizer.parameter_type.convert_model(nn_model, transform=weight_model)
         nn_model.set_optimizer(
             super_optimizer_cls=PseudoOptimizer,
