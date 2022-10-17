@@ -21,7 +21,9 @@ _________________
    :maxdepth: 2
 
    install
+   sample_code
    tutorial
+   features
 
 .. only:: html
 
