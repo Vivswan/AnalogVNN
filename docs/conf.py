@@ -9,7 +9,7 @@ now = datetime.datetime.now()
 
 templates_path = ['_templates']
 source_suffix = '.rst'
-master_doc = 'index.rst'
+master_doc = 'index'
 project = 'AnalogVNN'
 copyright = str(now.year) + ', Vivswan Shah (vivswanshah@pitt.edu)'
 author = 'Vivswan Shah'
