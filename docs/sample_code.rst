@@ -1,8 +1,8 @@
 *********************************************
-3 Layer Linear Photonic Analog Neural Network
+Linear3 Photonic Analog Neural Network
 *********************************************
 
-Sample code for 3 layer linear photonic analog neural network:
+Sample code for 3 layered linear photonic analog neural network:
 
 .. code-block:: python
 
