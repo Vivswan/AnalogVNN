@@ -1,19 +1,18 @@
-pytorch
-torchvision>=0.11.3
-tensorboard>=2.8.0
-tensorflow>=2.7.0
-torchviz>=0.0.2
-dataclasses>=0.6
-numpy~=1.21.5
-matplotlib>=3.4.2
-tabulate
-pillow>=8.4.0
-graphviz~=2.38
-python-graphviz
-scipy~=1.8.0
-seaborn~=0.11.2
-natsort~=7.1.1
-
+# pytorch
+# torchvision
+# tensorboard
+# tensorflow
+# torchviz
+# dataclasses
+# numpy
+# matplotlib
+# tabulate
+# pillow
+# graphviz
+# python-graphviz
+# scipy
+# seaborn
+# natsort
 # conda install python-graphviz graphviz numpy matplotlib tabulate pillow scipy seaborn natsort
 # pip install tensorflow tensorboard torchviz dataclasses
 
