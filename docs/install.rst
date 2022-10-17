@@ -1,5 +1,5 @@
 ***************************************************************
-Installing a Python GDSII development environment under Windows
+Installing AnalogVNN
 ***************************************************************
 
 Download and install Git
