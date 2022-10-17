@@ -4,8 +4,7 @@
 
 Sample code for 3 layer linear photonic analog neural network:
 
-.. plot::
-    :include-source:
+.. code-block:: python
 
     from typing import Type, List
 
