@@ -105,6 +105,8 @@ class WeightModel(Sequential):
 
 
 def run_linear3_model():
+    """ The main function to train photonics image classifier with 3 linear/dense layers for MNIST dataset
+    """
     torch.backends.cudnn.benchmark = True
     device, is_cuda = is_cpu_cuda.is_using_cuda()
     print(f"Device: {device}")
