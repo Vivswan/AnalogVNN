@@ -5,6 +5,7 @@ Linear3 Photonic Analog Neural Network
 Sample code for 3 layered linear photonic analog neural network with 4-bit precision, 0.2 leakage and clamp normlization:
 
 .. code-block:: python
+
     import torch.backends.cudnn
     import torchvision
     from torch import optim, nn
