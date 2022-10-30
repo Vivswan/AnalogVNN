@@ -5,7 +5,6 @@ Linear3 Photonic Analog Neural Network
 Sample code for 3 layered linear photonic analog neural network with 4-bit precision, 0.2 leakage and clamp normlization:
 
 .. code-block:: python
-
     import torch.backends.cudnn
     import torchvision
     from torch import optim, nn
@@ -23,7 +22,16 @@ Sample code for 3 layered linear photonic analog neural network with 4-bit preci
     from nn.utils.is_cpu_cuda import is_cpu_cuda
 
 
-    def cross_entropy_loss_accuracy(output, target):
+    def cross_entropy_accuracy(output, target) -> float:
+        """ Cross Entropy accuracy function
+
+        Args:
+            output (torch.Tensor): output of the model from passing inputs
+            target (torch.Tensor): correct labels for the inputs
+
+        Returns:
+            float: accuracy from 0 to 1
+        """
         _, preds = torch.max(output.data, 1)
         correct = (preds == target).sum().item()
         return correct / len(output)
@@ -31,6 +39,19 @@ Sample code for 3 layered linear photonic analog neural network with 4-bit preci
 
     class LinearModel(FullSequential):
         def __init__(self, activation_class, norm_class, precision_class, precision, noise_class, leakage):
+            """ Linear Model with 3 dense layers
+
+            Args:
+                activation_class: Activation Class
+                norm_class: Normalization Class
+                precision_class: Precision Class (ReducePrecision or StochasticReducePrecision)
+                precision (int): precision of the weights and biases
+                noise_class: Noise Class
+                leakage (float): leakage is the probability that a reduced precision digital value (e.g., “1011”) will
+                acquire a different digital value (e.g., “1010” or “1100”) after passing through the noise layer
+                (i.e., the probability that the digital values transmitted and detected are different after passing through
+                the analog channel).
+            """
             super(LinearModel, self).__init__()
 
             self.activation_class = activation_class
@@ -49,6 +70,11 @@ Sample code for 3 layered linear photonic analog neural network with 4-bit preci
             self.add_sequence(*self.all_layers)
 
         def add_layer(self, layer):
+            """ To add the analog layer
+
+            Args:
+                layer (BaseLayer): digital layer module
+            """
             self.all_layers.append(self.norm_class())
             self.all_layers.append(self.precision_class(precision=self.precision))
             self.all_layers.append(self.noise_class(leakage=self.leakage, precision=self.precision))
@@ -62,6 +88,18 @@ Sample code for 3 layered linear photonic analog neural network with 4-bit preci
 
     class WeightModel(Sequential):
         def __init__(self, norm_class, precision_class, precision, noise_class, leakage):
+            """
+
+            Args:
+                norm_class: Normalization Class
+                precision_class: Precision Class (ReducePrecision or StochasticReducePrecision)
+                precision (int): precision of the weights and biases
+                noise_class: Noise Class
+                leakage (float): leakage is the probability that a reduced precision digital value (e.g., “1011”) will
+                acquire a different digital value (e.g., “1010” or “1100”) after passing through the noise layer
+                (i.e., the probability that the digital values transmitted and detected are different after passing through
+                the analog channel).
+            """
             super(WeightModel, self).__init__()
             self.all_layers = []
 
@@ -79,6 +117,7 @@ Sample code for 3 layered linear photonic analog neural network with 4-bit preci
         print(f"Device: {device}")
         print()
 
+        # Loading Data
         print(f"Loading Data...")
         train_loader, test_loader, input_shape, classes = load_vision_dataset(
             dataset=torchvision.datasets.MNIST,
@@ -87,6 +126,7 @@ Sample code for 3 layered linear photonic analog neural network with 4-bit preci
             is_cuda=is_cuda
         )
 
+        # Creating Models
         print(f"Creating Models...")
         nn_model = LinearModel(
             activation_class=GeLU,
@@ -104,8 +144,9 @@ Sample code for 3 layered linear photonic analog neural network with 4-bit preci
             leakage=0.2
         )
 
+        # Setting Model Parameters
         nn_model.loss_fn = nn.CrossEntropyLoss()
-        nn_model.accuracy_fn = cross_entropy_loss_accuracy
+        nn_model.accuracy_fn = cross_entropy_accuracy
 
         nn_model.compile(device=device)
         nn_model.to(device=device)
@@ -117,6 +158,7 @@ Sample code for 3 layered linear photonic analog neural network with 4-bit preci
             params=nn_model.parameters(),
         )
 
+        # Training
         print(f"Starting Training...")
         for epoch in range(10):
             train_loss, train_accuracy = nn_model.train_on(train_loader, epoch=epoch)
