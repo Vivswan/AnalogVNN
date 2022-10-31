@@ -36,15 +36,16 @@ Before doing any real work you will have to tell PyCharm which Python it should 
 on the gear in the upper right and then ``Add``. There you can add the Python Interpreter by selecting ``System Interpreter``.
 The right path should be already in the form.
 
-PyCharm will then parse all the installed modules of that Python installation.
-
-Installing the gdshelpers and optional dependencies
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Updating AnalogVNN
-^^^^^^^^^^^^^^^^^^^
+Install the required dependencies:
+    - PyTorch
+    - Tensorflow
+    - dataclasses
+    - graphviz
+    - python-graphviz
+    - scipy
+    - numpy
 
 Finish
 """"""
 
-That's it, you are all set to simulate analog neural networks. Head over to the tutorial.
+That's it, you are all set to simulate analog neural networks. Head over to the :doc:`tutorial` and look over the :doc:`sample code`.
