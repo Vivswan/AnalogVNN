@@ -48,4 +48,4 @@ Install the required dependencies:
 Finish
 """"""
 
-That's it, you are all set to simulate analog neural networks. Head over to the :doc:`tutorial` and look over the :doc:`sample code`.
+That's it, you are all set to simulate analog neural networks. Head over to the :doc:`tutorial` and look over the :doc:`sample_code`.
