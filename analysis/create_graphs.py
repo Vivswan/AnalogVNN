@@ -9,7 +9,6 @@ import matplotlib
 import matplotlib.colors
 import numpy as np
 import seaborn
-import torchvision
 from matplotlib import pyplot as plt
 from seaborn.palettes import _color_to_rgb, _ColorPalette
 
@@ -426,8 +425,8 @@ def create_line_figure_max(data_path, x_axis, y_axis, subsection=None, colorbar=
 
     plot_data = pick_max_from_plot_data(plot_data, max_keys, "y")
 
-    color_map = main_color_palette(n_colors=10)
     if colorbar is not None:
+        color_map = main_color_palette(n_colors=256)
         color_map = matplotlib.colors.LinearSegmentedColormap.from_list("hsl", color_map)
         # color_map = seaborn.color_palette("cubehelix", len(set(plot_data["hue"])), as_cmap=True)
         # color_map = seaborn.dark_palette("#69d", n_colors=len(set(plot_data["hue"])), reverse=True, as_cmap=True)
@@ -435,10 +434,11 @@ def create_line_figure_max(data_path, x_axis, y_axis, subsection=None, colorbar=
         scalar_map = plt.cm.ScalarMappable(cmap=color_map, norm=norm)
         cbar = plt.colorbar(scalar_map)
         cbar.ax.set_ylabel(to_title_case(colorbar))
+        g = seaborn.lineplot(**plot_data, palette=color_map, linewidth=1, errorbar=('ci', 1), hue_norm=norm)
     else:
         color_map = main_color_palette(n_colors=len(plot_data["hue_order"]))
+        g = seaborn.lineplot(**plot_data, palette=color_map, linewidth=1, errorbar=('ci', 1))
 
-    g = seaborn.lineplot(**plot_data, palette=color_map, linewidth=1, ci=1)
     if x_lim is not None:
         g.set_xlim(*x_lim)
     # g.set(yscale="log")
@@ -734,6 +734,15 @@ if __name__ == '__main__':
     # create_analogvnn1_figures()
     # create_parneet_figures()
 
+    create_line_figure_max(
+        f"{location}/runs_parneet_4_g_json.json",
+        "std_w",
+        "test_accuracy",
+        colorbar="std_y",
+        x_lim=[0, 0.08],
+        size_factor=(6.5 * 1 / 3, 1.61803398874),
+    )
+
     # data = get_combined_data(Path(f"{location}/analogvnn_1.2_json.json"))
     # filtered_data = get_filtered_data(data, {"parameter_log.dataset": torchvision.datasets.MNIST.__name__, "parameter_log.num_linear_layer":1, "parameter_log.num_conv_layer":0})
     # print("MNIST 0,1 max: ", np.max([get_key(data[key], "test_accuracy") for key, value in filtered_data.items()]))
@@ -774,10 +783,10 @@ if __name__ == '__main__':
     # filtered_data = get_filtered_data(data, {"parameter_log.dataset": torchvision.datasets.CIFAR10.__name__, "parameter_log.num_linear_layer":3, "parameter_log.num_conv_layer":3})
     # print("CIFAR10 3,3 max: ", np.max([get_key(data[key], "test_accuracy") for key, value in filtered_data.items()]))
 
-    data = get_combined_data(Path(f"{location}/analog_vnn_3.json"))
-    filtered_data = get_filtered_data(data, {"parameter_log.dataset": torchvision.datasets.MNIST.__name__,
-                                             "bit_precision_w": 4, "bit_precision_y": 2})
-    print("MNIST max: ", np.max([get_key(data[key], "test_accuracy") for key, value in filtered_data.items()]))
+    # data = get_combined_data(Path(f"{location}/analog_vnn_3.json"))
+    # filtered_data = get_filtered_data(data, {"parameter_log.dataset": torchvision.datasets.MNIST.__name__,
+    #                                          "bit_precision_w": 4, "bit_precision_y": 2})
+    # print("MNIST max: ", np.max([get_key(data[key], "test_accuracy") for key, value in filtered_data.items()]))
 
     # create_line_figure_max(
     #     f"{location}/runs_parneet_4_g_json.json",
