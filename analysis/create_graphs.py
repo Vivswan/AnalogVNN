@@ -430,7 +430,7 @@ def create_line_figure_max(data_path, x_axis, y_axis, subsection=None, colorbar=
         color_map = matplotlib.colors.LinearSegmentedColormap.from_list("hsl", color_map)
         # color_map = seaborn.color_palette("cubehelix", len(set(plot_data["hue"])), as_cmap=True)
         # color_map = seaborn.dark_palette("#69d", n_colors=len(set(plot_data["hue"])), reverse=True, as_cmap=True)
-        norm = matplotlib.colors.Normalize(vmin=min(plot_data["hue"]), vmax=max(plot_data["hue"]))
+        norm = matplotlib.colors.Normalize(vmin=min(plot_data["hue"]), vmax=0.2)
         scalar_map = plt.cm.ScalarMappable(cmap=color_map, norm=norm)
         cbar = plt.colorbar(scalar_map)
         cbar.ax.set_ylabel(to_title_case(colorbar))
@@ -740,7 +740,7 @@ if __name__ == '__main__':
         "test_accuracy",
         colorbar="std_y",
         x_lim=[0, 0.08],
-        size_factor=(6.5 * 1 / 3, 1.61803398874),
+        size_factor=(6.5 * 1.25 / 3, 1.61803398874),
     )
 
     # data = get_combined_data(Path(f"{location}/analogvnn_1.2_json.json"))
