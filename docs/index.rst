@@ -13,7 +13,7 @@ Citing AnalogVNN
 _________________
 We would appreciate if you cite the following paper in your publications for which you used AnalogVNN:
 
-Shah, Vivswan, and Nathan Youngblood. "AnalogVNN: A fully modular framework for modeling and optimizing photonic neural networks." *arXiv preprint arXiv:2210.10048 (2022)*.
+Vivswan Shah, and Nathan Youngblood. "AnalogVNN: A fully modular framework for modeling and optimizing photonic neural networks." *arXiv preprint arXiv:2210.10048 (2022)*.
 
 Table of contents
 _________________
