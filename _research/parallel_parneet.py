@@ -294,7 +294,7 @@ def run_combination_main():
 def create_slurm_scripts():
     shutil.rmtree("_crc_slurm")
     os.mkdir("_crc_slurm")
-    with open("_test/run_array_@@@.slurm", "r") as main_run_file:
+    with open("run_array_@@@.slurm", "r") as main_run_file:
         text = main_run_file.read()
 
     with open(f"_crc_slurm/_run.sh", "w") as run_file:

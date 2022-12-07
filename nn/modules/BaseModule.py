@@ -4,12 +4,12 @@ import torch
 from torch import nn, Tensor
 from torch.utils.data import DataLoader
 
-from nn.TensorboardModelLog import TensorboardModelLog
 from nn.backward_pass.BaseBackwardPass import BaseBackwardPass
 from nn.backward_pass.GraphBackwardPass import GraphBackwardPass
 from nn.fn.test import test
 from nn.fn.train import train
 from nn.modules.BaseLayer import BaseLayer
+from nn.utils.TensorboardModelLog import TensorboardModelLog
 from nn.utils.is_cpu_cuda import is_cpu_cuda
 
 

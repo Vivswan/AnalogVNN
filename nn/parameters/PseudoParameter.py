@@ -1,10 +1,8 @@
 import torch
-from torch import nn, optim
+from torch import nn, Tensor
 
-from nn.layers.noise.GaussianNoise import GaussianNoise
 from nn.optimizer.BaseOptimizer import set_grad_zero
 from nn.parameters.Parameter import Parameter
-from nn.parameters.Tensor import Tensor
 from nn.utils.common_types import TENSOR_CALLABLE
 
 
@@ -107,63 +105,3 @@ class PseudoParameter(Parameter):
         for i in parameters:
             if isinstance(i, PseudoParameter):
                 i.update()
-
-
-if __name__ == '__main__':
-    class Double(nn.Module):
-        def forward(self, x):
-            return x * 2
-
-
-    linear1 = nn.Linear(4, 1)
-    linear1.weight.data = torch.ones_like(linear1.weight.data, requires_grad=True)
-    linear1.bias.data = torch.ones_like(linear1.bias.data, requires_grad=True)
-    PseudoParameter.convert_model(linear1, transform=GaussianNoise(std=1))
-
-    adam = optim.Adam(PseudoParameter.sanitize_parameters(linear1), lr=1)
-    print()
-    print("linear1.parameters():          ", list(linear1.parameters()))
-    print("linear1.parameters():          ", list(linear1.named_parameters()))
-    print()
-
-    ans1: Tensor = linear1(torch.ones(1, 4))
-    # save_graph("ans1", ans1)
-    ans1.backward()
-    print("linear1.weight:                ", linear1.weight)
-    print("linear1.weight.grad:           ", linear1.weight.grad)
-    print("linear1.weight.original:       ", linear1.weight.original)
-    print("linear1.weight.original.grad:  ", linear1.weight.original.grad)
-    print("linear1.bias:                  ", linear1.bias)
-    print("linear1.bias.grad:             ", linear1.bias.grad)
-    print("linear1.bias.original:         ", linear1.bias.original)
-    print("linear1.bias.original.grad:    ", linear1.bias.original.grad)
-    print("ans:                           ", ans1)
-
-    print()
-    adam.step()
-    print("############ step ############")
-    print("linear1.weight:                ", linear1.weight)
-    print("linear1.weight.grad:           ", linear1.weight.grad)
-    print("linear1.weight.original:       ", linear1.weight.original)
-    print("linear1.weight.original.grad:  ", linear1.weight.original.grad)
-    print("linear1.bias:                  ", linear1.bias)
-    print("linear1.bias.grad:             ", linear1.bias.grad)
-    print("linear1.bias.original:         ", linear1.bias.original)
-    print("linear1.bias.original.grad:    ", linear1.bias.original.grad)
-
-    print()
-    adam.zero_grad()
-    print("########### zero_grad ###########")
-    print("linear1.weight:                ", linear1.weight)
-    print("linear1.weight.grad:           ", linear1.weight.grad)
-    print("linear1.weight.original:       ", linear1.weight.original)
-    print("linear1.weight.original.grad:  ", linear1.weight.original.grad)
-    print("linear1.bias:                  ", linear1.bias)
-    print("linear1.bias.grad:             ", linear1.bias.grad)
-    print("linear1.bias.original:         ", linear1.bias.original)
-    print("linear1.bias.original.grad:    ", linear1.bias.original.grad)
-
-    print()
-    print("linear1.parameters():          ", list(linear1.parameters()))
-    print("linear1.parameters():          ", list(linear1.named_parameters()))
-    print()

@@ -13,11 +13,11 @@ from torch.nn import Flatten
 from torch.optim import Optimizer
 from torchvision.datasets import VisionDataset
 
-from _test.crc._common import pick_instanceof_module
-from _test.dataloaders.load_vision_dataset import load_vision_dataset
-from _test.utils.data_dirs import data_dirs
-from _test.utils.path_functions import path_join
-from _test.utils.save_graph import save_graph
+from _research.crc._common import pick_instanceof_module
+from _research.dataloaders.load_vision_dataset import load_vision_dataset
+from _research.utils.data_dirs import data_dirs
+from _research.utils.path_functions import path_join
+from _research.utils.save_graph import save_graph
 from nn.backward_pass.BackwardFunction import BackwardUsingForward
 from nn.layers.activations.Activation import Activation
 from nn.layers.functionals.BackwardWrapper import BackwardWrapper

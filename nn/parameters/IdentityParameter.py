@@ -1,9 +1,9 @@
 import torch
 
-from nn.parameters.BaseParameter import BaseParameter
+from nn.parameters.Parameter import Parameter
 
 
-class IdentityParameter(BaseParameter):
+class IdentityParameter(Parameter):
     def __repr__(self):
         return f'IdentityParameter: ' + super(IdentityParameter, self).__repr__()
 
