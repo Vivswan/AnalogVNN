@@ -16,7 +16,7 @@ from matplotlib.pyplot import figure, close
 from torch import nn
 from torch.utils.data import DataLoader
 
-from dataloaders.load_vision_dataset import load_vision_dataset
+from _test.dataloaders.load_vision_dataset import load_vision_dataset
 from nn.layers.functionals.Normalize import Clamp, Clamp01
 from nn.layers.functionals.ReducePrecision import ReducePrecision
 from nn.layers.noise.GaussianNoise import GaussianNoise

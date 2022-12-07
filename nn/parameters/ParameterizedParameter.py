@@ -3,7 +3,7 @@ from typing import Type
 import torch
 from torch import nn, optim
 
-from nn.layers.Linear import Linear
+from nn.modules.Linear import Linear
 from nn.parameters.Parameter import Parameter
 from nn.parameters.Tensor import Tensor
 from nn.utils.common_types import TENSOR_CALLABLE

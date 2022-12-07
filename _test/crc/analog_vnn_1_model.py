@@ -13,24 +13,24 @@ from torch.nn import Flatten
 from torch.optim import Optimizer
 from torchvision.datasets import VisionDataset
 
-from crc._common import pick_instanceof_module
-from dataloaders.load_vision_dataset import load_vision_dataset
-from nn.activations.Activation import Activation
+from _test.crc._common import pick_instanceof_module
+from _test.dataloaders.load_vision_dataset import load_vision_dataset
+from _test.utils.data_dirs import data_dirs
+from _test.utils.path_functions import path_join
+from _test.utils.save_graph import save_graph
 from nn.backward_pass.BackwardFunction import BackwardUsingForward
-from nn.layers.Linear import Linear
+from nn.layers.activations.Activation import Activation
 from nn.layers.functionals.BackwardWrapper import BackwardWrapper
 from nn.layers.functionals.Normalize import *
 from nn.layers.functionals.ReducePrecision import ReducePrecision
 from nn.layers.functionals.StochasticReducePrecision import StochasticReducePrecision
 from nn.layers.noise.GaussianNoise import GaussianNoise
 from nn.modules.FullSequential import FullSequential
+from nn.modules.Linear import Linear
 from nn.modules.Sequential import Sequential
 from nn.optimizer.PseudoOptimizer import PseudoOptimizer
 from nn.utils.is_cpu_cuda import is_cpu_cuda
 from nn.utils.summary import summary
-from utils.data_dirs import data_dirs
-from utils.path_functions import path_join
-from utils.save_graph import save_graph
 
 LINEAR_LAYER_SIZES = {
     1: [],
@@ -52,8 +52,8 @@ class RunParametersAnalogVNN1:
     num_conv_layer: Union[None, int] = 0
     num_linear_layer: Union[None, int] = 1
     activation_class: Union[None, Type[Activation]] = None
-    norm_class: Union[None, Type[Normalize]] = None
     approach: Union[None, str] = "default"
+    norm_class: Union[None, Type[Normalize]] = None
     precision_class: Type[BaseLayer] = None
     precision: Union[None, int] = None
     noise_class: Type[BaseLayer] = None
@@ -87,8 +87,8 @@ class RunParametersAnalogVNN1:
             "num_conv_layer": self.num_conv_layer,
             "num_linear_layer": self.num_linear_layer,
             "activation_class": self.activation_class,
-            "norm_class": self.norm_class,
             "approach": self.approach,
+            "norm_class": self.norm_class,
             "precision_class": self.precision_class,
             "precision": self.precision,
             "noise_class": self.noise_class,

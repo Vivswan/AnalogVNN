@@ -3,7 +3,7 @@ from typing import Union
 import torch
 from torch import nn, Tensor
 
-from nn.layers.BaseLayer import BaseLayer, BackwardFunction
+from nn.modules.BaseLayer import BaseLayer, BackwardFunction
 from nn.modules.FullSequential import FullSequential
 
 

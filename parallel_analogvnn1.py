@@ -15,7 +15,7 @@ from pathlib import Path
 import torchvision
 from natsort import natsorted, ns
 
-from crc.analog_vnn_1 import analogvnn1_parameters_list
+from _test.crc.analog_vnn_1 import analogvnn1_parameters_list
 from nn.layers.functionals.Normalize import *
 
 
@@ -378,7 +378,7 @@ def run_combination_main():
 def create_slurm_scripts():
     shutil.rmtree("_crc_slurm")
     os.mkdir("_crc_slurm")
-    with open("run_array_@@@.slurm", "r") as main_run_file:
+    with open("_test/run_array_@@@.slurm", "r") as main_run_file:
         text = main_run_file.read()
 
     for i in RUN_UNDER_12_LIST:

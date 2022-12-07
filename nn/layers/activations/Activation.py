@@ -3,7 +3,7 @@ from abc import ABC
 from torch import Tensor, nn
 
 from nn.backward_pass.BackwardFunction import BackwardFunction
-from nn.layers.BaseLayer import BaseLayer
+from nn.modules.BaseLayer import BaseLayer
 
 
 class InitImplement:

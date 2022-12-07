@@ -5,8 +5,8 @@ import torch
 from torch import nn, Tensor
 
 from nn.backward_pass.BackwardFunction import BackwardFunction
-from nn.layers.BaseLayer import BaseLayer
-from utils.helper_functions import to_matrix
+from nn.fn.to_matrix import to_matrix
+from nn.modules.BaseLayer import BaseLayer
 
 
 class LinearBackpropagation(BackwardFunction):

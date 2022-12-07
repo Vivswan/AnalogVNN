@@ -7,9 +7,9 @@ from torch.utils.data import DataLoader
 from nn.TensorboardModelLog import TensorboardModelLog
 from nn.backward_pass.BaseBackwardPass import BaseBackwardPass
 from nn.backward_pass.GraphBackwardPass import GraphBackwardPass
-from nn.layers.BaseLayer import BaseLayer
-from nn.test import test
-from nn.train import train
+from nn.fn.test import test
+from nn.fn.train import train
+from nn.modules.BaseLayer import BaseLayer
 from nn.utils.is_cpu_cuda import is_cpu_cuda
 
 
@@ -17,6 +17,7 @@ class BaseModule(nn.Module):
     __constants__ = ['in_features', 'device']
 
     device: torch.device
+
     # tensorboard: Union[None, TensorboardModelLog]
 
     def __init__(self, tensorboard_log_dir=None, backward_class: Type[BaseBackwardPass] = GraphBackwardPass):

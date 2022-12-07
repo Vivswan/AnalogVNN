@@ -1,4 +1,4 @@
-from crc.parneet import parser_run_parneet
+from _test.crc.parneet import parser_run_parneet
 
 if __name__ == '__main__':
     parser_run_parneet(__file__)

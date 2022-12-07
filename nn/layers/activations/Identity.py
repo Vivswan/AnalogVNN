@@ -2,7 +2,7 @@ from typing import Union
 
 from torch import Tensor
 
-from nn.activations.Activation import Activation
+from nn.layers.activations.Activation import Activation
 
 
 class Identity(Activation):

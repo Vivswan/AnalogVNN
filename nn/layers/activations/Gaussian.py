@@ -4,7 +4,7 @@ from typing import Union
 import torch
 from torch import Tensor
 
-from nn.activations.Activation import Activation
+from nn.layers.activations.Activation import Activation
 
 
 class Gaussian(Activation):

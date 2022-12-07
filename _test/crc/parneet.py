@@ -1,18 +1,18 @@
 import argparse
 import json
 
-from crc.parneet_model import run_parneet_model, RunParametersParneet
-from nn.activations.ELU import ELU
-from nn.activations.Gaussian import GeLU
-from nn.activations.ReLU import ReLU, LeakyReLU
-from nn.activations.SiLU import SiLU
-from nn.activations.Tanh import Tanh
+from _test.crc.parneet_model import run_parneet_model, RunParametersParneet
+from _test.utils.path_functions import get_relative_path
+from nn.layers.activations.ELU import ELU
+from nn.layers.activations.Gaussian import GeLU
+from nn.layers.activations.ReLU import ReLU, LeakyReLU
+from nn.layers.activations.SiLU import SiLU
+from nn.layers.activations.Tanh import Tanh
 from nn.layers.functionals.Normalize import *
 from nn.layers.functionals.ReducePrecision import ReducePrecision
 from nn.layers.functionals.StochasticReducePrecision import StochasticReducePrecision
 from nn.layers.noise.GaussianNoise import GaussianNoise
 from nn.layers.noise.PoissonNoise import PoissonNoise
-from utils.path_functions import get_relative_path
 
 parneet_parameters_list = {
     "nn_model_params": {

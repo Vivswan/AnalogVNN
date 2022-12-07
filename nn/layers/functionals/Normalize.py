@@ -5,7 +5,7 @@ import torch
 from torch import Tensor, nn
 
 from nn.backward_pass.BackwardFunction import BackwardIdentity
-from nn.layers.BaseLayer import BaseLayer
+from nn.modules.BaseLayer import BaseLayer
 
 
 class Normalize(BaseLayer, BackwardIdentity, ABC):
@@ -36,23 +36,6 @@ class LPNorm(Normalize):
 
         self.save_tensor("norm", norm)
         return x
-
-    # def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
-    #     x = self.get_tensor("input")
-    #     norm = self.get_tensor("norm")
-    #     grad = (
-    #                torch.div(torch.ones_like(x, device=grad_output.device).T, norm)
-    #            ).T - (
-    #                torch.div(torch.sign(x), torch.pow(x, 2))
-    #            )
-    #     return grad_output * grad
-
-    # def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
-    #     x = self.get_tensor("input")
-    #     norm = self.get_tensor("norm")
-    #     grad = (torch.div(torch.ones_like(x, device=grad_output.device).T, norm)).T - (
-    #         torch.div(torch.pow(x, 2).T, torch.pow(norm, 2.5))).T
-    #     return grad_output * grad
 
 
 class LPNormW(LPNorm):

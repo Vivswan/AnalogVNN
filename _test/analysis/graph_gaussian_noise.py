@@ -12,6 +12,7 @@ from matplotlib import pyplot as plt
 from scipy import integrate
 from scipy.io import savemat
 
+from nn.fn.dirac_delta import dirac_delta
 from nn.layers.functionals.ReducePrecision import ReducePrecision
 from nn.layers.noise.GaussianNoise import GaussianNoise
 from nn.layers.noise.LaplacianNoise import LaplacianNoise
@@ -19,7 +20,6 @@ from nn.layers.noise.PoissonNoise import PoissonNoise
 from nn.layers.noise.UniformNoise import UniformNoise
 from nn.modules.Sequential import Sequential
 from nn.utils.is_cpu_cuda import is_cpu_cuda
-from utils.dirac_delta import dirac_delta
 
 
 def calculate_leakage(x, rp_normal_noise):

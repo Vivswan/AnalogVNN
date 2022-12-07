@@ -4,7 +4,7 @@ from typing import Union
 import torch
 from torch import Tensor, nn
 
-from nn.activations.Activation import Activation
+from nn.layers.activations.Activation import Activation
 
 
 class PReLU(Activation):

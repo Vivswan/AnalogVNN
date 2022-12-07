@@ -15,11 +15,11 @@ from pathlib import Path
 import torchvision
 from natsort import natsorted, ns
 
-from nn.activations.ELU import ELU
-from nn.activations.Gaussian import GeLU
-from nn.activations.ReLU import LeakyReLU, ReLU
-from nn.activations.SiLU import SiLU
-from nn.activations.Tanh import Tanh
+from nn.layers.activations import ELU
+from nn.layers.activations import GeLU
+from nn.layers.activations.ReLU import LeakyReLU, ReLU
+from nn.layers.activations.SiLU import SiLU
+from nn.layers.activations.Tanh import Tanh
 from nn.layers.functionals.Normalize import *
 from nn.layers.functionals.ReducePrecision import ReducePrecision
 from nn.layers.functionals.StochasticReducePrecision import StochasticReducePrecision
@@ -294,7 +294,7 @@ def run_combination_main():
 def create_slurm_scripts():
     shutil.rmtree("_crc_slurm")
     os.mkdir("_crc_slurm")
-    with open("run_array_@@@.slurm", "r") as main_run_file:
+    with open("_test/run_array_@@@.slurm", "r") as main_run_file:
         text = main_run_file.read()
 
     with open(f"_crc_slurm/_run.sh", "w") as run_file:

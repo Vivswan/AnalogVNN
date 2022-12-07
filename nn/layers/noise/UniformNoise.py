@@ -4,7 +4,7 @@ import torch
 from torch import Tensor
 
 from nn.backward_pass.BackwardFunction import BackwardIdentity
-from nn.layers.BaseLayer import BaseLayer
+from nn.modules.BaseLayer import BaseLayer
 from nn.utils.to_tensor_parameter import to_float_tensor, to_nongrad_parameter
 
 
