@@ -13,6 +13,6 @@
 # scipy
 # seaborn
 # natsort
-# conda install -y python-graphviz graphviz numpy matplotlib tabulate pillow scipy seaborn natsort
+# conda install python-graphviz graphviz numpy matplotlib tabulate pillow scipy seaborn natsort
 # pip install tensorflow tensorboard torchviz dataclasses
 

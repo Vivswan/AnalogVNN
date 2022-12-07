@@ -1,9 +1,17 @@
+# -*- coding: utf-8 -*-
+import datetime
+
+now = datetime.datetime.now()
+
 # Configuration file for the Sphinx documentation builder.
 
 # -- Project information
 
+templates_path = ['_templates']
+source_suffix = '.rst'
+master_doc = 'index'
 project = 'AnalogVNN'
-copyright = '2020-2022, Vivswan Shah (vivswanshah@pitt.edu)'
+copyright = str(now.year) + ', Vivswan Shah (vivswanshah@pitt.edu)'
 author = 'Vivswan Shah'
 
 release = '0.1'
@@ -25,7 +33,6 @@ intersphinx_mapping = {
 }
 intersphinx_disabled_domains = ['std']
 
-templates_path = ['_templates']
 
 # -- Options for HTML output
 
