@@ -5,12 +5,8 @@ def train(
         model,
         train_loader: DataLoader,
         epoch=None,
-        apply_to_parameters_fn=None,
-        parameters_to_apply_fn=None,
         test_run=False
 ):
-    if apply_to_parameters_fn is None:
-        apply_to_parameters_fn = []
     model.train()
     total_loss = 0.0
     total_accuracy = 0
@@ -32,18 +28,8 @@ def train(
         output = model.output(data)
         loss, accuracy = model.loss(output, target)
 
-        for i in apply_to_parameters_fn:
-            model.apply_to_parameters(i)
-        # for i in parameters_to_apply_fn:
-        #     i(model.parameters())
-
         model.backward()
         model.optimizer.step()
-
-        for i in apply_to_parameters_fn:
-            model.apply_to_parameters(i)
-        # for i in parameters_to_apply_fn:
-        #     i(model.parameters())
 
         # print statistics
         total_loss += loss.item() * len(data)

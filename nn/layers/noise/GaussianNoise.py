@@ -65,7 +65,6 @@ class GaussianNoise(BaseLayer, BackwardIdentity):
 
     @staticmethod
     def calc_leakage(std, precision):
-        # return 1 - torch.erf(1 / (std * 2 * precision * math.sqrt(2)))
         return 2 * GaussianNoise.static_cdf(x=-1 / (2 * precision), std=std)
 
     @property
@@ -101,18 +100,3 @@ class GaussianNoise(BaseLayer, BackwardIdentity):
 
     def extra_repr(self) -> str:
         return f'std={self.std:.4f}, leakage={self.leakage}, precision={self.precision}'
-
-    # def signal_to_noise_ratio(self, reference_std=1):
-    #     return 1 / (reference_std * 2 * self.std)
-
-
-if __name__ == '__main__':
-    print(f"leakage=0.25 , precision=2**2 : {GaussianNoise.calc_std(leakage=0.25, precision=2 ** 2)}")
-    print(f"leakage=0.50 , precision=2**2 : {GaussianNoise.calc_std(leakage=0.50, precision=2 ** 2)}")
-    print(f"leakage=0.75 , precision=2**2 : {GaussianNoise.calc_std(leakage=0.75, precision=2 ** 2)}")
-    print(f"leakage=0.25 , precision=2**4 : {GaussianNoise.calc_std(leakage=0.25, precision=2 ** 4)}")
-    print(f"leakage=0.50 , precision=2**4 : {GaussianNoise.calc_std(leakage=0.50, precision=2 ** 4)}")
-    print(f"leakage=0.75 , precision=2**4 : {GaussianNoise.calc_std(leakage=0.75, precision=2 ** 4)}")
-    print(f"leakage=0.25 , precision=2**6 : {GaussianNoise.calc_std(leakage=0.25, precision=2 ** 6)}")
-    print(f"leakage=0.50 , precision=2**6 : {GaussianNoise.calc_std(leakage=0.50, precision=2 ** 6)}")
-    print(f"leakage=0.75 , precision=2**6 : {GaussianNoise.calc_std(leakage=0.75, precision=2 ** 6)}")
