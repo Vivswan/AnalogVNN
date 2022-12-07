@@ -1,18 +1,65 @@
 import torch.backends.cudnn
 import torchvision
-from dataloaders.load_vision_dataset import load_vision_dataset
-from nn.activations.Gaussian import GeLU
-from nn.layers.Linear import Linear
 from torch import optim, nn
+from torch.utils.data import DataLoader
+from torchvision.transforms import transforms
 
+from nn.layers.activations.Gaussian import GeLU
 from nn.layers.functionals.BackwardWrapper import BackwardWrapper
 from nn.layers.functionals.Normalize import Clamp
 from nn.layers.functionals.ReducePrecision import ReducePrecision
 from nn.layers.noise.GaussianNoise import GaussianNoise
 from nn.modules.FullSequential import FullSequential
+from nn.modules.Linear import Linear
 from nn.modules.Sequential import Sequential
 from nn.optimizer.PseudoOptimizer import PseudoOptimizer
 from nn.utils.is_cpu_cuda import is_cpu_cuda
+
+
+def load_vision_dataset(dataset, path, batch_size, is_cuda=False, grayscale=True):
+    """
+    Loads a vision dataset with optional grayscale conversion and CUDA support.
+
+    Args:
+        dataset (Type[torchvision.datasetsVisionDataset]): the dataset class to use (e.g. torchvision.datasets.MNIST)
+        path (str): the path to the dataset files
+        batch_size (int): the batch size to use for the data loader
+        is_cuda (bool): a flag indicating whether to use CUDA support (defaults to False)
+        grayscale (bool): a flag indicating whether to convert the images to grayscale (defaults to True)
+
+    Returns:
+        A tuple containing the train and test data loaders, the input shape, and a tuple of class labels.
+    """
+
+    dataset_kwargs = {
+        'batch_size': batch_size,
+        'shuffle': True
+    }
+
+    if is_cuda:
+        cuda_kwargs = {
+            'num_workers': 1,
+            'pin_memory': True,
+        }
+        dataset_kwargs.update(cuda_kwargs)
+
+    if grayscale:
+        use_transform = transforms.Compose([
+            transforms.Grayscale(),
+            transforms.ToTensor(),
+        ])
+    else:
+        use_transform = transforms.Compose([transforms.ToTensor()])
+
+    train_set = dataset(root=path, train=True, download=True, transform=use_transform)
+    test_set = dataset(root=path, train=False, download=True, transform=use_transform)
+    train_loader = DataLoader(train_set, **dataset_kwargs)
+    test_loader = DataLoader(test_set, **dataset_kwargs)
+
+    zeroth_element = next(iter(test_loader))[0]
+    input_shape = list(zeroth_element.shape)
+
+    return train_loader, test_loader, input_shape, tuple(train_set.classes)
 
 
 def cross_entropy_accuracy(output, target) -> float:
