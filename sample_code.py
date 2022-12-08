@@ -10,7 +10,7 @@ from nn.layers.functionals.Normalize import Clamp
 from nn.layers.functionals.ReducePrecision import ReducePrecision
 from nn.layers.noise.GaussianNoise import GaussianNoise
 from nn.modules.FullSequential import FullSequential
-from nn.modules.Linear import Linear
+from nn.layers.Linear import Linear
 from nn.modules.Sequential import Sequential
 from nn.optimizer.PseudoOptimizer import PseudoOptimizer
 from nn.utils.is_cpu_cuda import is_cpu_cuda
