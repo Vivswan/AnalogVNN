@@ -4,7 +4,6 @@ import torch
 from torch import nn, Tensor
 from torch.utils.data import DataLoader
 
-from nn.backward_pass.BaseBackwardPass import BaseBackwardPass
 from nn.backward_pass.GraphBackwardPass import GraphBackwardPass
 from nn.fn.test import test
 from nn.fn.train import train
@@ -20,7 +19,7 @@ class BaseModule(nn.Module):
 
     # tensorboard: Union[None, TensorboardModelLog]
 
-    def __init__(self, tensorboard_log_dir=None, backward_class: Type[BaseBackwardPass] = GraphBackwardPass):
+    def __init__(self, tensorboard_log_dir=None, device=is_cpu_cuda.get_device()):
         super(BaseModule, self).__init__()
 
         self._compiled = False
@@ -30,14 +29,11 @@ class BaseModule(nn.Module):
         if tensorboard_log_dir is not None:
             self.create_tensorboard(tensorboard_log_dir)
 
-        if not issubclass(backward_class, BaseBackwardPass):
-            raise Exception(f"backward_class must be subclass of '{BaseBackwardPass.__name__}'")
-
-        self.backward = backward_class()
+        self.backward = GraphBackwardPass()
         self.optimizer = None
         self.loss_fn = None
         self.accuracy_fn = None
-        self.device = is_cpu_cuda.get_device()
+        self.device = device
 
     def __call__(self, *args, **kwargs):
         result = super(BaseModule, self).__call__(*args, **kwargs)
