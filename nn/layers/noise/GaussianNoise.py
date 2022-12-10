@@ -6,13 +6,13 @@ import scipy.special
 import torch
 from torch import Tensor
 
-from nn.backward_pass.BackwardFunction import BackwardIdentity
-from nn.modules.BaseLayer import BaseLayer
+from nn.graphs.BackwardFunction import BackwardIdentity
+from nn.modules.Layer import Layer
 from nn.utils.common_types import TENSOR_OPERABLE
 from nn.utils.to_tensor_parameter import to_nongrad_parameter, to_float_tensor
 
 
-class GaussianNoise(BaseLayer, BackwardIdentity):
+class GaussianNoise(Layer, BackwardIdentity):
     __constants__ = ['std', 'leakage', 'precision']
 
     def __init__(
@@ -99,4 +99,4 @@ class GaussianNoise(BaseLayer, BackwardIdentity):
         return torch.normal(mean=x, std=self.std)
 
     def extra_repr(self) -> str:
-        return f'std={self.std:.4f}, leakage={self.leakage}, precision={self.precision}'
+        return f'std={float(self.std):.4f}, leakage={float(self.leakage):.4f}, precision={int(self.precision)}'
