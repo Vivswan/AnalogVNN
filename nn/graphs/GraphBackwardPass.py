@@ -1,11 +1,11 @@
 import inspect
-from typing import Union, Callable
+from typing import Callable
 
 import torch
 from torch import Tensor
 
-from nn.backward_pass.BackwardFunction import BackwardFunction
-from nn.modules.BaseLayer import BaseLayer
+from nn.graphs.BackwardFunction import BackwardFunction
+from nn.modules.Layer import Layer
 from typing import Union, Dict, Set, Tuple
 
 _backward_fn_type = Union[BackwardFunction, Callable[[Union[None, Tensor]], Union[None, Tensor]]]
@@ -31,6 +31,11 @@ class GraphBackwardPass:
 
         if self._loss is None:
             raise Exception("loss is not set.")
+
+        if len(gradient) == 0:
+            gradient = None
+        elif len(gradient) == 1:
+            gradient = gradient[0]
 
         result = self._loss.backward(gradient=gradient)
         if not self.use_autograd_graph:
@@ -70,7 +75,7 @@ class GraphBackwardPass:
 
     @staticmethod
     def get_backward_function(module):
-        if isinstance(module, BaseLayer):
+        if isinstance(module, Layer):
             if module.get_backward_module() is not None:
                 return module.get_backward_module().backward
         if isinstance(module, BackwardFunction):
@@ -79,7 +84,7 @@ class GraphBackwardPass:
             return module
         return None
 
-    def add_relation(self, *args: Union[str, BackwardFunction]):
+    def add_connection(self, *args: Union[str, BackwardFunction]):
         for i, from_fn in enumerate(args[:-1]):
             if from_fn not in self.relation_dict:
                 self.relation_dict[from_fn] = set()

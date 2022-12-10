@@ -6,14 +6,14 @@ import torch
 from scipy.optimize import *
 from torch import Tensor
 
-from nn.backward_pass.BackwardFunction import BackwardIdentity
+from nn.graphs.BackwardFunction import BackwardIdentity
 from nn.fn.dirac_delta import dirac_delta
-from nn.modules.BaseLayer import BaseLayer
+from nn.modules.Layer import Layer
 from nn.utils.common_types import TENSOR_OPERABLE
 from nn.utils.to_tensor_parameter import to_float_tensor, to_nongrad_parameter
 
 
-class PoissonNoise(BaseLayer, BackwardIdentity):
+class PoissonNoise(Layer, BackwardIdentity):
     def __init__(
             self,
             scale: Union[None, float] = None,
@@ -141,7 +141,7 @@ class PoissonNoise(BaseLayer, BackwardIdentity):
         return torch.sign(x) * torch.poisson(torch.abs(x * self.rate_factor)) / self.rate_factor
 
     def extra_repr(self) -> str:
-        return f'scale={self.scale:.4f}' \
-               f', max_leakage={self.max_leakage}' \
-               f', leakage={self.leakage:.4f}' \
-               f', precision={self.precision}'
+        return f'scale={float(self.scale):.4f}' \
+               f', max_leakage={float(self.max_leakage):.4f}' \
+               f', leakage={float(self.leakage):.4f}' \
+               f', precision={int(self.precision)}'

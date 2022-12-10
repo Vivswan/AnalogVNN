@@ -6,12 +6,12 @@ from typing import Iterator, TypeVar, Union, Dict, Optional
 from torch import nn
 from torch.nn import Module
 
-from nn.modules.BaseModule import BaseModule
+from nn.modules.Model import Model
 
 T = TypeVar('T', bound=nn.Module)
 
 
-class Sequential(BaseModule):
+class Sequential(Model):
     def __init__(self, *args):
         super(Sequential, self).__init__()
         self._runtime_module_list: Dict[str, Optional[Module]] = OrderedDict()

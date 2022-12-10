@@ -5,13 +5,13 @@ import numpy as np
 import torch
 from torch import Tensor
 
-from nn.backward_pass.BackwardFunction import BackwardIdentity
-from nn.modules.BaseLayer import BaseLayer
+from nn.graphs.BackwardFunction import BackwardIdentity
+from nn.modules.Layer import Layer
 from nn.utils.common_types import TENSOR_OPERABLE
 from nn.utils.to_tensor_parameter import to_float_tensor, to_nongrad_parameter
 
 
-class LaplacianNoise(BaseLayer, BackwardIdentity):
+class LaplacianNoise(Layer, BackwardIdentity):
     __constants__ = ['scale', 'leakage', 'precision']
 
     def __init__(
@@ -87,4 +87,4 @@ class LaplacianNoise(BaseLayer, BackwardIdentity):
         return torch.distributions.Laplace(loc=x, scale=self.scale).sample()
 
     def extra_repr(self) -> str:
-        return f'scale={self.scale:.4f}, leakage={self.leakage}, precision={self.precision}'
+        return f'std={float(self.std):.4f}, leakage={float(self.leakage):.4f}, precision={int(self.precision)}'

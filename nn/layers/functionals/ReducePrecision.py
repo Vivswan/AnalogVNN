@@ -1,12 +1,12 @@
 import torch
 from torch import nn, Tensor
 
-from nn.backward_pass.BackwardFunction import BackwardIdentity
+from nn.graphs.BackwardFunction import BackwardIdentity
 from nn.fn.reduce_precision import reduce_precision
-from nn.modules.BaseLayer import BaseLayer
+from nn.modules.Layer import Layer
 
 
-class ReducePrecision(BaseLayer, BackwardIdentity):
+class ReducePrecision(Layer, BackwardIdentity):
     __constants__ = ['precision', 'divide']
     precision: nn.Parameter
     divide: nn.Parameter
@@ -38,7 +38,7 @@ class ReducePrecision(BaseLayer, BackwardIdentity):
         return 2 ** bit_precision - 1
 
     def extra_repr(self) -> str:
-        return f'precision={self.precision}, divide={self.divide}'
+        return f'precision={int(self.precision)}, divide={float(self.divide):0.2f}'
 
     def forward(self, x: Tensor):
         return reduce_precision(x, self.precision, self.divide)

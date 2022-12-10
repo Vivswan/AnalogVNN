@@ -11,18 +11,18 @@ class FullSequential(Sequential):
         if len(self) > 0:
             first_module = self[-1]
         else:
-            first_module = self.backward.OUTPUT
+            first_module = self.backward_graph.OUTPUT
 
         if len(args) == 1 and isinstance(args[0], OrderedDict):
-            self.backward.add_relation(*([first_module] + list(reversed(args[0].values()))))
+            self.backward_graph.add_connection(*([first_module] + list(reversed(args[0].values()))))
             for key, module in args[0].items():
-                if module == self.backward.STOP:
+                if module == self.backward_graph.STOP:
                     continue
                 self._add_run_module(key, module)
         else:
-            self.backward.add_relation(*([first_module] + list(reversed(list(args)))))
+            self.backward_graph.add_connection(*([first_module] + list(reversed(list(args)))))
             for idx, module in enumerate(args):
-                if module == self.backward.STOP:
+                if module == self.backward_graph.STOP:
                     continue
                 self._add_run_module(str(idx), module)
 
