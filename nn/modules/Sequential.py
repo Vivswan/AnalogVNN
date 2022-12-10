@@ -6,21 +6,16 @@ from typing import Iterator, TypeVar, Union, Dict, Optional
 from torch import nn
 from torch.nn import Module
 
-from nn.modules.Model import Model
+from nn.modules.BaseModule import BaseModule
 
 T = TypeVar('T', bound=nn.Module)
 
 
-class Sequential(Model):
+class Sequential(BaseModule):
     def __init__(self, *args):
         super(Sequential, self).__init__()
         self._runtime_module_list: Dict[str, Optional[Module]] = OrderedDict()
         self.add_sequence(*args)
-
-    def compile(self, device=None, layer_data=True):
-        arr = [self.graphs.INPUT, *list(self._runtime_module_list.values()), self.graphs.OUTPUT]
-        self.graphs.forward_graph.add_connection(*arr)
-        return super().compile(device, layer_data)
 
     def add_sequence(self, *args):
         if len(args) == 1 and isinstance(args[0], OrderedDict):
@@ -72,3 +67,8 @@ class Sequential(Model):
 
     def __iter__(self) -> Iterator[nn.Module]:
         return iter(self._runtime_module_list.values())
+
+    def forward(self, x):
+        for module in self._runtime_module_list.values():
+            x = module(x)
+        return x

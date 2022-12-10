@@ -4,9 +4,9 @@ from typing import Union
 import torch
 from torch import nn, Tensor
 
-from nn.graphs.BackwardFunction import BackwardFunction
+from nn.backward_pass.BackwardFunction import BackwardFunction
 from nn.fn.to_matrix import to_matrix
-from nn.modules.Layer import Layer
+from nn.modules.BaseLayer import BaseLayer
 
 
 class LinearBackpropagation(BackwardFunction):
@@ -29,7 +29,7 @@ class LinearBackpropagation(BackwardFunction):
         return grad_input
 
 
-class Linear(Layer):
+class Linear(BaseLayer):
     __constants__ = ['in_features', 'out_features']
     in_features: int
     out_features: int

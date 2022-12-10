@@ -1,18 +1,18 @@
-from typing import Union, Callable
+from typing import Union, Type, Callable
 
 import torch
 from torch import nn, Tensor
 from torch.utils.data import DataLoader
 
-from nn.graphs.ModelGraph import ModelGraph
+from nn.backward_pass.GraphBackwardPass import GraphBackwardPass
 from nn.fn.test import test
 from nn.fn.train import train
-from nn.modules.Layer import Layer
+from nn.modules.BaseLayer import BaseLayer
 from nn.utils.TensorboardModelLog import TensorboardModelLog
 from nn.utils.is_cpu_cuda import is_cpu_cuda
 
 
-class Model(Layer):
+class BaseModule(nn.Module):
     __constants__ = ['in_features', 'device']
 
     device: torch.device
@@ -20,7 +20,7 @@ class Model(Layer):
     # tensorboard: Union[None, TensorboardModelLog]
 
     def __init__(self, tensorboard_log_dir=None, device=is_cpu_cuda.get_device()):
-        super(Model, self).__init__()
+        super(BaseModule, self).__init__()
 
         self._compiled = False
         self._output_hook = None
@@ -29,32 +29,28 @@ class Model(Layer):
         if tensorboard_log_dir is not None:
             self.create_tensorboard(tensorboard_log_dir)
 
-        self.graphs = ModelGraph()
-        self.forward_graph = self.graphs.forward_graph
-        self.backward_graph = self.graphs.backward_graph
-
+        self.backward = GraphBackwardPass()
         self.optimizer = None
-        self.loss_function = None
-        self.accuracy_function = None
+        self.loss_fn = None
+        self.accuracy_fn = None
         self.device = device
 
-    @property
-    def use_autograd_graph(self):
-        return self.graphs.use_autograd_graph
-
-    @use_autograd_graph.setter
-    def use_autograd_graph(self, use_autograd_graph: bool):
-        self.graphs.use_autograd_graph = use_autograd_graph
+    def __call__(self, *args, **kwargs):
+        result = super(BaseModule, self).__call__(*args, **kwargs)
+        if self.training:
+            self.backward.set_inputs(*args)
+            result = self.backward.set_output(result)
+        return result
 
     def compile(self, device=None, layer_data=True):
         if device is not None:
             self.device = device
 
-        self.graphs.compile()
+        self.backward.compile()
         self.to(device=self.device)
 
         for module in self.children():
-            if isinstance(module, Layer):
+            if isinstance(module, BaseLayer):
                 module._parent_module_attr = lambda name: getattr(self, name) if hasattr(self, name) else None
 
         self._compiled = True
@@ -62,30 +58,32 @@ class Model(Layer):
             self.tensorboard.on_compile(layer_data=layer_data)
         return self
 
-    def forward(self, *inputs):
-        return self.graphs.forward_graph(inputs, self.training)
+    @property
+    def use_autograd_graph(self):
+        return self.backward.use_autograd_graph
 
-    def backward(self, *inputs):
-        return self.graphs.backward_graph(inputs)
+    @use_autograd_graph.setter
+    def use_autograd_graph(self, use_autograd_graph: bool):
+        self.backward.use_autograd_graph = use_autograd_graph
 
     def output(self, x: Tensor) -> Tensor:
         return self(x)
 
     def loss(self, output, target):
-        if self.loss_function is None:
-            raise Exception("loss_function is not set")
+        if self.loss_fn is None:
+            raise Exception("loss_fn is not set")
 
-        loss_result = self.loss_function(output, target)
+        loss_result = self.loss_fn(output, target)
         if self.training:
-            self.graphs.loss = loss_result
+            self.backward.set_loss(loss_result)
 
         accuracy_result = None
-        if self.accuracy_function is not None:
-            accuracy_result = self.accuracy_function(output, target)
+        if self.accuracy_fn is not None:
+            accuracy_result = self.accuracy_fn(output, target)
 
         return loss_result, accuracy_result
 
-    def apply_to_parameters(self: nn.Module, layer: Union[Layer, Callable], requires_grad=True):
+    def apply_to_parameters(self: nn.Module, layer: Union[BaseLayer, Callable], requires_grad=True):
         with torch.no_grad():
             for p in self.parameters():
                 if requires_grad and not p.requires_grad:
@@ -129,3 +127,6 @@ class Model(Layer):
         self.tensorboard = tensorboard
         if self._compiled is True:
             self.tensorboard.on_compile()
+
+    def forward(self, x: Tensor):
+        raise NotImplementedError

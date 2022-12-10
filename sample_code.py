@@ -126,7 +126,7 @@ class LinearModel(FullSequential):
         self.activation_class.initialise_(layer.weight)
 
 
-class WeightModel(FullSequential):
+class WeightModel(Sequential):
     def __init__(self, norm_class, precision_class, precision, noise_class, leakage):
         """
 
@@ -187,10 +187,10 @@ def run_linear3_model():
     )
 
     # Setting Model Parameters
-    nn_model.loss_function = nn.CrossEntropyLoss()
-    nn_model.accuracy_function = cross_entropy_accuracy
+    nn_model.loss_fn = nn.CrossEntropyLoss()
+    nn_model.accuracy_fn = cross_entropy_accuracy
+
     nn_model.compile(device=device)
-    weight_model.compile(device=device)
     nn_model.to(device=device)
     weight_model.to(device=device)
 

@@ -1,12 +1,8 @@
-#
---extra-index-url https://download.pytorch.org/whl/cu116
-torch
-torchvision~=0.14.0
-torchaudio
-numpy
-scipy
-networkx
-
+# pytorch
+# torchvision
+# tensorboard
+# tensorflow
+# torchviz
 # dataclasses
 # numpy
 # matplotlib
@@ -19,3 +15,4 @@ networkx
 # natsort
 # conda install python-graphviz graphviz numpy matplotlib tabulate pillow scipy seaborn natsort
 # pip install tensorflow tensorboard torchviz dataclasses
+

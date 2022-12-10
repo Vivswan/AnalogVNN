@@ -1,10 +1,9 @@
-import abc
 from abc import ABC
 
 from torch import Tensor, nn
 
-from nn.graphs.BackwardFunction import BackwardFunction
-from nn.modules.Layer import Layer
+from nn.backward_pass.BackwardFunction import BackwardFunction
+from nn.modules.BaseLayer import BaseLayer
 
 
 class InitImplement:
@@ -17,5 +16,5 @@ class InitImplement:
         return nn.init.xavier_uniform_(tensor)
 
 
-class Activation(Layer, BackwardFunction, InitImplement, metaclass=abc.ABCMeta):
+class Activation(BaseLayer, BackwardFunction, InitImplement, ABC):
     pass

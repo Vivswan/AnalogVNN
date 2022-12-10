@@ -4,11 +4,11 @@ from typing import Union
 import torch
 from torch import Tensor, nn
 
-from nn.graphs.BackwardFunction import BackwardIdentity
-from nn.modules.Layer import Layer
+from nn.backward_pass.BackwardFunction import BackwardIdentity
+from nn.modules.BaseLayer import BaseLayer
 
 
-class Normalize(Layer, BackwardIdentity, ABC):
+class Normalize(BaseLayer, BackwardIdentity, ABC):
     pass
 
 

@@ -2,11 +2,11 @@ from typing import Union
 
 from torch import nn, Tensor
 
-from nn.modules.Layer import Layer, BackwardFunction
+from nn.modules.BaseLayer import BaseLayer, BackwardFunction
 from nn.modules.FullSequential import FullSequential
 
 
-class BackwardWrapper(Layer, BackwardFunction):
+class BackwardWrapper(BaseLayer, BackwardFunction):
     def __init__(self, layer: nn.Module):
         super(BackwardWrapper, self).__init__()
         self._layer = layer
