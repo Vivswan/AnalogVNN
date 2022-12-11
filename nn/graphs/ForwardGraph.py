@@ -1,16 +1,4 @@
-import enum
-import inspect
-from typing import Union
-
-import networkx as nx
-import torch
-from torch import Tensor
-
-from nn.graphs.BackwardFunction import BackwardFunction
-from nn.graphs.ModelGraphState import ModelGraphState
 from nn.graphs.TensorFlowGraph import TensorFlowGraph
-from nn.layers.Linear import Linear
-from nn.modules.Layer import Layer
 
 
 class ForwardGraph(TensorFlowGraph):
@@ -21,7 +9,7 @@ class ForwardGraph(TensorFlowGraph):
             outputs = outputs[0][1]
 
         if is_training:
-            self._graph_state.input = inputs
+            self._graph_state.set_inputs(inputs)
             outputs = self._graph_state.set_outputs(outputs)
 
         return outputs

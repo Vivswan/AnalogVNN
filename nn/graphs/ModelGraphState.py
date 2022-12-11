@@ -16,10 +16,9 @@ class ModelGraphState:
         self.allow_loops = allow_loops
         self.use_autograd_graph: bool = use_autograd_graph
 
-        self.input: Union[None, Tensor] = None
+        self._inputs: Union[None, Tensor] = None
         self._output: Union[None, Tensor] = None
-        self.loss: Union[None, Tensor] = None
-        self.output_hook = None
+        self._loss: Union[None, Tensor] = None
 
     def ready_for_forward(self, exception=False):
         pass
@@ -29,27 +28,36 @@ class ModelGraphState:
             if self.output is None:
                 raise Exception("output is not set.")
 
-            if self.loss is None:
+            if self._loss is None:
                 raise Exception("loss is not set.")
         else:
-            return not (self.output is None or self.loss is None)
+            return not (self.output is None or self._loss is None)
+
+    @property
+    def inputs(self):
+        return self._inputs
 
     @property
     def output(self):
         return self._output
 
-    @output.setter
-    def output(self, output: Tensor):
-        with torch.no_grad():
-            if self.output_hook is not None:
-                self.output_hook.remove()
+    @property
+    def loss(self):
+        return self._loss
 
+    def set_inputs(self, *inputs):
+        self._inputs = inputs
+        return self._inputs
+
+    def set_outputs(self, output: Union[Tensor, None]):
+        with torch.no_grad():
             if self.use_autograd_graph or output is None:
                 self._output = output
             else:
                 self._output = output.detach()
                 self._output.requires_grad = True
+        return self._output
 
-    def set_outputs(self, output: Tensor):
-        self.output = output
-        return self.output
+    def set_loss(self, loss: Union[Tensor, None]):
+        self._loss = loss
+        return self._loss

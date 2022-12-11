@@ -67,11 +67,13 @@ class TensorFlowGraph(abc.ABC):
                     continue
 
                 if search_module_function is not None:
-                    next_module = search_module_function(next_module)
+                    grad_function = search_module_function(next_module)
                     if next_module is None:
-                        continue
+                        raise NotImplementedError
+                else:
+                    grad_function = next_module
 
-                next_module_output = next_module(last_module_output)
+                next_module_output = grad_function(last_module_output)
                 if next_module_output is None:
                     continue
 

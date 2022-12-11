@@ -23,7 +23,6 @@ class Model(Layer):
         super(Model, self).__init__()
 
         self._compiled = False
-        self._output_hook = None
 
         self.tensorboard = None
         if tensorboard_log_dir is not None:
@@ -38,12 +37,13 @@ class Model(Layer):
         self.accuracy_function = None
         self.device = device
 
-    def __call__(self, *args, **kwargs):
-        result = super(Model, self).__call__(*args, **kwargs)
-        if self.training:
-            self.backward_graph.set_inputs(*args)
-            result = self.backward_graph.set_output(result)
-        return result
+    @property
+    def use_autograd_graph(self):
+        return self.graphs.use_autograd_graph
+
+    @use_autograd_graph.setter
+    def use_autograd_graph(self, use_autograd_graph: bool):
+        self.graphs.use_autograd_graph = use_autograd_graph
 
     def compile(self, device=None, layer_data=True):
         if device is not None:
@@ -61,16 +61,11 @@ class Model(Layer):
             self.tensorboard.on_compile(layer_data=layer_data)
         return self
 
-    @property
-    def use_autograd_graph(self):
-        return self.backward_graph.use_autograd_graph
-
-    @use_autograd_graph.setter
-    def use_autograd_graph(self, use_autograd_graph: bool):
-        self.backward_graph.use_autograd_graph = use_autograd_graph
+    def forward(self, *inputs):
+        return self.graphs.forward_graph(inputs, self.training)
 
     def backward(self, *inputs):
-        return self.backward_graph(inputs)
+        return self.graphs.backward_graph(inputs)
 
     def output(self, x: Tensor) -> Tensor:
         return self(x)
@@ -81,7 +76,7 @@ class Model(Layer):
 
         loss_result = self.loss_function(output, target)
         if self.training:
-            self.backward_graph.set_loss(loss_result)
+            self.graphs.set_loss(loss_result)
 
         accuracy_result = None
         if self.accuracy_function is not None:
@@ -133,6 +128,3 @@ class Model(Layer):
         self.tensorboard = tensorboard
         if self._compiled is True:
             self.tensorboard.on_compile()
-
-    def forward(self, x: Tensor):
-        raise NotImplementedError

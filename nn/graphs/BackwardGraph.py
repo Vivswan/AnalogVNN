@@ -1,8 +1,6 @@
 import inspect
 
-import networkx as nx
 import torch
-from torch import Tensor
 
 from nn.graphs.BackwardFunction import BackwardFunction
 from nn.graphs.ModelGraphState import ModelGraphState
@@ -24,8 +22,8 @@ class BackwardGraph(TensorFlowGraph):
         if not self._graph_state.use_autograd_graph:
             result = self._pass(self._graph_state.output.grad)
 
-        self._graph_state.output = None
-        self._graph_state.loss = None
+        self._graph_state.set_outputs(None)
+        self._graph_state.set_loss(None)
 
         return result
 
