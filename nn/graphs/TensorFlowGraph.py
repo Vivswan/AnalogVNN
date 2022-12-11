@@ -1,8 +1,6 @@
 import abc
-import enum
 
 import networkx as nx
-from torch import Tensor
 
 from nn.graphs.ModelGraphState import ModelGraphState
 from nn.graphs.TensorFlowGraphEnum import TensorFlowGraphEnum

@@ -2,11 +2,10 @@ import inspect
 
 import torch
 
-from nn.graphs.BackwardFunction import BackwardFunction
 from nn.graphs.ModelGraphState import ModelGraphState
 from nn.graphs.TensorFlowGraph import TensorFlowGraph
 from nn.layers.Linear import Linear
-from nn.modules.Layer import Layer
+from nn.modules.Layer import Layer, BackwardFunction
 
 
 class BackwardGraph(TensorFlowGraph):

@@ -1,5 +1,4 @@
 import json
-import math
 import time
 from pathlib import Path
 
@@ -11,14 +10,13 @@ from torch.utils.data import DataLoader
 from torchvision.transforms import transforms
 
 from _research.utils.save_graph import save_graph
+from nn.layers.BackwardWrapper import BackwardWrapper
+from nn.layers.Linear import Linear
 from nn.layers.activations.Gaussian import GeLU
-from nn.layers.functionals.BackwardWrapper import BackwardWrapper
 from nn.layers.functionals.Normalize import Clamp
 from nn.layers.functionals.ReducePrecision import ReducePrecision
 from nn.layers.noise.GaussianNoise import GaussianNoise
 from nn.modules.FullSequential import FullSequential
-from nn.layers.Linear import Linear
-from nn.modules.Sequential import Sequential
 from nn.optimizer.PseudoOptimizer import PseudoOptimizer
 from nn.utils.is_cpu_cuda import is_cpu_cuda
 from nn.utils.summary import summary

@@ -1,7 +1,7 @@
 import torch
 from torch import nn, Tensor
 
-from nn.graphs.BackwardFunction import BackwardIdentity
+from nn.fn.BackwardIdentity import BackwardIdentity
 from nn.fn.reduce_precision import reduce_precision
 from nn.modules.Layer import Layer
 

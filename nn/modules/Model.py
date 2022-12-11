@@ -4,9 +4,9 @@ import torch
 from torch import nn, Tensor
 from torch.utils.data import DataLoader
 
-from nn.graphs.ModelGraph import ModelGraph
 from nn.fn.test import test
 from nn.fn.train import train
+from nn.graphs.ModelGraph import ModelGraph
 from nn.modules.Layer import Layer
 from nn.utils.TensorboardModelLog import TensorboardModelLog
 from nn.utils.is_cpu_cuda import is_cpu_cuda

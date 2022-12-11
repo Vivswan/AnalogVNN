@@ -1,9 +1,8 @@
 import abc
-from abc import ABC
 
 from torch import Tensor, nn
 
-from nn.graphs.BackwardFunction import BackwardFunction
+from nn.fn.BackwardIdentity import BackwardFunction
 from nn.modules.Layer import Layer
 
 

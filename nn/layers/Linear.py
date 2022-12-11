@@ -4,7 +4,7 @@ from typing import Union
 import torch
 from torch import nn, Tensor
 
-from nn.graphs.BackwardFunction import BackwardFunction
+from nn.fn.BackwardIdentity import BackwardFunction
 from nn.fn.to_matrix import to_matrix
 from nn.modules.Layer import Layer
 

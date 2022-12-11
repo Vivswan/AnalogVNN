@@ -5,21 +5,19 @@ Linear3 Photonic Analog Neural Network
 `Sample code <https://github.com/Photonics-Pitt-Org/AnalogVNN/blob/master/sample_code.py>`_ for 3 layered linear photonic analog neural network with 4-bit precision, 0.2 leakage and clamp normalization:
 
 .. code-block:: python
-
     import torch.backends.cudnn
     import torchvision
     from torch import optim, nn
     from torch.utils.data import DataLoader
     from torchvision.transforms import transforms
 
+    from nn.layers.BackwardWrapper import BackwardWrapper
+    from nn.layers.Linear import Linear
     from nn.layers.activations.Gaussian import GeLU
-    from nn.layers.functionals.BackwardWrapper import BackwardWrapper
     from nn.layers.functionals.Normalize import Clamp
     from nn.layers.functionals.ReducePrecision import ReducePrecision
     from nn.layers.noise.GaussianNoise import GaussianNoise
     from nn.modules.FullSequential import FullSequential
-    from nn.modules.Linear import Linear
-    from nn.modules.Sequential import Sequential
     from nn.optimizer.PseudoOptimizer import PseudoOptimizer
     from nn.utils.is_cpu_cuda import is_cpu_cuda
 
@@ -134,7 +132,7 @@ Linear3 Photonic Analog Neural Network
             self.activation_class.initialise_(layer.weight)
 
 
-    class WeightModel(Sequential):
+    class WeightModel(FullSequential):
         def __init__(self, norm_class, precision_class, precision, noise_class, leakage):
             """
 
@@ -195,10 +193,10 @@ Linear3 Photonic Analog Neural Network
         )
 
         # Setting Model Parameters
-        nn_model.loss_fn = nn.CrossEntropyLoss()
-        nn_model.accuracy_fn = cross_entropy_accuracy
-
+        nn_model.loss_function = nn.CrossEntropyLoss()
+        nn_model.accuracy_function = cross_entropy_accuracy
         nn_model.compile(device=device)
+        weight_model.compile(device=device)
         nn_model.to(device=device)
         weight_model.to(device=device)
 

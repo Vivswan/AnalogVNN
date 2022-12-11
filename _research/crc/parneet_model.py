@@ -19,14 +19,14 @@ from _research.dataloaders.load_vision_dataset import load_vision_dataset
 from _research.utils.data_dirs import data_dirs
 from _research.utils.path_functions import path_join
 from _research.utils.save_graph import save_graph
+from nn.layers.BackwardWrapper import BackwardWrapper
+from nn.layers.Linear import Linear
 from nn.layers.activations.Activation import Activation
-from nn.layers.functionals.BackwardWrapper import BackwardWrapper
 from nn.layers.functionals.Normalize import *
 from nn.layers.functionals.ReducePrecision import ReducePrecision
 from nn.layers.functionals.StochasticReducePrecision import StochasticReducePrecision
 from nn.layers.noise.GaussianNoise import GaussianNoise
 from nn.modules.FullSequential import FullSequential
-from nn.layers.Linear import Linear
 from nn.optimizer.PseudoOptimizer import PseudoOptimizer
 from nn.utils.is_cpu_cuda import is_cpu_cuda
 from nn.utils.summary import summary

@@ -1,8 +1,8 @@
-from typing import Union, Type
+from typing import Type, Union
 
 from torch import Tensor
 
-from nn.modules.Layer import Layer, BackwardFunction
+from nn.modules.Layer import BackwardFunction, Layer
 
 
 class BackwardUsingForward(BackwardFunction):
@@ -14,8 +14,3 @@ class BackwardUsingForward(BackwardFunction):
         self._layer.training = mode
 
         return result
-
-
-class BackwardIdentity(BackwardFunction):
-    def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
-        return grad_output

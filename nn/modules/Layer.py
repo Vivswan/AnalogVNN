@@ -1,3 +1,4 @@
+from abc import ABC
 from typing import Union, Type
 
 import torch
@@ -69,7 +70,7 @@ class Layer(nn.Module):
         self._saved_tensor = {}
 
 
-class BackwardFunction:
+class BackwardFunction(ABC):
     def __init__(self, layer: Layer):
         if not isinstance(layer, Layer):
             raise Exception(f'layer not instance of BaseLayer class')

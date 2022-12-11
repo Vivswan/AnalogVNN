@@ -6,7 +6,7 @@ import torch
 from scipy.optimize import *
 from torch import Tensor
 
-from nn.graphs.BackwardFunction import BackwardIdentity
+from nn.fn.BackwardIdentity import BackwardIdentity
 from nn.fn.dirac_delta import dirac_delta
 from nn.modules.Layer import Layer
 from nn.utils.common_types import TENSOR_OPERABLE

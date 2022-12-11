@@ -6,7 +6,7 @@ import scipy.special
 import torch
 from torch import Tensor
 
-from nn.graphs.BackwardFunction import BackwardIdentity
+from nn.fn.BackwardIdentity import BackwardIdentity
 from nn.modules.Layer import Layer
 from nn.utils.common_types import TENSOR_OPERABLE
 from nn.utils.to_tensor_parameter import to_nongrad_parameter, to_float_tensor
