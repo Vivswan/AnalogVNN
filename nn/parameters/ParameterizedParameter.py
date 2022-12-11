@@ -3,7 +3,7 @@ from typing import Type
 import torch
 from torch import nn, optim, Tensor
 
-from nn.modules.Linear import Linear
+from nn.layers.Linear import Linear
 from nn.parameters.Parameter import Parameter
 from nn.utils.common_types import TENSOR_CALLABLE
 
@@ -134,9 +134,9 @@ if __name__ == '__main__':
     # print("a:               ", a)
     # print("a.grad:          ", a.grad)
 
-    linear1 = Linear(4, 1)
+    linear1 = Linear(4, 1, bias=False)
     linear1.weight.data = torch.ones_like(linear1.weight.data, requires_grad=True)
-    linear1.bias.data = torch.ones_like(linear1.bias.data, requires_grad=True)
+    # linear1.bias.data = torch.ones_like(linear1.bias.data, requires_grad=True)
     linear1.to(device=device)
     ParameterizedParameter.convert_model(linear1, transform=Double())
 
@@ -152,23 +152,23 @@ if __name__ == '__main__':
     ans1.backward()
     print("linear1.weight:       ", linear1.weight)
     print("linear1.weight.grad:  ", linear1.weight.grad)
-    print("linear1.bias:         ", linear1.bias)
-    print("linear1.bias.grad:    ", linear1.bias.grad)
+    # print("linear1.bias:         ", linear1.bias)
+    # print("linear1.bias.grad:    ", linear1.bias.grad)
     print("ans:                  ", ans1)
 
     print()
     adam.step()
     print("linear1.weight:       ", linear1.weight)
     print("linear1.weight.grad:  ", linear1.weight.grad)
-    print("linear1.bias:         ", linear1.bias)
-    print("linear1.bias.grad:    ", linear1.bias.grad)
+    # print("linear1.bias:         ", linear1.bias)
+    # print("linear1.bias.grad:    ", linear1.bias.grad)
 
     print()
     adam.zero_grad()
     print("linear1.weight:       ", linear1.weight)
     print("linear1.weight.grad:  ", linear1.weight.grad)
-    print("linear1.bias:         ", linear1.bias)
-    print("linear1.bias.grad:    ", linear1.bias.grad)
+    # print("linear1.bias:         ", linear1.bias)
+    # print("linear1.bias.grad:    ", linear1.bias.grad)
 
     print()
     print("linear1.parameters(): ", list(linear1.parameters()))

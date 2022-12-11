@@ -3,12 +3,12 @@ from typing import Union
 import torch
 from torch import Tensor
 
-from nn.backward_pass.BackwardFunction import BackwardIdentity
-from nn.modules.BaseLayer import BaseLayer
+from nn.fn.BackwardIdentity import BackwardIdentity
+from nn.modules.Layer import Layer
 from nn.utils.to_tensor_parameter import to_float_tensor, to_nongrad_parameter
 
 
-class UniformNoise(BaseLayer, BackwardIdentity):
+class UniformNoise(Layer, BackwardIdentity):
     __constants__ = ['std', 'leakage', 'precision']
 
     def __init__(
@@ -77,4 +77,4 @@ class UniformNoise(BaseLayer, BackwardIdentity):
         return torch.distributions.Uniform(low=x + self.low, high=x + self.high).sample()
 
     def extra_repr(self) -> str:
-        return f'high={self.high:.4f}, low={self.low:.4f}, leakage={self.leakage}, precision={self.precision}'
+        return f'high={float(self.high):.4f}, low={float(self.low):.4f}, leakage={float(self.leakage):.4f}, precision={int(self.precision)}'

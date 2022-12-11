@@ -1,4 +1,4 @@
-from nn.layers.functionals.BackwardWrapper import BackwardWrapper
+from nn.layers.BackwardWrapper import BackwardWrapper
 
 
 def pick_instanceof_module(arr: list, superclass):

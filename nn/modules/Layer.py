@@ -1,17 +1,18 @@
+from abc import ABC
 from typing import Union, Type
 
 import torch
 from torch import nn, Tensor
 
 
-class BaseLayer(nn.Module):
+class Layer(nn.Module):
     def __init__(self):
-        super(BaseLayer, self).__init__()
+        super(Layer, self).__init__()
         self._saved_tensor = {}
         self._backward_module: Union[None, BackwardFunction] = None
         self._parent_module_attr = lambda x: None
 
-    def set_backward_module(self, backward_class: Type['BackwardFunction']) -> 'BaseLayer':
+    def set_backward_module(self, backward_class: Type['BackwardFunction']) -> 'Layer':
         if not issubclass(backward_class, BackwardFunction):
             raise Exception(f"Backward Module is not set for '{self}'")
         self._backward_module = backward_class(self)
@@ -20,7 +21,7 @@ class BaseLayer(nn.Module):
     def get_backward_module(self) -> Union[None, 'BackwardFunction']:
         return self._backward_module
 
-    def use(self, *args) -> 'BaseLayer':
+    def use(self, *args) -> 'Layer':
         for i in args:
             if issubclass(i, BackwardFunction):
                 self.set_backward_module(i)
@@ -69,9 +70,9 @@ class BaseLayer(nn.Module):
         self._saved_tensor = {}
 
 
-class BackwardFunction:
-    def __init__(self, layer: BaseLayer):
-        if not isinstance(layer, BaseLayer):
+class BackwardFunction(ABC):
+    def __init__(self, layer: Layer):
+        if not isinstance(layer, Layer):
             raise Exception(f'layer not instance of BaseLayer class')
 
         self._layer = layer

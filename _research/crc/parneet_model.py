@@ -19,14 +19,14 @@ from _research.dataloaders.load_vision_dataset import load_vision_dataset
 from _research.utils.data_dirs import data_dirs
 from _research.utils.path_functions import path_join
 from _research.utils.save_graph import save_graph
+from nn.layers.BackwardWrapper import BackwardWrapper
+from nn.layers.Linear import Linear
 from nn.layers.activations.Activation import Activation
-from nn.layers.functionals.BackwardWrapper import BackwardWrapper
 from nn.layers.functionals.Normalize import *
 from nn.layers.functionals.ReducePrecision import ReducePrecision
 from nn.layers.functionals.StochasticReducePrecision import StochasticReducePrecision
 from nn.layers.noise.GaussianNoise import GaussianNoise
 from nn.modules.FullSequential import FullSequential
-from nn.modules.Linear import Linear
 from nn.optimizer.PseudoOptimizer import PseudoOptimizer
 from nn.utils.is_cpu_cuda import is_cpu_cuda
 from nn.utils.summary import summary
@@ -39,15 +39,15 @@ class RunParametersParneet:
 
     activation_class: Union[None, Type[Activation]] = None
     norm_class: Union[None, Type[Normalize]] = None
-    precision_class: Type[BaseLayer] = None
+    precision_class: Type[Layer] = None
     precision: Union[None, int] = None
-    noise_class: Type[BaseLayer] = None
+    noise_class: Type[Layer] = None
     leakage: Union[None, float] = None
 
     w_norm_class: Union[None, Type[Normalize]] = None
-    w_precision_class: Type[BaseLayer] = None
+    w_precision_class: Type[Layer] = None
     w_precision: Union[None, int] = None
-    w_noise_class: Type[BaseLayer] = None
+    w_noise_class: Type[Layer] = None
     w_leakage: Union[None, float] = None
 
     optimiser_class: Type[Optimizer] = optim.Adam
@@ -242,8 +242,8 @@ class ParneetModel(FullSequential):
             'noise_class_y': self.noise_class.__name__ if self.noise_class is not None else str(None),
             'leakage_y': self.leakage,
 
-            'loss_class': self.loss_fn.__class__.__name__,
-            'accuracy_fn': self.accuracy_fn.__name__,
+            'loss_class': self.loss_function.__class__.__name__,
+            'accuracy_fn': self.accuracy_function.__name__,
             'optimiser_superclass': self.optimizer.__class__.__name__,
         }
 
@@ -296,8 +296,8 @@ def run_parneet_model(parameters: RunParametersParneet):
         nn_model.create_tensorboard(paths.tensorboard)
 
     nn_model.compile(device=device, layer_data=True)
-    nn_model.loss_fn = nn.CrossEntropyLoss()
-    nn_model.accuracy_fn = cross_entropy_loss_accuracy
+    nn_model.loss_function = nn.CrossEntropyLoss()
+    nn_model.accuracy_function = cross_entropy_loss_accuracy
     nn_model.to(device=device)
     weight_model.to(device=device)
     PseudoOptimizer.parameter_type.convert_model(nn_model, transform=weight_model)

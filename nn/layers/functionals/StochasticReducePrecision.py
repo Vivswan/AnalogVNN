@@ -1,12 +1,12 @@
 import torch
 from torch import nn, Tensor
 
-from nn.backward_pass.BackwardFunction import BackwardIdentity
+from nn.fn.BackwardIdentity import BackwardIdentity
 from nn.fn.reduce_precision import stochastic_reduce_precision
-from nn.modules.BaseLayer import BaseLayer
+from nn.modules.Layer import Layer
 
 
-class StochasticReducePrecision(BaseLayer, BackwardIdentity):
+class StochasticReducePrecision(Layer, BackwardIdentity):
     __constants__ = ['precision']
     precision: nn.Parameter
 
