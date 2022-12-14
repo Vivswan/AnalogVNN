@@ -101,7 +101,7 @@ class LinearModel(FullSequential):
         self.leakage = leakage
 
         self.all_layers = []
-        self.all_layers.append(BackwardWrapper(nn.Flatten(start_dim=1)))
+        self.all_layers.append(nn.Flatten(start_dim=1))
         self.add_layer(Linear(in_features=28 * 28, out_features=256))
         self.add_layer(Linear(in_features=256, out_features=128))
         self.add_layer(Linear(in_features=128, out_features=10))

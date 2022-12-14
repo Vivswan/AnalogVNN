@@ -1,22 +1,23 @@
-from typing import Union
+from typing import Union, Dict
 
 import torch
+from dataclasses import dataclass
 from torch import Tensor
 
-from nn.graphs.TensorFlowGraphEnum import TensorFlowGraphEnum
+from nn.graphs.GraphEnum import GraphEnum
+from nn.graphs.InputOutput import InputOutput
 
 
 class ModelGraphState:
-    INPUT = TensorFlowGraphEnum.INPUT
-    OUTPUT = TensorFlowGraphEnum.OUTPUT
-    STOP = TensorFlowGraphEnum.STOP
+    INPUT = GraphEnum.INPUT
+    OUTPUT = GraphEnum.OUTPUT
+    STOP = GraphEnum.STOP
 
-    def __init__(self, allow_loops=False, use_autograd_graph: bool = False):
+    def __init__(self, use_autograd_graph: bool = False, allow_loops=False):
         self.allow_loops = allow_loops
         self.use_autograd_graph: bool = use_autograd_graph
 
-        self._inputs: Union[None, Tensor] = None
-        self._output: Union[None, Tensor] = None
+        self.forward_input_output_graph: Dict[Union[GraphEnum, torch.nn.Module], InputOutput] = None
         self._loss: Union[None, Tensor] = None
 
     def ready_for_forward(self, exception=False):
@@ -34,28 +35,19 @@ class ModelGraphState:
 
     @property
     def inputs(self):
-        return self._inputs
+        if self.INPUT not in self.forward_input_output_graph:
+            return None
+        return self.forward_input_output_graph[self.INPUT].inputs
 
     @property
     def output(self):
-        return self._output
+        if self.OUTPUT not in self.forward_input_output_graph:
+            return None
+        return self.forward_input_output_graph[self.OUTPUT].outputs
 
     @property
     def loss(self):
         return self._loss
-
-    def set_inputs(self, *inputs):
-        self._inputs = inputs
-        return self._inputs
-
-    def set_outputs(self, output: Union[Tensor, None]):
-        with torch.no_grad():
-            if self.use_autograd_graph or output is None:
-                self._output = output
-            else:
-                self._output = output.detach()
-                self._output.requires_grad = True
-        return self._output
 
     def set_loss(self, loss: Union[Tensor, None]):
         self._loss = loss

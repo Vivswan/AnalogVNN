@@ -25,7 +25,7 @@ def train(
         model.optimizer.zero_grad()
 
         # forward + backward + optimize
-        output = model.output(data)
+        output = model.outputs(data)
         loss, accuracy = model.loss(output, target)
 
         model.backward()
