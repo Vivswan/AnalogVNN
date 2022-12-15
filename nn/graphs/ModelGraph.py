@@ -27,7 +27,7 @@ class ModelGraph(ModelGraphState):
         self.backward_graph.compile(is_static=is_static)
 
 
-def to_digraph(N):
+def to_digraph(N, real_label=False):
     """Returns a pygraphviz graph from a NetworkX graph N.
 
     Parameters
@@ -84,7 +84,10 @@ def to_digraph(N):
         attr["tail_name"] = str(id(u))
         attr["head_name"] = str(id(v))
 
-        attr["label"] = attr["label"].replace("->", "→") if "label" in attr else None
+        if real_label and "real_label" in attr:
+            attr["label"] = attr["real_label"]
+        else:
+            attr["label"] = attr["label"].replace("->", "→") if "label" in attr else None
         A.edge(**attr)
 
     return A
@@ -127,7 +130,7 @@ if __name__ == '__main__':
 
     mg.compile(is_static=True, auto_backward_graph=True)
     to_digraph(mg.forward_graph.graph).render("../../_data/forward", format="svg", cleanup=True)
-    to_digraph(mg.backward_graph.graph).render("../../_data/backward", format="svg", cleanup=True)
+    to_digraph(mg.backward_graph.graph, real_label=True).render("../../_data/backward", format="svg", cleanup=True)
     inputs = torch.ones((1, 1), requires_grad=True)
 
     print()

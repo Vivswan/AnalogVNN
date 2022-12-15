@@ -128,7 +128,7 @@ class BackwardGraph(AcyclicDirectedGraph):
 
         return result
 
-    def from_forward(self, forward_graph, real_label=False):
+    def from_forward(self, forward_graph):
         if isinstance(forward_graph, AcyclicDirectedGraph):
             forward_graph = forward_graph.graph
 
@@ -153,7 +153,8 @@ class BackwardGraph(AcyclicDirectedGraph):
                             "in_kwarg": attr["in_kwarg"],
                             "out_arg": None,
                             "out_kwarg": uuid_str,
-                            "label": " ".join(attr["label"].split(" ")[:-1] + ["{" + uuid_str + "}"]) if real_label else attr["label"],
+                            "real_label": " ".join(attr["label"].split(" ")[:-1] + ["{" + uuid_str + "}"]),
+                            "label": attr["label"]
                         })
                         akc.locations[uuid_str] = {
                             **attr,
@@ -166,7 +167,8 @@ class BackwardGraph(AcyclicDirectedGraph):
                             "in_kwarg": None,
                             "out_arg": None,
                             "out_kwarg": uuid_str,
-                            "label": "[] -> {" + uuid_str + "}" if real_label else "[] -> []",
+                            "real_label": "[] -> {" + uuid_str + "}",
+                            "label": "[] -> []",
                         })
                         akc.locations[uuid_str] = {
                             **attr,
@@ -180,7 +182,8 @@ class BackwardGraph(AcyclicDirectedGraph):
                             "in_kwarg": True,
                             "out_arg": None,
                             "out_kwarg": uuid_str,
-                            "label": "{} -> {" + uuid_str + "}" if real_label else "{} -> {}",
+                            "real_label": "{} -> {" + uuid_str + "}",
+                            "label": "{} -> {}",
                         })
                         akc.locations[uuid_str] = {
                             **attr,
