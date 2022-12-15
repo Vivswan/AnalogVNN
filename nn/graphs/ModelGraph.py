@@ -18,8 +18,12 @@ class ModelGraph(ModelGraphState):
         self.forward_graph = ForwardGraph(self)
         self.backward_graph = BackwardGraph(self)
 
-    def compile(self, is_static=True):
+    def compile(self, is_static=True, auto_backward_graph=True):
         self.forward_graph.compile(is_static=is_static)
+
+        if auto_backward_graph:
+            self.backward_graph.from_forward(self.forward_graph)
+
         self.backward_graph.compile(is_static=is_static)
 
 
@@ -80,7 +84,7 @@ def to_digraph(N):
         attr["tail_name"] = str(id(u))
         attr["head_name"] = str(id(v))
 
-        attr["label"] = attr["label"].replace("->", "→")
+        attr["label"] = attr["label"].replace("->", "→") if "label" in attr else None
         A.edge(**attr)
 
     return A
@@ -107,29 +111,24 @@ if __name__ == '__main__':
     # l2 :: (2, 1) -> (3, 1)
     # l3 :: (2, 3) -> {a: -1, b: 5}
     # l4 :: (-1, 5, 2, 3, 1) -> {c: 10}
-    mg.forward_graph.add_edge(mg.INPUT, l1, out_arg=0)
-    # mg.forward_graph.add_edge(mg.INPUT, l1, out_arg=0)
+    mg.forward_graph.add_edge(mg.INPUT, l1, in_arg=0)
     mg.forward_graph.add_edge(mg.INPUT, l2)
     mg.forward_graph.add_edge(l1, l2, out_arg=1)
     mg.forward_graph.add_edge(l1, l3, out_arg=0)
     mg.forward_graph.add_edge(l1, l3, out_arg=0)
     mg.forward_graph.add_edge(l2, l3, in_arg=1, out_arg=1)
     mg.forward_graph.add_edge(l2, l3, in_arg=0, out_arg=1)
-    mg.forward_graph.add_edge(l3, l4, in_kwarg="a", out_kwarg="x")
-    mg.forward_graph.add_edge(l3, l4, in_kwarg="b", out_kwarg="y")
+    mg.forward_graph.add_edge(l3, l4, in_kwarg=True, out_arg=True)
+    # mg.forward_graph.add_edge(l3, l4, in_kwarg="b", out_kwarg="y")
     mg.forward_graph.add_edge(l1, l4, out_kwarg="z")
     mg.forward_graph.add_edge(l2, l4, out_kwarg="a")
     mg.forward_graph.add_edge(l2, l4, in_arg=1, out_kwarg="b")
     mg.forward_graph.add_edge(l4, mg.OUTPUT, in_kwarg="c", out_arg=0)
 
-    mg.backward_graph.from_forward(mg.forward_graph)
-    mg.compile(is_static=True)
-    # mg.forward_graph.show_graph()
-    # mg.backward_graph.show_graph()
-    inputs = torch.ones((1, 1), requires_grad=True)
-
+    mg.compile(is_static=True, auto_backward_graph=True)
     to_digraph(mg.forward_graph.graph).render("../../_data/forward", format="svg", cleanup=True)
     to_digraph(mg.backward_graph.graph).render("../../_data/backward", format="svg", cleanup=True)
+    inputs = torch.ones((1, 1), requires_grad=True)
 
     print()
     print("Starting Forward Pass ::")
@@ -146,6 +145,7 @@ if __name__ == '__main__':
     # print(mg.backward_graph.calculate_graph(torch.ones((1, 1))))
     print()
     print("Grads ::")
+    output = mg.forward_graph.calculate_graph(torch.ones((1, 1), requires_grad=True))
     for k, v in reversed(list(mg.forward_input_output_graph.items())):
         if len(v.outputs.args) > 0:
             grad = torch.autograd.grad(outputs=output, grad_outputs=torch.ones((1, 1)), inputs=v.outputs.args, retain_graph=True)
@@ -177,5 +177,6 @@ if __name__ == '__main__':
     print()
     print("Starting Backward Pass ::")
     # output.backward(torch.ones((1, 1)), retain_graph=True)
+    output = mg.forward_graph.calculate_graph(torch.ones((1, 1), requires_grad=True))
     output.grad = torch.ones((1, 1))
     print(mg.backward_graph.calculate_graph())
