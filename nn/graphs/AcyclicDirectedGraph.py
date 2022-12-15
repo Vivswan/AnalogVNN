@@ -5,6 +5,7 @@ import networkx as nx
 from nn.graphs.GraphEnum import GraphEnum
 from nn.graphs.InputOutput import ArgsKwargs
 from nn.graphs.ModelGraphState import ModelGraphState
+from nn.graphs.to_graph_viz_digraph import to_digraph
 
 
 class AcyclicDirectedGraph(abc.ABC):
@@ -265,3 +266,6 @@ class AcyclicDirectedGraph(abc.ABC):
             print(f"{module} :o: {input_output_graph[module].outputs.args}")
         if len(input_output_graph[module].outputs.kwargs.keys()) > 0:
             print(f"{module} :o: {input_output_graph[module].outputs.kwargs}")
+
+    def render(self, *args, real_label=False, **kwargs):
+        return to_digraph(self.graph, real_label=real_label).render(*args, **kwargs)

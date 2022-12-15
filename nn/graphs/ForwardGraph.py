@@ -1,4 +1,4 @@
-from typing import Dict, Any, Sequence, Tuple
+from typing import Dict, Any, Sequence, Tuple, Union
 
 import torch
 from torch import Tensor
@@ -27,7 +27,7 @@ class ForwardGraph(AcyclicDirectedGraph):
 
         return super().compile(self.INPUT, is_static)
 
-    def calculate_graph(self, inputs: Tuple[Tensor], is_training=True, **kwargs):
+    def calculate_graph(self, inputs: Union[Tensor, Sequence[Tensor]], is_training=True, **kwargs):
         if not isinstance(inputs, Sequence):
             inputs = (inputs, )
 
