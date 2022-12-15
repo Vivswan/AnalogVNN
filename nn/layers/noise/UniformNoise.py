@@ -19,6 +19,10 @@ class UniformNoise(Layer, BackwardIdentity):
             precision: Union[None, int] = None
     ):
         super(UniformNoise, self).__init__()
+
+        if (low is None or high is None) + (leakage is None) + (precision is None) != 1:
+            raise ValueError("only 2 out of 3 arguments are needed (scale, leakage, precision)")
+
         self.low, self.high, self.leakage, self.precision = to_float_tensor(
             low, high, leakage, precision
         )

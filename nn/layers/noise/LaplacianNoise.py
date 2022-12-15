@@ -22,11 +22,8 @@ class LaplacianNoise(Layer, BackwardIdentity):
     ):
         super(LaplacianNoise, self).__init__()
 
-        if scale is not None and precision is not None and leakage is not None:
-            raise ValueError("only 2 out of 3 arguments are needed (scale, precision, leakage)")
-
-        if scale is None or (precision is None and leakage is None):
-            raise ValueError("Invalid arguments not found: scale or (leakage and precision)")
+        if (scale is None) + (leakage is None) + (precision is None) != 1:
+            raise ValueError("only 2 out of 3 arguments are needed (scale, leakage, precision)")
 
         self.scale, self.leakage, self.precision = to_float_tensor(
             scale, leakage, precision
