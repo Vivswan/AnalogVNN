@@ -108,7 +108,10 @@ if __name__ == '__main__':
 
 
     def l4(x, y, z, a, b):
-        return {"c": x + y + z + a + b}
+        return x + y + z + a + b
+
+    def l5(x):
+        return {"c": x * 0.5}
 
     # l1 :: 1 -> 2
     # l2 :: (2, 1) -> (3, 1)
@@ -126,7 +129,8 @@ if __name__ == '__main__':
     mg.forward_graph.add_edge(l1, l4, out_kwarg="z")
     mg.forward_graph.add_edge(l2, l4, out_kwarg="a")
     mg.forward_graph.add_edge(l2, l4, in_arg=1, out_kwarg="b")
-    mg.forward_graph.add_edge(l4, mg.OUTPUT, in_kwarg="c", out_arg=0)
+    mg.forward_graph.add_edge(l4, l5)
+    mg.forward_graph.add_edge(l5, mg.OUTPUT, in_kwarg="c", out_arg=0)
 
     mg.compile(is_static=True, auto_backward_graph=True)
     to_digraph(mg.forward_graph.graph).render("../../_data/forward", format="svg", cleanup=True)
@@ -180,6 +184,4 @@ if __name__ == '__main__':
     print()
     print("Starting Backward Pass ::")
     # output.backward(torch.ones((1, 1)), retain_graph=True)
-    output = mg.forward_graph.calculate_graph(torch.ones((1, 1), requires_grad=True))
-    output.grad = torch.ones((1, 1))
-    print(mg.backward_graph.calculate_graph())
+    print(mg.backward_graph.calculate_graph(torch.ones((1, 1))))

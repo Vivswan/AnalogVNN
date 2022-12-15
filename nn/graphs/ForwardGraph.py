@@ -1,6 +1,7 @@
-from typing import Dict, Any
+from typing import Dict, Any, Sequence, Tuple
 
 import torch
+from torch import Tensor
 
 from nn.graphs.AcyclicDirectedGraph import AcyclicDirectedGraph
 from nn.graphs.GraphEnum import GraphEnum
@@ -26,13 +27,20 @@ class ForwardGraph(AcyclicDirectedGraph):
 
         return super().compile(self.INPUT, is_static)
 
-    def calculate_graph(self, inputs, is_training=True, **kwargs):
+    def calculate_graph(self, inputs: Tuple[Tensor], is_training=True, **kwargs):
+        if not isinstance(inputs, Sequence):
+            inputs = (inputs, )
+
+        if not self.graph_state.use_autograd_graph:
+            for i in inputs:
+                i.requires_grad = True
+
         if is_training:
-            input_output_graph = self._pass(inputs, self.INPUT)
+            input_output_graph = self._pass(self.INPUT, *inputs)
             self.graph_state.forward_input_output_graph = input_output_graph
         else:
             with torch.no_grad():
-                input_output_graph = self._pass(inputs, self.INPUT)
+                input_output_graph = self._pass(self.INPUT, *inputs)
 
         output = input_output_graph[self.OUTPUT].outputs
         if len(output.kwargs.keys()) > 0:
@@ -44,10 +52,10 @@ class ForwardGraph(AcyclicDirectedGraph):
         else:
             return None
 
-    def _pass(self, inputs, from_node) -> Dict[Any, InputOutput]:
+    def _pass(self, from_node: GraphEnum, *inputs: Tensor) -> Dict[Any, InputOutput]:
         static_graph = self._static_graph or self._create_sub_graph(from_node)
         input_output_graph = {
-            from_node: InputOutput(inputs=ArgsKwargs(args=[inputs]))
+            from_node: InputOutput(inputs=ArgsKwargs(args=[*inputs]))
         }
         for module, predecessors in static_graph:
             if module != from_node:
@@ -56,7 +64,7 @@ class ForwardGraph(AcyclicDirectedGraph):
 
             if isinstance(module, GraphEnum):
                 input_output_graph[module].outputs = input_output_graph[module].inputs
-                self.print_inputs_outputs(input_output_graph, module)
+                # self.print_inputs_outputs(input_output_graph, module)
                 continue
 
             outputs = module(
@@ -64,34 +72,7 @@ class ForwardGraph(AcyclicDirectedGraph):
                 **input_output_graph[module].inputs.kwargs
             )
             input_output_graph[module].outputs = self.output_to_args_kwargs(outputs)
-            self.print_inputs_outputs(input_output_graph, module)
+            # self.print_inputs_outputs(input_output_graph, module)
 
         return input_output_graph
 
-
-if __name__ == '__main__':
-    gb = ForwardGraph(ModelGraphState())
-
-
-    def l3(x):
-        return x * 2
-
-
-    def l2(x, y):
-        return x * y * 3
-
-
-    def l1(x, y, z):
-        return x * y * z * 5
-
-
-    gb.add_connection(ForwardGraph.INPUT, l3, name="x")
-    gb.add_connection(l3, l2, name="y")
-    gb.add_connection(ForwardGraph.INPUT, l2, name="x")
-    gb.add_connection(ForwardGraph.INPUT, l1, name="x")
-    gb.add_connection(l3, l1, name="y")
-    gb.add_connection(l2, l1, name="z")
-    gb.add_connection(l1, ForwardGraph.OUTPUT, name="OUTPUT")
-
-    gb.compile(is_static=True)
-    print(gb._pass(1))

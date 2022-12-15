@@ -31,6 +31,9 @@ class ArgsKwargs:
         self.args: List = args
         self.kwargs: Dict = kwargs
 
+    def is_empty(self):
+        return len(self.args) == 0 and not bool(self.kwargs)
+
     def __repr__(self):
         return f"ArgsKwargs(args={self.args}, kwargs={self.kwargs})"
 

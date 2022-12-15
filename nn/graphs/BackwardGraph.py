@@ -51,7 +51,8 @@ class ArgsKwargsCalculator:
                 forward_inputs = forward_input_output_graph[location["from"]].inputs.args
                 forward_outputs = forward_input_output_graph[self.module].outputs.args
                 for i in range(len(forward_inputs)):
-                    value_index = forward_outputs.index(forward_inputs[i]) if forward_inputs[i] in forward_outputs else -1
+                    value_index = forward_outputs.index(forward_inputs[i]) if forward_inputs[
+                                                                                  i] in forward_outputs else -1
                     if value_index == -1:
                         continue
                     if value_index not in grad_inputs_args:
@@ -115,14 +116,16 @@ class BackwardGraph(AcyclicDirectedGraph):
         if self.graph_state.use_autograd_graph:
             result = self.graph_state.loss.backward(
                 gradient=gradient,
-                inputs=self.graph_state.output
+                inputs=self.graph_state.output.args
             )
         else:
-            self.graph_state.loss.backward(
-                gradient=gradient,
-                inputs=self.graph_state.output
+            grad_outputs = torch.autograd.grad(
+                outputs=self.graph_state.loss,
+                inputs=self.graph_state.output.args,
+                grad_outputs=gradient,
+                retain_graph=True
             )
-            result = self.calculate_graph()
+            result = self.calculate_graph(*grad_outputs)
 
         self.graph_state.set_loss(None)
 
@@ -143,6 +146,13 @@ class BackwardGraph(AcyclicDirectedGraph):
             if v == self.OUTPUT:
                 continue
             all_predecessors = list(graph.predecessors(v))
+
+            if len(all_predecessors) == 1 and len(graph.get_edge_data(all_predecessors[0], v)) == 1:
+                attr = graph.get_edge_data(all_predecessors[0], v)[0]
+                if attr["in_arg"] == attr["in_kwarg"] == attr["in_arg"] == attr["in_arg"] == True:
+                    new_graph.add_edge(all_predecessors[0], v, **attr)
+                    continue
+
             akc = ArgsKwargsCalculator(v)
             for u in all_predecessors:
                 for key, attr in graph.get_edge_data(u, v).items():
@@ -200,6 +210,8 @@ class BackwardGraph(AcyclicDirectedGraph):
                 # "label": f"* -> *",
                 "len": 0,
             })
+
+        for v in graph.nodes():
             new_graph.nodes[v]["fillcolor"] = "lightblue"
         self.graph = new_graph
         # self.graph = graph
@@ -212,11 +224,11 @@ class BackwardGraph(AcyclicDirectedGraph):
         return super().compile(self.OUTPUT, is_static)
 
     @torch.no_grad()
-    def calculate_graph(self):
+    def calculate_graph(self, *args, **kwargs):
         if self.graph_state.forward_input_output_graph is None:
             raise Exception("No forward pass has been performed yet")
 
-        input_output_graph = self._pass(self.OUTPUT)
+        input_output_graph = self._pass(self.OUTPUT, *args, **kwargs)
         self.graph_state.forward_input_output_graph = None
 
         if self.INPUT in input_output_graph:
@@ -230,13 +242,12 @@ class BackwardGraph(AcyclicDirectedGraph):
 
         return None
 
-    def _pass(self, from_node) -> Dict[Any, InputOutput]:
+    def _pass(self, from_node, *args, **kwargs) -> Dict[Any, InputOutput]:
         static_graph = self._static_graph or self._create_sub_graph(from_node)
-        from_node_inputs = self.graph_state.forward_input_output_graph[from_node].inputs
         input_output_graph = {
             from_node: InputOutput(inputs=ArgsKwargs(
-                args=[i.grad for i in from_node_inputs.args],
-                kwargs={k: v.grad for k, v in from_node_inputs.kwargs.items()}
+                args=args,
+                kwargs=kwargs
             ))
         }
         for module, predecessors in static_graph:
@@ -246,8 +257,8 @@ class BackwardGraph(AcyclicDirectedGraph):
 
             if isinstance(module, GraphEnum):
                 input_output_graph[module].outputs = input_output_graph[module].inputs
-                print()
-                self.print_inputs_outputs(input_output_graph, module)
+                # print()
+                # self.print_inputs_outputs(input_output_graph, module)
                 continue
 
             outputs = self.gradient_wrapper(
@@ -255,7 +266,7 @@ class BackwardGraph(AcyclicDirectedGraph):
                 input_output_graph[module]
             )
             input_output_graph[module].outputs = self.output_to_args_kwargs(outputs)
-            self.print_inputs_outputs(input_output_graph, module)
+            # self.print_inputs_outputs(input_output_graph, module)
 
         return input_output_graph
 
@@ -273,6 +284,9 @@ class BackwardGraph(AcyclicDirectedGraph):
         else:
             module_inputs_outputs = None
 
+        if grads.inputs.is_empty():
+            return ArgsKwargs()
+
         grad_dict = {}
         if isinstance(module, ArgsKwargsCalculator):
             return module.grad(
@@ -283,6 +297,12 @@ class BackwardGraph(AcyclicDirectedGraph):
         inputs = module_inputs_outputs.inputs.args + list(module_inputs_outputs.inputs.kwargs.values())
         outputs = []
         outputs_grads = []
+
+        if len(inputs) == 0:
+            return ArgsKwargs(
+                args=[torch.zeros_like(i) for i in module_inputs_outputs.inputs.args],
+                kwargs={key: torch.zeros_like(value) for key, value in module_inputs_outputs.inputs.kwargs.items()}
+            )
 
         for i in range(len(module_inputs_outputs.outputs.args)):
             outputs.append(module_inputs_outputs.outputs.args[i])

@@ -67,7 +67,7 @@ class Model(Layer):
     def backward(self, *inputs):
         return self.graphs.backward_graph(inputs)
 
-    def output(self, x: Tensor) -> Tensor:
+    def outputs(self, x: Tensor) -> Tensor:
         return self(x)
 
     def loss(self, output, target):
