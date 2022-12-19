@@ -29,7 +29,7 @@ To convert a digital model to its analog counterpart the following steps needs t
 
                     self.add_sequence(*self.all_layers)
 
-       Note: "add_sequence" is used to create and set forward and backward graphs in AnalogVNN, more information in :doc:`forward_backward`
+       Note: "add_sequence" is used to create and set forward and backward graphs in AnalogVNN, more information in :doc:`inner_workings`
 
     #. To add the Reduce Precision, Normalization, and Noise before and after the main Linear layer, we can modify the "add_layer" function
         .. code-block:: python
