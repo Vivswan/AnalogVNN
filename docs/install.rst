@@ -47,7 +47,7 @@ Install the required dependencies:
 
 Install AnalogVNN (one fo the following ways):
     - Finally AnalogVNN can be downloaded at (`GitHub <https://github.com/Photonics-Pitt-Org/AnalogVNN>`_) or creating a fork of it.
-    - Pip installation instructions coming soon...
+    - Pip installation instructions [coming soon...]
 
 Finish
 """"""
