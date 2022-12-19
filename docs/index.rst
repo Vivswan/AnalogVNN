@@ -24,8 +24,8 @@ _________________
    install
    sample_code
    tutorial
-   inner_workings
    extra_classes
+   inner_workings
 
 .. only:: html
 
