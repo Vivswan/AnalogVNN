@@ -37,7 +37,7 @@ Reduce Precision uses the following probabilistic function to reduce precision o
     \end{array} \right.
 
 where:
-	r is a uniformly distributed random number between 0 and 1
+    r is a uniformly distributed random number between 0 and 1
 
     p is the analog precision (p ∈ Natural Numbers, number of bits= log2(p+1))
 
@@ -104,21 +104,54 @@ parameter used in PyTorch’s Dropout Layer [23], though different in function. 
 
 .. math::
 
+    EP = 1 - \frac{\int_{q=a}^{b}\int_{p=-\infty}^{\infty} sign\left( \delta\left( RP\left( p \right) -RP\left( q \right)\right) \right) * PDF_{N_{RP(q)}}(p) \; dp \; dq}{\left| b - a \right|}
+
+    EP = 1 - \frac{\int_{q=a}^{b}\int_{p=max\left( RP(q) - \frac{s}{2}, a \right)}^{min\left( RP(q) + \frac{s}{2}, b \right)}  PDF_{N_{RP(q)}}(p) \; dp \; dq}{\left| b - a \right|}
+
+    EP = 1 - \frac{1}{size(R_{RP}(a,b)) - 1} * \sum_{q\in S_{RP}(s,b)}^{}\int_{p=max\left( p - \frac{s}{2}, a \right)}^{min\left( q + \frac{s}{2}, b \right)} PDF_{N_{RP(q)}}(p) \; dp
+
+    EP = 1 - \frac{1}{size(R_{RP}(a,b)) - 1} * \sum_{q\in S_{RP}(s,b)}^{} \left[ CDF_{N_{q}}(p) \right]_{max\left( p - \frac{s}{2}, a \right)}^{min\left( q + \frac{s}{2}, b \right)}
+
+For noise distributions invariant to linear transformations (e.g., Uniform, Normal, Laplace, etc.), the EP equation is as follows:
+
+.. math::
+
+    EP = 2 * CDF_{N_{0}} \left( - \frac{1}{2 * p} \right)
+
+where:
+    EP is in the range [0, 1]
+
+    δ is the Dirac Delta function
+
+    RP is the Reduce Precision function (for the above equation, d=0.5)
+
+    s is the step width of reduce precision function
+
+    S_RP (a, b) is {x ∈ [a, b] | RP (x) = x}
+
+    PDF_x is the probability density function for the noise distribution, x
+
+    CDF_x is the cumulative density function for the noise distribution, x
+
+    N_x is the noise function around point x. (for Gaussian Noise, x = mean and for Poisson Noise, x = rate)
+
+    a, b are the limits of the analog signal domain (for photonics a = −1 and b = 1)
 
 
 GaussianNoise
 _____________
-Coming Soon...
+.. math::
 
-LaplacianNoise
-______________
-Coming Soon...
+    EP = 1 - erf \left( \frac{1}{2\sqrt{2} * \sigma * p} \right)
 
-PoissonNoise
-____________
-Coming Soon...
+    \sigma = \frac{1}{2\sqrt{2} * p * erf^{-1}(1 - EP)}
 
-UniformNoise
-____________
-Coming Soon...
+where:
+    \sigma is the standard deviation of Gaussian Noise
+
+    EP is the error probability (0\le EP\le1)
+
+    erf is the Gauss Error Function
+
+    p is precision
 
