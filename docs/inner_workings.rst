@@ -44,16 +44,19 @@ PseudoOptimizers
 ================
 "PseudoOptimizers" is a subclass of "Optimizer" class of PyTorch.
 
+For "PseudoParameters" to properly work we will need to modify the PyTorch's Optimizer class. We can do so by using the
+following code. Here we are using Adam optimizer with lr=0.01 as an example:
 
     .. code-block:: python
 
         new_optimizer = PseudoOptimizer(
             optimizer_cls=optim.Adam,
-            params=nn_model.parameters(),
+            params=Model.parameters(),
+            lr=0.01
         )
+
 
 Forward and Backward Graphs
 ===========================
 Coming Soon...
 
-BackwardFunction, BackwardPass, BackwardWrapper, FullSequential
