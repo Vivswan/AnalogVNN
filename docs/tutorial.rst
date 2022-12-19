@@ -2,8 +2,6 @@
 Tutorial
 ********
 
-Custom Forward and backward graphs
-
 To convert a digital model to its analog counterpart the following steps needs to be followed:
 
 #. Adding the analog layers to the digital model. For example, to create the Photonic Linear Layer with Reduce Precision, Normalization and Noise:
