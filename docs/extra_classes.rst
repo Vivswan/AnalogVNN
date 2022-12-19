@@ -106,9 +106,15 @@ parameter used in PyTorch’s Dropout Layer [23], though different in function. 
 
     EP = 1 - \frac{\int_{q=a}^{b}\int_{p=-\infty}^{\infty} sign\left( \delta\left( RP\left( p \right) -RP\left( q \right)\right) \right) * PDF_{N_{RP(q)}}(p) \; dp \; dq}{\left| b - a \right|}
 
+.. math::
+
     EP = 1 - \frac{\int_{q=a}^{b}\int_{p=max\left( RP(q) - \frac{s}{2}, a \right)}^{min\left( RP(q) + \frac{s}{2}, b \right)}  PDF_{N_{RP(q)}}(p) \; dp \; dq}{\left| b - a \right|}
 
+.. math::
+
     EP = 1 - \frac{1}{size(R_{RP}(a,b)) - 1} * \sum_{q\in S_{RP}(s,b)}^{}\int_{p=max\left( p - \frac{s}{2}, a \right)}^{min\left( q + \frac{s}{2}, b \right)} PDF_{N_{RP(q)}}(p) \; dp
+
+.. math::
 
     EP = 1 - \frac{1}{size(R_{RP}(a,b)) - 1} * \sum_{q\in S_{RP}(s,b)}^{} \left[ CDF_{N_{q}}(p) \right]_{max\left( p - \frac{s}{2}, a \right)}^{min\left( q + \frac{s}{2}, b \right)}
 
