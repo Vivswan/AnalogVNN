@@ -106,7 +106,7 @@ To convert a digital model to its analog counterpart the following steps needs t
         weight_model.to(device=device)
 
 
-#. Using Analog Parameters Model to, convert digital parameters to analog parameters
+#. Using Analog Parameters Model to convert digital parameters to analog parameters
     .. code-block:: python
 
         PseudoParameter.convert_model(nn_model, transform=weight_model)
@@ -119,7 +119,7 @@ To convert a digital model to its analog counterpart the following steps needs t
             params=nn_model.parameters(),
         )
 
-#. Then you are good to go, and train and test the model
+#. Then you are good to go to train and test the model
     .. code-block:: python
 
         # Training
