@@ -1,111 +1,18 @@
-import copy
 import uuid
 from typing import Dict, Any
 
 import networkx as nx
 import torch
 
+from nn.graphs.AccumulateGrad import AccumulateGrad
 from nn.graphs.AcyclicDirectedGraph import AcyclicDirectedGraph
 from nn.graphs.GraphEnum import GraphEnum
-from nn.graphs.InputOutput import ArgsKwargs, InputOutput
-
-
-class ArgsKwargsCalculator:
-    def __init__(self, module):
-        self.locations = {}
-        self.module = module
-
-    def __repr__(self):
-        return f"AccumulateGrad"
-        # return f"ArgsKwargsCalculator({self.module})"
-
-    def grad(self, grad_outputs_args_kwargs: ArgsKwargs, forward_input_output_graph):
-        grad_inputs_args = {}
-        grad_inputs_kwargs = {}
-        for key, grad_output in grad_outputs_args_kwargs.kwargs.items():
-            location = self.locations[key]
-            forward_out_arg = location['in_arg']
-            forward_out_kwarg = location['in_kwarg']
-            forward_in_arg = location['out_arg']
-            forward_in_kwarg = location['out_kwarg']
-            # print(out_kwarg, out_arg, value)
-
-            # 0 - not allowed
-
-            # 4
-            if forward_out_arg is True and isinstance(forward_in_arg, int) and not isinstance(forward_in_arg, bool):
-                forward_inputs = forward_input_output_graph[location["from"]].inputs.args
-                forward_outputs = forward_input_output_graph[self.module].outputs.args
-                forward_out_arg = forward_inputs.index(forward_outputs[forward_in_arg])
-                grad_output = grad_output[forward_out_arg]
-
-            # 7
-            if forward_out_arg is True and isinstance(forward_in_kwarg, str):
-                forward_inputs = forward_input_output_graph[location["from"]].inputs.args
-                forward_outputs = forward_input_output_graph[self.module].outputs.kwargs
-                forward_out_arg = forward_inputs.index(forward_outputs[forward_in_kwarg])
-                grad_output = grad_output[forward_out_arg]
-
-            # 1
-            if forward_out_arg is True and forward_in_arg is True:
-                forward_inputs = forward_input_output_graph[location["from"]].inputs.args
-                forward_outputs = forward_input_output_graph[self.module].outputs.args
-                for i in range(len(forward_inputs)):
-                    value_index = forward_outputs.index(forward_inputs[i]) if forward_inputs[
-                                                                                  i] in forward_outputs else -1
-                    if value_index == -1:
-                        continue
-                    if value_index not in grad_inputs_args:
-                        grad_inputs_args[value_index] = torch.zeros_like(grad_output[i])
-                    grad_inputs_args[value_index] += grad_output[i]
-                continue
-
-            # 2
-            if forward_out_arg is True and forward_in_kwarg is True:
-                forward_inputs = forward_input_output_graph[location["from"]].inputs.args
-                forward_outputs = forward_input_output_graph[self.module].outputs.kwargs
-                for i in forward_outputs:
-                    value_index = forward_inputs.index(forward_outputs[i])
-
-                    if i not in grad_inputs_kwargs:
-                        grad_inputs_kwargs[i] = torch.zeros_like(grad_output[value_index])
-                    grad_inputs_kwargs[i] += grad_output[value_index]
-                continue
-
-            # 3
-            if forward_out_kwarg is True and forward_in_kwarg is True:
-                for i in grad_output:
-                    if i not in grad_inputs_kwargs:
-                        grad_inputs_kwargs[i] = torch.zeros_like(grad_output[i])
-
-                    grad_inputs_kwargs[i] += grad_output[i]
-                continue
-
-            # 8 & 9
-            if forward_in_kwarg is not None and isinstance(forward_in_kwarg, str):
-                if forward_in_kwarg not in grad_inputs_kwargs:
-                    grad_inputs_kwargs[forward_in_kwarg] = torch.zeros_like(grad_output)
-
-                grad_inputs_kwargs[forward_in_kwarg] += grad_output
-                continue
-
-            # 5 & 6
-            if forward_in_arg is not None and isinstance(forward_in_arg, int) and not isinstance(forward_in_arg, bool):
-                if forward_in_arg not in grad_inputs_args:
-                    grad_inputs_args[forward_in_arg] = torch.zeros_like(grad_output)
-                grad_inputs_args[forward_in_arg] += grad_output
-                continue
-
-            raise NotImplementedError("WTF!Why!")
-
-        return ArgsKwargs(
-            args=[grad_inputs_args[i] for i in sorted(list(grad_inputs_args.keys()))],
-            kwargs=grad_inputs_kwargs
-        )
+from nn.graphs.InputOutput import InputOutput
+from nn.graphs.ArgsKwargs import ArgsKwargs
 
 
 class BackwardGraph(AcyclicDirectedGraph):
-    def __call__(self, gradient=None, *args, **kwargs):
+    def __call__(self, gradient=None):
         self.graph_state.ready_for_backward(exception=True)
 
         if len(gradient) == 0:
@@ -139,7 +46,7 @@ class BackwardGraph(AcyclicDirectedGraph):
         for _, _, attr in graph.edges(data=True):
             attr["in_arg"], attr["out_arg"] = attr["out_arg"], attr["in_arg"]
             attr["in_kwarg"], attr["out_kwarg"] = attr["out_kwarg"], attr["in_kwarg"]
-            attr["label"] = " ".join(attr["label"].split(" ")[::-1])
+            attr["label"] = AcyclicDirectedGraph._create_edge_label(**attr)
 
         new_graph = nx.MultiDiGraph()
         for v in graph.nodes():
@@ -153,7 +60,7 @@ class BackwardGraph(AcyclicDirectedGraph):
                     new_graph.add_edge(all_predecessors[0], v, **attr)
                     continue
 
-            akc = ArgsKwargsCalculator(v)
+            akc = AccumulateGrad(v)
             for u in all_predecessors:
                 for key, attr in graph.get_edge_data(u, v).items():
                     if attr["in_arg"] is None or attr["in_kwarg"] is None:
@@ -288,7 +195,7 @@ class BackwardGraph(AcyclicDirectedGraph):
             return ArgsKwargs()
 
         grad_dict = {}
-        if isinstance(module, ArgsKwargsCalculator):
+        if isinstance(module, AccumulateGrad):
             return module.grad(
                 forward_input_output_graph=self.graph_state.forward_input_output_graph,
                 grad_outputs_args_kwargs=grads.inputs,
@@ -317,6 +224,7 @@ class BackwardGraph(AcyclicDirectedGraph):
             inputs=inputs,
             grad_outputs=outputs_grads,
             retain_graph=True,
+            allow_unused=True
         )
         # print()
         # print(f"inputs: {inputs}")

@@ -8,7 +8,7 @@ class Parameter(nn.Parameter):
 
     # noinspection PyUnusedLocal
     def __init__(self, data=None, requires_grad=True, *args, **kwargs):
-        super().__init__()
+        super(Parameter, self).__init__()
 
     def __repr__(self):
         return super(Parameter, self).__repr__()

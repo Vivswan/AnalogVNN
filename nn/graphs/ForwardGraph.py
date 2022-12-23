@@ -5,12 +5,13 @@ from torch import Tensor
 
 from nn.graphs.AcyclicDirectedGraph import AcyclicDirectedGraph
 from nn.graphs.GraphEnum import GraphEnum
-from nn.graphs.InputOutput import ArgsKwargs, InputOutput
+from nn.graphs.InputOutput import InputOutput
+from nn.graphs.ArgsKwargs import ArgsKwargs
 from nn.graphs.ModelGraphState import ModelGraphState
 
 
 class ForwardGraph(AcyclicDirectedGraph):
-    def __call__(self, inputs, is_training, **kwargs):
+    def __call__(self, inputs, is_training):
         self.graph_state.ready_for_forward(exception=True)
         outputs = self.calculate_graph(inputs, is_training)
         if len(outputs) == 1:
@@ -29,9 +30,9 @@ class ForwardGraph(AcyclicDirectedGraph):
 
     def calculate_graph(self, inputs: Union[Tensor, Sequence[Tensor]], is_training=True, **kwargs):
         if not isinstance(inputs, Sequence):
-            inputs = (inputs, )
+            inputs = (inputs,)
 
-        if not self.graph_state.use_autograd_graph:
+        if not self.graph_state.use_autograd_graph and is_training:
             for i in inputs:
                 i.requires_grad = True
 
@@ -60,6 +61,9 @@ class ForwardGraph(AcyclicDirectedGraph):
         for module, predecessors in static_graph:
             if module != from_node:
                 inputs = self.get_args_kwargs(input_output_graph, module, predecessors)
+                if not self.graph_state.use_autograd_graph:
+                    inputs.args = [self._detach_tensor(i) for i in inputs.args]
+                    inputs.kwargs = {k: self._detach_tensor(v) for k, v in inputs.kwargs.items()}
                 input_output_graph[module] = InputOutput(inputs=inputs)
 
             if isinstance(module, GraphEnum):
@@ -76,3 +80,8 @@ class ForwardGraph(AcyclicDirectedGraph):
 
         return input_output_graph
 
+    @staticmethod
+    def _detach_tensor(tensor: torch.Tensor) -> torch.Tensor:
+        tensor: torch.Tensor = tensor.detach()
+        tensor.requires_grad = True
+        return tensor

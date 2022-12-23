@@ -3,7 +3,7 @@ import abc
 import networkx as nx
 
 from nn.graphs.GraphEnum import GraphEnum
-from nn.graphs.InputOutput import ArgsKwargs
+from nn.graphs.ArgsKwargs import ArgsKwargs
 from nn.graphs.ModelGraphState import ModelGraphState
 from nn.graphs.to_graph_viz_digraph import to_digraph
 
@@ -22,7 +22,7 @@ class AcyclicDirectedGraph(abc.ABC):
             raise NotImplementedError("Loops are not implemented yet. Coming soon...")
 
     @abc.abstractmethod
-    def __call__(self, inputs, *args, **kwargs):
+    def __call__(self, *args, **kwargs):
         raise NotImplementedError
 
     def add_connection(self, *args):
@@ -70,17 +70,6 @@ class AcyclicDirectedGraph(abc.ABC):
             if (in_arg is True or in_kwarg is True) and (out_arg is None and out_kwarg is None):
                 out_arg = in_arg
                 out_kwarg = in_kwarg
-
-            label = f""
-            if in_arg:
-                label += "[]"
-            if in_kwarg:
-                label += "{}"
-            label += " -> "
-            if out_arg:
-                label += "[]"
-            if out_kwarg:
-                label += "{}"
         elif in_arg is not None or in_kwarg is not None:
             # one -> one
             if in_arg is not None and (not isinstance(in_arg, int) or in_arg < 0):
@@ -96,36 +85,48 @@ class AcyclicDirectedGraph(abc.ABC):
                 out_arg = True
             if in_kwarg is not None and (out_arg is None and out_kwarg is None):
                 out_kwarg = in_kwarg
-
-            label = f""
-            if in_arg is not None:
-                label += "[" + str(in_arg) + "]"
-            if in_kwarg is not None:
-                label += "{" + str(in_kwarg) + "}"
-            label += " -> "
-            if out_arg is not None:
-                if out_arg is True:
-                    label += "[]"
-                else:
-                    label += "[" + str(out_arg) + "]"
-            if out_kwarg is not None:
-                label += "{" + str(out_kwarg) + "}"
         else:
             in_arg = True
             out_arg = True
             in_kwarg = True
             out_kwarg = True
-            label = f"* -> *"
 
         attr = {
             "in_arg": in_arg,
             "in_kwarg": in_kwarg,
             "out_arg": out_arg,
             "out_kwarg": out_kwarg,
-            "label": label,
         }
+        attr["label"] = AcyclicDirectedGraph._create_edge_label(**attr)
 
         return attr
+
+    @staticmethod
+    def _create_edge_label(in_arg=None, in_kwarg=None, out_arg=None, out_kwarg=None, **kwargs):
+        label = ""
+        if in_arg == in_kwarg == out_arg == out_kwarg == True:
+            return "* -> *"
+
+        if in_arg is True:
+            label += "[]"
+        elif in_arg is not None:
+            label += "[" + str(in_arg) + "]"
+        if in_kwarg is True:
+            label += "{}"
+        elif in_kwarg is not None:
+            label += "{" + str(in_kwarg) + "}"
+
+        label += " -> "
+        if out_arg is True:
+            label += "[]"
+        elif out_arg is not None:
+            label += "[" + str(out_arg) + "]"
+        if out_kwarg is True:
+            label += "{}"
+        elif out_kwarg is not None:
+            label += "{" + str(out_kwarg) + "}"
+
+        return label
 
     def add_edge(
             self,
@@ -160,17 +161,41 @@ class AcyclicDirectedGraph(abc.ABC):
     def _create_sub_graph(self, from_node):
         nodes = nx.descendants(self.graph, from_node)
         nodes.add(from_node)
-        sub_graph: nx.DiGraph = self.graph.subgraph(nodes)
+
+        sub_graph: nx.MultiDiGraph = self.graph.subgraph(nodes)
         sorted_graph = nx.topological_sort(sub_graph)
         dependent_sorted_graph = []
+
         for i in sorted_graph:
             dependent_sorted_graph.append((i, list(sub_graph.predecessors(i))))
         return dependent_sorted_graph
+
+    @staticmethod
+    def _remove_missing_args(graph: nx.MultiDiGraph):
+        graph = graph.copy()
+
+        for v in graph.nodes():
+            args_index = []
+            for u in graph.predecessors(v):
+                for _, edge_data in graph.get_edge_data(u, v).items():
+                    if isinstance(edge_data["out_arg"], int) and not isinstance(edge_data["out_arg"], bool):
+                        args_index.append(edge_data)
+
+            if len(args_index) == 0:
+                continue
+
+            args_index = sorted(args_index, key=lambda x: x["out_arg"])
+            for index, value in enumerate(args_index):
+                value["out_arg"] = index
+                value["label"] = AcyclicDirectedGraph._create_edge_label(**value)
+
+        return graph
 
     def compile(self, from_node, is_static=True):
         for i in nx.simple_cycles(self.graph):
             raise Exception(f"There is cyclic loop between {i}")
 
+        self.graph = self._remove_missing_args(self.graph)
         if is_static:
             self._static_graph = self._create_sub_graph(from_node)
         else:
@@ -256,16 +281,17 @@ class AcyclicDirectedGraph(abc.ABC):
         )
         return inputs
 
-    @staticmethod
-    def print_inputs_outputs(input_output_graph, module):
-        if len(input_output_graph[module].inputs.args) > 0:
-            print(f"{module} :i: {input_output_graph[module].inputs.args}")
-        if len(input_output_graph[module].inputs.kwargs.keys()) > 0:
-            print(f"{module} :i: {input_output_graph[module].inputs.kwargs}")
-        if len(input_output_graph[module].outputs.args) > 0:
-            print(f"{module} :o: {input_output_graph[module].outputs.args}")
-        if len(input_output_graph[module].outputs.kwargs.keys()) > 0:
-            print(f"{module} :o: {input_output_graph[module].outputs.kwargs}")
+    # @staticmethod
+    # def print_inputs_outputs(input_output_graph, module):
+    #     if len(input_output_graph[module].inputs.args) > 0:
+    #         print(f"{module} :i: {input_output_graph[module].inputs.args}")
+    #     if len(input_output_graph[module].inputs.kwargs.keys()) > 0:
+    #         print(f"{module} :i: {input_output_graph[module].inputs.kwargs}")
+    #     if len(input_output_graph[module].outputs.args) > 0:
+    #         print(f"{module} :o: {input_output_graph[module].outputs.args}")
+    #     if len(input_output_graph[module].outputs.kwargs.keys()) > 0:
+    #         print(f"{module} :o: {input_output_graph[module].outputs.kwargs}")
 
     def render(self, *args, real_label=False, **kwargs):
         return to_digraph(self.graph, real_label=real_label).render(*args, **kwargs)
+
