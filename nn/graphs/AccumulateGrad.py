@@ -12,7 +12,7 @@ class AccumulateGrad:
         # return f"AccumulateGrad"
         return f"AccumulateGrad({self.module})"
 
-    def grad(self, grad_outputs_args_kwargs: ArgsKwargs, forward_input_output_graph):
+    def grad(self, grad_outputs_args_kwargs: ArgsKwargs, forward_input_output_graph) -> ArgsKwargs:
         grad_inputs_args = {}
         grad_inputs_kwargs = {}
         for key, grad_output in grad_outputs_args_kwargs.kwargs.items():
