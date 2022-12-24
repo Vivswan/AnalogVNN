@@ -1,4 +1,5 @@
 import abc
+from typing import Any, List, Union
 
 import networkx as nx
 
@@ -202,7 +203,7 @@ class AcyclicDirectedGraph(abc.ABC):
             self._static_graph = False
 
     @staticmethod
-    def output_to_args_kwargs(outputs):
+    def to_args_kwargs_object(outputs) -> ArgsKwargs:
         if isinstance(outputs, ArgsKwargs):
             pass
         elif isinstance(outputs, dict):
@@ -212,6 +213,17 @@ class AcyclicDirectedGraph(abc.ABC):
         else:
             outputs = ArgsKwargs(args=outputs)
         return outputs
+
+    @staticmethod
+    def from_args_kwargs_object(outputs) -> Union[ArgsKwargs, List, Any, None]:
+        if len(outputs.kwargs.keys()) > 0:
+            return outputs
+        elif len(outputs.args) > 1:
+            return outputs.args
+        elif len(outputs.args) == 1:
+            return outputs.args[0]
+        else:
+            return None
 
     def get_args_kwargs(self, input_output_graph, module, predecessors) -> ArgsKwargs:
         args = {}

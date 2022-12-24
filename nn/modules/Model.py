@@ -67,9 +67,6 @@ class Model(Layer):
     def backward(self, *inputs):
         return self.graphs.backward_graph(inputs)
 
-    def outputs(self, x: Tensor) -> Tensor:
-        return self(x)
-
     def loss(self, output, target):
         if self.loss_function is None:
             raise Exception("loss_function is not set")

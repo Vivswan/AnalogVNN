@@ -40,15 +40,8 @@ class ForwardGraph(AcyclicDirectedGraph):
             with torch.no_grad():
                 input_output_graph = self._pass(self.INPUT, *inputs)
 
-        output = input_output_graph[self.OUTPUT].outputs
-        if len(output.kwargs.keys()) > 0:
-            return output
-        elif len(output.args) > 1:
-            return output.args
-        elif len(output.args) == 1:
-            return output.args[0]
-        else:
-            return None
+        outputs = input_output_graph[self.OUTPUT].outputs
+        return self.from_args_kwargs_object(outputs)
 
     def _pass(self, from_node: GraphEnum, *inputs: Tensor) -> Dict[Any, InputOutput]:
         static_graph = self._static_graph or self._create_sub_graph(from_node)
@@ -72,7 +65,7 @@ class ForwardGraph(AcyclicDirectedGraph):
                 *input_output_graph[module].inputs.args,
                 **input_output_graph[module].inputs.kwargs
             )
-            input_output_graph[module].outputs = self.output_to_args_kwargs(outputs)
+            input_output_graph[module].outputs = self.to_args_kwargs_object(outputs)
             # self.print_inputs_outputs(input_output_graph, module)
 
         return input_output_graph
