@@ -71,7 +71,7 @@ if __name__ == '__main__':
 
     mg.compile(is_static=True, auto_backward_graph=True)
     mg.forward_graph.render("../../_data/forward", real_label=True)
-    mg.backward_graph.render("../../_data/backward", real_label=True)
+    mg.backward_graph.render("../../_data/backward")
 
     print()
     print("Starting Forward Pass ::")

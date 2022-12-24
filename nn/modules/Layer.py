@@ -1,4 +1,4 @@
-from abc import ABC
+import abc
 from typing import Union, Type
 
 import torch
@@ -70,7 +70,7 @@ class Layer(nn.Module):
         self._saved_tensor = {}
 
 
-class BackwardFunction(ABC):
+class BackwardFunction(abc.ABC):
     def __init__(self, layer: Layer):
         if not isinstance(layer, Layer):
             raise Exception(f'layer not instance of BaseLayer class')
@@ -90,7 +90,7 @@ class BackwardFunction(ABC):
     def reset_parameters(self):
         pass
 
-    def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
+    def backward(self, *grad_output: Union[None, Tensor], **grad_output_kwarg) -> Union[None, Tensor]:
         raise NotImplementedError
 
     @property

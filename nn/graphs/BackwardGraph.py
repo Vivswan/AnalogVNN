@@ -1,3 +1,4 @@
+import inspect
 import uuid
 from typing import Dict, Any
 
@@ -9,6 +10,7 @@ from nn.graphs.AcyclicDirectedGraph import AcyclicDirectedGraph
 from nn.graphs.GraphEnum import GraphEnum
 from nn.graphs.InputOutput import InputOutput
 from nn.graphs.ArgsKwargs import ArgsKwargs
+from nn.modules.Layer import BackwardFunction, Layer
 
 
 class BackwardGraph(AcyclicDirectedGraph):
@@ -177,30 +179,34 @@ class BackwardGraph(AcyclicDirectedGraph):
 
         return input_output_graph
 
-    def gradient_wrapper(self, module, grads):
-        # if isinstance(module, Layer):
-        #     if module.get_backward_module() is not None:
-        #         return module.get_backward_module().backward
-        # if isinstance(module, BackwardFunction):
-        #     return module.backward
-        # if inspect.ismethod(module) or inspect.isfunction(module):
-        #     return module
-        # raise NotImplementedError
+    def gradient_wrapper(self, module, grad_outputs):
         if module in self.graph_state.forward_input_output_graph:
             module_inputs_outputs = self.graph_state.forward_input_output_graph[module]
         else:
             module_inputs_outputs = None
 
-        if grads.inputs.is_empty():
+        if grad_outputs.inputs.is_empty():
             return ArgsKwargs()
 
-        grad_dict = {}
         if isinstance(module, AccumulateGrad):
             return module.grad(
                 forward_input_output_graph=self.graph_state.forward_input_output_graph,
-                grad_outputs_args_kwargs=grads.inputs,
+                grad_outputs_args_kwargs=grad_outputs.inputs,
             )
 
+        if isinstance(module, BackwardFunction):
+            grad_inputs = module.backward(*grad_outputs.inputs.args, **grad_outputs.inputs.kwargs)
+            return self.output_to_args_kwargs(grad_inputs)
+
+        if isinstance(module, Layer) and module.get_backward_module() is not None:
+            grad_inputs = module.get_backward_module().backward(*grad_outputs.inputs.args, **grad_outputs.inputs.kwargs)
+            return self.output_to_args_kwargs(grad_inputs)
+
+        if (inspect.ismethod(module) or inspect.isfunction(module)) and not inspect.isclass(module):
+            grad_inputs = module(*grad_outputs.inputs.args, **grad_outputs.inputs.kwargs)
+            return self.output_to_args_kwargs(grad_inputs)
+
+        grad_dict = {}
         inputs = module_inputs_outputs.inputs.args + list(module_inputs_outputs.inputs.kwargs.values())
         outputs = []
         outputs_grads = []
@@ -213,11 +219,11 @@ class BackwardGraph(AcyclicDirectedGraph):
 
         for i in range(len(module_inputs_outputs.outputs.args)):
             outputs.append(module_inputs_outputs.outputs.args[i])
-            outputs_grads.append(grads.inputs.args[i])
+            outputs_grads.append(grad_outputs.inputs.args[i])
 
         for i in module_inputs_outputs.outputs.kwargs:
             outputs.append(module_inputs_outputs.outputs.kwargs[i])
-            outputs_grads.append(grads.inputs.kwargs[i])
+            outputs_grads.append(grad_outputs.inputs.kwargs[i])
 
         out_grads = torch.autograd.grad(
             outputs=outputs,
@@ -233,8 +239,7 @@ class BackwardGraph(AcyclicDirectedGraph):
         for i, v in enumerate(out_grads):
             grad_dict[inputs[i]] = v
 
-        grad_output = ArgsKwargs(
+        return ArgsKwargs(
             args=[grad_dict[i] for i in module_inputs_outputs.inputs.args],
             kwargs={key: grad_dict[value] for key, value in module_inputs_outputs.inputs.kwargs.items()}
         )
-        return grad_output

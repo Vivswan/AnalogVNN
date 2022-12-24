@@ -14,9 +14,6 @@ class ForwardGraph(AcyclicDirectedGraph):
     def __call__(self, inputs, is_training):
         self.graph_state.ready_for_forward(exception=True)
         outputs = self.calculate_graph(inputs, is_training)
-        if len(outputs) == 1:
-            outputs = outputs[0][1]
-
         return outputs
 
     def compile(self, is_static=True, **kwargs):
