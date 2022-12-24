@@ -13,7 +13,7 @@ class ModelGraph(ModelGraphState):
         self.forward_graph = ForwardGraph(self)
         self.backward_graph = BackwardGraph(self)
 
-    def compile(self, is_static=True, auto_backward_graph=True):
+    def compile(self, is_static=True, auto_backward_graph=False):
         self.forward_graph.compile(is_static=is_static)
 
         if auto_backward_graph:
