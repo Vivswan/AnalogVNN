@@ -1,11 +1,10 @@
 from __future__ import annotations
+
 import abc
 from typing import Union, Type
 
-import torch
 from torch import nn, Tensor
 
-from nn.graphs.AcyclicDirectedGraph import AcyclicDirectedGraph
 from nn.graphs.ArgsKwargs import ArgsKwargs
 
 
@@ -21,7 +20,7 @@ class Layer(nn.Module):
         outputs = super().__call__(*inputs, **kwargs)
 
         if self.training:
-            self._inputs = AcyclicDirectedGraph.from_args_kwargs_object(ArgsKwargs(args=inputs, kwargs=kwargs))
+            self._inputs = ArgsKwargs.from_args_kwargs_object(ArgsKwargs(args=inputs, kwargs=kwargs))
             self._outputs = outputs
 
         return outputs

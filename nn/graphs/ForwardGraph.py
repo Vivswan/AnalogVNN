@@ -1,13 +1,12 @@
-from typing import Dict, Any, Sequence, Tuple, Union
+from typing import Dict, Any, Sequence, Union
 
 import torch
 from torch import Tensor
 
 from nn.graphs.AcyclicDirectedGraph import AcyclicDirectedGraph
+from nn.graphs.ArgsKwargs import ArgsKwargs
 from nn.graphs.GraphEnum import GraphEnum
 from nn.graphs.InputOutput import InputOutput
-from nn.graphs.ArgsKwargs import ArgsKwargs
-from nn.graphs.ModelGraphState import ModelGraphState
 
 
 class ForwardGraph(AcyclicDirectedGraph):
@@ -41,7 +40,7 @@ class ForwardGraph(AcyclicDirectedGraph):
                 input_output_graph = self._pass(self.INPUT, *inputs)
 
         outputs = input_output_graph[self.OUTPUT].outputs
-        return self.from_args_kwargs_object(outputs)
+        return ArgsKwargs.from_args_kwargs_object(outputs)
 
     def _pass(self, from_node: GraphEnum, *inputs: Tensor) -> Dict[Any, InputOutput]:
         static_graph = self._static_graph or self._create_sub_graph(from_node)
@@ -65,7 +64,7 @@ class ForwardGraph(AcyclicDirectedGraph):
                 *input_output_graph[module].inputs.args,
                 **input_output_graph[module].inputs.kwargs
             )
-            input_output_graph[module].outputs = self.to_args_kwargs_object(outputs)
+            input_output_graph[module].outputs = ArgsKwargs.to_args_kwargs_object(outputs)
             # self.print_inputs_outputs(input_output_graph, module)
 
         return input_output_graph

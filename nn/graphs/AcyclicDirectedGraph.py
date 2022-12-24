@@ -1,10 +1,9 @@
 import abc
-from typing import Any, List, Union
 
 import networkx as nx
 
-from nn.graphs.GraphEnum import GraphEnum
 from nn.graphs.ArgsKwargs import ArgsKwargs
+from nn.graphs.GraphEnum import GraphEnum
 from nn.graphs.ModelGraphState import ModelGraphState
 from nn.graphs.to_graph_viz_digraph import to_digraph
 
@@ -201,29 +200,6 @@ class AcyclicDirectedGraph(abc.ABC):
             self._static_graph = self._create_sub_graph(from_node)
         else:
             self._static_graph = False
-
-    @staticmethod
-    def to_args_kwargs_object(outputs) -> ArgsKwargs:
-        if isinstance(outputs, ArgsKwargs):
-            pass
-        elif isinstance(outputs, dict):
-            outputs = ArgsKwargs(kwargs=outputs)
-        elif isinstance(outputs, tuple) and len(outputs) == 2 and isinstance(outputs[1], dict):
-            outputs = ArgsKwargs(args=outputs[0], kwargs=outputs[1])
-        else:
-            outputs = ArgsKwargs(args=outputs)
-        return outputs
-
-    @staticmethod
-    def from_args_kwargs_object(outputs) -> Union[ArgsKwargs, List, Any, None]:
-        if len(outputs.kwargs.keys()) > 0:
-            return outputs
-        elif len(outputs.args) > 1:
-            return outputs.args
-        elif len(outputs.args) == 1:
-            return outputs.args[0]
-        else:
-            return None
 
     def get_args_kwargs(self, input_output_graph, module, predecessors) -> ArgsKwargs:
         args = {}

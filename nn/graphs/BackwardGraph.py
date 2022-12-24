@@ -7,9 +7,9 @@ import torch
 
 from nn.graphs.AccumulateGrad import AccumulateGrad
 from nn.graphs.AcyclicDirectedGraph import AcyclicDirectedGraph
+from nn.graphs.ArgsKwargs import ArgsKwargs
 from nn.graphs.GraphEnum import GraphEnum
 from nn.graphs.InputOutput import InputOutput
-from nn.graphs.ArgsKwargs import ArgsKwargs
 from nn.modules.Layer import BackwardFunction, Layer
 
 
@@ -174,7 +174,7 @@ class BackwardGraph(AcyclicDirectedGraph):
                 module,
                 input_output_graph[module]
             )
-            input_output_graph[module].outputs = self.to_args_kwargs_object(outputs)
+            input_output_graph[module].outputs = ArgsKwargs.to_args_kwargs_object(outputs)
             # self.print_inputs_outputs(input_output_graph, module)
 
         return input_output_graph
@@ -196,15 +196,15 @@ class BackwardGraph(AcyclicDirectedGraph):
 
         if isinstance(module, BackwardFunction):
             grad_inputs = module.backward(*grad_outputs.inputs.args, **grad_outputs.inputs.kwargs)
-            return self.to_args_kwargs_object(grad_inputs)
+            return ArgsKwargs.to_args_kwargs_object(grad_inputs)
 
         if isinstance(module, Layer) and module.get_backward_module() is not None:
             grad_inputs = module.get_backward_module().backward(*grad_outputs.inputs.args, **grad_outputs.inputs.kwargs)
-            return self.to_args_kwargs_object(grad_inputs)
+            return ArgsKwargs.to_args_kwargs_object(grad_inputs)
 
         if (inspect.ismethod(module) or inspect.isfunction(module)) and not inspect.isclass(module):
             grad_inputs = module(*grad_outputs.inputs.args, **grad_outputs.inputs.kwargs)
-            return self.to_args_kwargs_object(grad_inputs)
+            return ArgsKwargs.to_args_kwargs_object(grad_inputs)
 
         grad_dict = {}
         inputs = module_inputs_outputs.inputs.args + list(module_inputs_outputs.inputs.kwargs.values())
