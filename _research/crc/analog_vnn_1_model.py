@@ -19,7 +19,6 @@ from _research.utils.data_dirs import data_dirs
 from _research.utils.path_functions import path_join
 from _research.utils.save_graph import save_graph
 from nn.fn.BackwardUsingForward import BackwardUsingForward
-from nn.layers.BackwardWrapper import BackwardWrapper
 from nn.layers.Linear import Linear
 from nn.layers.activations.Activation import Activation
 from nn.layers.functionals.Normalize import *
@@ -158,17 +157,17 @@ class ConvLinearModel(FullSequential):
             )
 
             self.add_doa_layers()
-            self.all_layers.append(BackwardWrapper(conv_layer))
+            self.all_layers.append(conv_layer)
             self.add_aod_layers()
 
             temp_x = conv_layer(temp_x)
 
             max_pool = nn.MaxPool2d(2, 2)
-            self.all_layers.append(BackwardWrapper(max_pool))
+            self.all_layers.append(max_pool)
             temp_x = max_pool(temp_x)
 
         flatten = Flatten(start_dim=1)
-        self.all_layers.append(BackwardWrapper(flatten))
+        self.all_layers.append(flatten)
         temp_x = flatten(temp_x)
 
         for i in range(len(linear_features_sizes)):
