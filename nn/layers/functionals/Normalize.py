@@ -38,7 +38,6 @@ class LPNorm(Normalize):
 
 class LPNormW(LPNorm):
     def forward(self, x: Tensor):
-
         norm = torch.norm(x, self.p)
         norm = torch.clamp(norm, min=1e-4)
         x = torch.div(x, norm)

@@ -40,6 +40,12 @@ class BackwardGraph(AcyclicDirectedGraph):
 
         return result
 
+    def compile(self, is_static=True, **kwargs):
+        if not self.graph.has_node(self.OUTPUT):
+            raise Exception("OUTPUT doesn't exist in the forward graph")
+
+        return super().compile(self.OUTPUT, is_static)
+
     def from_forward(self, forward_graph):
         if isinstance(forward_graph, AcyclicDirectedGraph):
             forward_graph = forward_graph.graph
@@ -126,12 +132,6 @@ class BackwardGraph(AcyclicDirectedGraph):
         # self.graph = graph
         return self
 
-    def compile(self, is_static=True, **kwargs):
-        if not self.graph.has_node(self.OUTPUT):
-            raise Exception("OUTPUT doesn't exist in the forward graph")
-
-        return super().compile(self.OUTPUT, is_static)
-
     @torch.no_grad()
     def calculate_graph(self, *args, **kwargs):
         if self.graph_state.forward_input_output_graph is None:
@@ -170,7 +170,7 @@ class BackwardGraph(AcyclicDirectedGraph):
                 # self.print_inputs_outputs(input_output_graph, module)
                 continue
 
-            outputs = self.gradient_wrapper(
+            outputs = self._gradient_wrapper(
                 module,
                 input_output_graph[module]
             )
@@ -179,7 +179,7 @@ class BackwardGraph(AcyclicDirectedGraph):
 
         return input_output_graph
 
-    def gradient_wrapper(self, module, grad_outputs):
+    def _gradient_wrapper(self, module, grad_outputs):
         if module in self.graph_state.forward_input_output_graph:
             module_inputs_outputs = self.graph_state.forward_input_output_graph[module]
         else:

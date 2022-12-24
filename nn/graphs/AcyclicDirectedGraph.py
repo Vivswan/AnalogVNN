@@ -30,6 +30,36 @@ class AcyclicDirectedGraph(abc.ABC):
             self.add_edge(args[i - 1], args[i])
         return self
 
+    def add_edge(
+            self,
+            u_of_edge,
+            v_of_edge,
+            in_arg=None,
+            in_kwarg=None,
+            out_arg=None,
+            out_kwarg=None,
+    ):
+        attr = self.check_edge_parameters(in_arg, in_kwarg, out_arg, out_kwarg)
+        existing_edges = self.graph.get_edge_data(u_of_edge, v_of_edge)
+
+        if existing_edges is not None:
+            to_remove = []
+            for key, edge in existing_edges.items():
+                if not (
+                        edge["out_arg"] == attr["out_arg"] is not None
+                        or
+                        edge["out_kwarg"] == attr["out_kwarg"] is not None
+                ):
+                    continue
+                to_remove.append(key)
+            for key in to_remove:
+                self.graph.remove_edge(u_of_edge, v_of_edge, key=key)
+
+        self.graph.add_edge(u_of_edge, v_of_edge, **attr)
+        self.graph.nodes[u_of_edge]["fillcolor"] = "lightblue"
+        self.graph.nodes[v_of_edge]["fillcolor"] = "lightblue"
+        return self
+
     @staticmethod
     def check_edge_parameters(in_arg, in_kwarg, out_arg, out_kwarg):
         # @@@ in_arg: None    in_kwarg: None  out_arg: None   out_kwarg: None   0
@@ -128,47 +158,15 @@ class AcyclicDirectedGraph(abc.ABC):
 
         return label
 
-    def add_edge(
-            self,
-            u_of_edge,
-            v_of_edge,
-            in_arg=None,
-            in_kwarg=None,
-            out_arg=None,
-            out_kwarg=None,
-    ):
-        attr = self.check_edge_parameters(in_arg, in_kwarg, out_arg, out_kwarg)
-        existing_edges = self.graph.get_edge_data(u_of_edge, v_of_edge)
+    def compile(self, from_node, is_static=True):
+        for i in nx.simple_cycles(self.graph):
+            raise Exception(f"There is cyclic loop between {i}")
 
-        if existing_edges is not None:
-            to_remove = []
-            for key, edge in existing_edges.items():
-                if not (
-                        edge["out_arg"] == attr["out_arg"] is not None
-                        or
-                        edge["out_kwarg"] == attr["out_kwarg"] is not None
-                ):
-                    continue
-                to_remove.append(key)
-            for key in to_remove:
-                self.graph.remove_edge(u_of_edge, v_of_edge, key=key)
-
-        self.graph.add_edge(u_of_edge, v_of_edge, **attr)
-        self.graph.nodes[u_of_edge]["fillcolor"] = "lightblue"
-        self.graph.nodes[v_of_edge]["fillcolor"] = "lightblue"
-        return self
-
-    def _create_sub_graph(self, from_node):
-        nodes = nx.descendants(self.graph, from_node)
-        nodes.add(from_node)
-
-        sub_graph: nx.MultiDiGraph = self.graph.subgraph(nodes)
-        sorted_graph = nx.topological_sort(sub_graph)
-        dependent_sorted_graph = []
-
-        for i in sorted_graph:
-            dependent_sorted_graph.append((i, list(sub_graph.predecessors(i))))
-        return dependent_sorted_graph
+        self.graph = self._remove_missing_args(self.graph)
+        if is_static:
+            self._static_graph = self._create_sub_graph(from_node)
+        else:
+            self._static_graph = False
 
     @staticmethod
     def _remove_missing_args(graph: nx.MultiDiGraph):
@@ -191,15 +189,17 @@ class AcyclicDirectedGraph(abc.ABC):
 
         return graph
 
-    def compile(self, from_node, is_static=True):
-        for i in nx.simple_cycles(self.graph):
-            raise Exception(f"There is cyclic loop between {i}")
+    def _create_sub_graph(self, from_node):
+        nodes = nx.descendants(self.graph, from_node)
+        nodes.add(from_node)
 
-        self.graph = self._remove_missing_args(self.graph)
-        if is_static:
-            self._static_graph = self._create_sub_graph(from_node)
-        else:
-            self._static_graph = False
+        sub_graph: nx.MultiDiGraph = self.graph.subgraph(nodes)
+        sorted_graph = nx.topological_sort(sub_graph)
+        dependent_sorted_graph = []
+
+        for i in sorted_graph:
+            dependent_sorted_graph.append((i, list(sub_graph.predecessors(i))))
+        return dependent_sorted_graph
 
     def get_args_kwargs(self, input_output_graph, module, predecessors) -> ArgsKwargs:
         args = {}
@@ -282,4 +282,3 @@ class AcyclicDirectedGraph(abc.ABC):
 
     def render(self, *args, real_label=False, **kwargs):
         return to_digraph(self.graph, real_label=real_label).render(*args, **kwargs)
-

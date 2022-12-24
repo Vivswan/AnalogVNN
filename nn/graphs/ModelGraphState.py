@@ -1,7 +1,6 @@
 from typing import Union, Dict
 
 import torch
-from dataclasses import dataclass
 from torch import Tensor
 
 from nn.graphs.GraphEnum import GraphEnum

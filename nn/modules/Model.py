@@ -1,7 +1,7 @@
 from typing import Union, Callable
 
 import torch
-from torch import nn, Tensor
+from torch import nn
 from torch.utils.data import DataLoader
 
 from nn.fn.test import test

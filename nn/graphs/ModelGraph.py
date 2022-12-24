@@ -4,7 +4,6 @@ from torch import nn
 from nn.graphs.BackwardGraph import BackwardGraph
 from nn.graphs.ForwardGraph import ForwardGraph
 from nn.graphs.ModelGraphState import ModelGraphState
-from nn.graphs.to_graph_viz_digraph import to_digraph
 from nn.utils.make_dot import make_dot
 
 
@@ -29,6 +28,7 @@ if __name__ == '__main__':
     l1 = nn.Linear(1, 1, bias=False)
     l1.weight.data = torch.ones_like(l1.weight.data) * 2
 
+
     def l2(*x):
         return torch.add(*x), torch.sub(*x)
 
@@ -40,8 +40,10 @@ if __name__ == '__main__':
     def l4(x, y, z, a, b):
         return ((x + y) + (a + b)) + z
 
+
     def l5(x):
         return {"c": x * 0.5}
+
 
     # l1 :: 1 -> 2
     # l2 :: (1, 2) -> (3, -1)
@@ -94,7 +96,8 @@ if __name__ == '__main__':
         v = mg.forward_input_output_graph[k]
         print(f"{k} :o: ", end="")
         if len(v.outputs.args) > 0:
-            grad = torch.autograd.grad(outputs=output, grad_outputs=torch.ones((1, 1), dtype=torch.float), inputs=v.outputs.args)
+            grad = torch.autograd.grad(outputs=output, grad_outputs=torch.ones((1, 1), dtype=torch.float),
+                                       inputs=v.outputs.args)
             print(f"{grad}, ", end="")
 
         output = mg.forward_graph.calculate_graph(torch.ones((1, 1), dtype=torch.float, requires_grad=True))
@@ -102,7 +105,8 @@ if __name__ == '__main__':
         if len(v.outputs.kwargs.keys()) > 0:
             grad = {vk: vv for vk, vv in zip(
                 list(v.outputs.kwargs.keys()),
-                torch.autograd.grad(outputs=output, grad_outputs=torch.ones((1, 1), dtype=torch.float), inputs=list(v.outputs.kwargs.values()))
+                torch.autograd.grad(outputs=output, grad_outputs=torch.ones((1, 1), dtype=torch.float),
+                                    inputs=list(v.outputs.kwargs.values()))
             )}
             print(f"{grad}, ", end="")
 
@@ -112,7 +116,8 @@ if __name__ == '__main__':
         v = mg.forward_input_output_graph[k]
         print(f"{k} :i: ", end="")
         if len(v.inputs.args) > 0:
-            grad = torch.autograd.grad(outputs=output, grad_outputs=torch.ones((1, 1), dtype=torch.float), inputs=v.inputs.args)
+            grad = torch.autograd.grad(outputs=output, grad_outputs=torch.ones((1, 1), dtype=torch.float),
+                                       inputs=v.inputs.args)
             print(f"{grad}, ", end="")
 
         output = mg.forward_graph.calculate_graph(torch.ones((1, 1), dtype=torch.float, requires_grad=True))
@@ -120,7 +125,8 @@ if __name__ == '__main__':
         if len(v.inputs.kwargs.keys()) > 0:
             grad = {vk: vv for vk, vv in zip(
                 list(v.inputs.kwargs.keys()),
-                torch.autograd.grad(outputs=output, grad_outputs=torch.ones((1, 1), dtype=torch.float), inputs=list(v.inputs.kwargs.values()))
+                torch.autograd.grad(outputs=output, grad_outputs=torch.ones((1, 1), dtype=torch.float),
+                                    inputs=list(v.inputs.kwargs.values()))
             )}
             print(f"{grad}, ", end="")
 
