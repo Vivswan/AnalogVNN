@@ -29,7 +29,6 @@ class PseudoParameter(Parameter):
 
         self.original.parent = self
         self.original.requires_grad_(self.requires_grad)
-        self.grad_hook = self.register_hook(self.return_grad_to_original)
         self.update()
         return self
 
@@ -63,11 +62,6 @@ class PseudoParameter(Parameter):
     @transformation.setter
     def transformation(self, transform):
         self.set_transformation(transform)
-
-    def return_grad_to_original(self, grad):
-        self.original.grad = grad
-        self.grad = grad
-        return grad
 
     def zero_grad(self, set_to_none: bool = False):
         set_grad_zero(self, set_to_none=set_to_none)
