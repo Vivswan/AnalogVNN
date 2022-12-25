@@ -1,7 +1,7 @@
 from typing import Union, Callable
 
 import torch
-from torch import nn
+from torch import nn, optim
 from torch.utils.data import DataLoader
 
 from nn.fn.test import test
@@ -15,16 +15,12 @@ from nn.utils.is_cpu_cuda import is_cpu_cuda
 class Model(Layer):
     __constants__ = ['in_features', 'device']
 
-    device: torch.device
-
-    # tensorboard: Union[None, TensorboardModelLog]
-
     def __init__(self, tensorboard_log_dir=None, device=is_cpu_cuda.get_device()):
         super(Model, self).__init__()
 
-        self._compiled = False
+        self._compiled: bool = False
 
-        self.tensorboard = None
+        self.tensorboard: Union[None, TensorboardModelLog] = None
         if tensorboard_log_dir is not None:
             self.create_tensorboard(tensorboard_log_dir)
 
@@ -32,10 +28,10 @@ class Model(Layer):
         self.forward_graph = self.graphs.forward_graph
         self.backward_graph = self.graphs.backward_graph
 
-        self.optimizer = None
-        self.loss_function = None
-        self.accuracy_function = None
-        self.device = device
+        self.optimizer: Union[None, optim.Optimizer] = None
+        self.loss_function: Union[None, nn.Module, Callable] = None
+        self.accuracy_function: Union[None, nn.Module, Callable] = None
+        self.device: torch.device = device
 
     @property
     def use_autograd_graph(self):
