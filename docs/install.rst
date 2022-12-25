@@ -38,12 +38,12 @@ The right path should be already in the form.
 
 Install the required dependencies:
     - PyTorch
-    - Tensorflow
     - dataclasses
-    - graphviz
-    - python-graphviz
     - scipy
     - numpy
+    - tensorboard (optional)
+    - graphviz (optional)
+    - python-graphviz (optional)
 
 Install AnalogVNN (one fo the following ways):
     - Finally AnalogVNN can be downloaded at (`GitHub <https://github.com/Photonics-Pitt-Org/AnalogVNN>`_) or creating a fork of it.
