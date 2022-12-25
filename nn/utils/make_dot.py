@@ -3,7 +3,6 @@ from collections import namedtuple
 from distutils.version import LooseVersion
 
 import torch
-from graphviz import Digraph
 from torch import Tensor
 
 Node = namedtuple('Node', ('name', 'inputs', 'attr', 'op'))
@@ -41,6 +40,11 @@ def get_fn_name(fn, show_attrs, max_attr_chars):
 
 
 def make_dot(var, params=None, show_attrs=True, show_saved=True, max_attr_chars=50):
+    try:
+        from graphviz import Digraph
+    except ImportError as e:
+        raise ImportError("requires graphviz " "http://pygraphviz.github.io/") from e
+
     """ Produces Graphviz representation of PyTorch autograd graph.
 
     If a node represents a backward function, it is gray. Otherwise, the node

@@ -1,5 +1,4 @@
 import networkx as nx
-from graphviz import Digraph
 
 from nn.graphs.GraphEnum import GraphEnum
 
@@ -29,6 +28,10 @@ def to_digraph(from_graph, real_label=False):
         import pygraphviz
     except ImportError as e:
         raise ImportError("requires pygraphviz " "http://pygraphviz.github.io/") from e
+    try:
+        from graphviz import Digraph
+    except ImportError as e:
+        raise ImportError("requires graphviz " "http://pygraphviz.github.io/") from e
     strict = nx.number_of_selfloops(from_graph) == 0 and not from_graph.is_multigraph()
     node_attr = dict(style='filled',
                      shape='box',
