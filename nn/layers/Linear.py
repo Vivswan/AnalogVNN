@@ -53,7 +53,7 @@ class Linear(Layer):
         else:
             self.register_parameter('bias', None)
 
-        self.use(LinearBackpropagation)
+        self.set_backward_function(LinearBackpropagation)
         self.reset_parameters()
 
     def reset_parameters(self) -> None:

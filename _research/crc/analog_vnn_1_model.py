@@ -194,9 +194,9 @@ class ConvLinearModel(FullSequential):
         if approach == "use_autograd_graph":
             self.backward.use_autograd_graph = True
         if approach == "no_norm_grad":
-            [i.use(BackwardIdentity) for i in self.norm_layers]
+            [i.set_backward_function(BackwardIdentity) for i in self.norm_layers]
         if approach == "norm_grad_by_forward":
-            [i.use(BackwardUsingForward) for i in self.norm_layers]
+            [i.set_backward_function(BackwardUsingForward) for i in self.norm_layers]
 
         self.add_sequence(*self.all_layers)
 

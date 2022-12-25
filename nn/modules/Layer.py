@@ -33,44 +33,65 @@ class Layer(nn.Module):
     def outputs(self):
         return self._outputs
 
-    def set_backward_module(self, backward_class: Type[BackwardFunction]) -> Layer:
-        if not issubclass(backward_class, BackwardFunction):
-            raise Exception(f"Backward Module is not set for '{self}'")
-        self._backward_module = backward_class(self)
-        return self
-
-    def get_backward_module(self) -> Union[None, BackwardFunction]:
+    @property
+    def backward_function(self) -> Union[None, BackwardFunction]:
         return self._backward_module
 
-    def use(self, *args) -> Layer:
-        for i in args:
-            if issubclass(i, BackwardFunction):
-                self.set_backward_module(i)
+    @backward_function.setter
+    def backward_function(self, function):
+        self.set_backward_function(function)
+
+    def set_backward_function(self, backward_class: Type[BackwardFunction]) -> Layer:
+        if not issubclass(backward_class, BackwardFunction):
+            raise Exception(f"Backward Module is not set for '{self}'")
+
+        self._backward_module = backward_class(self)
         return self
 
 
 class BackwardFunction(abc.ABC):
-    def __init__(self, layer: Layer):
-        if not isinstance(layer, Layer):
-            raise Exception(f'layer not instance of BaseLayer class')
-
-        self._layer = layer
-
-    def get_parameter(self, name: str) -> Union[None, Tensor]:
-        if hasattr(self._layer, name):
-            return getattr(self._layer, name)
-
-        raise Exception(f'"{name}" is not found')
+    def __init__(self, layer: Layer = None):
+        self._layer = None
+        self.set_layer(layer)
 
     def backward(self, *grad_output: Union[None, Tensor], **grad_output_kwarg) -> Union[None, Tensor]:
         raise NotImplementedError
 
     @property
+    def layer(self):
+        return self._layer
+
+    @layer.setter
+    def layer(self, layer: Union[None, Layer]):
+        self.set_layer(layer)
+
+    def set_layer(self, layer: Union[None, Layer]):
+        if layer is not None and not isinstance(layer, Layer):
+            raise Exception(f'layer not instance of Layer class')
+
+        self._layer = layer
+
+    def get_parameter(self, name: str) -> Union[None, Tensor]:
+        if self._layer is None:
+            return None
+
+        if hasattr(self._layer, name):
+            return getattr(self._layer, name)
+
+        raise Exception(f'"{name}" is not found')
+
+    @property
     def inputs(self):
+        if self._layer is None:
+            return None
+
         return self._layer.inputs
 
     @property
     def outputs(self):
+        if self._layer is None:
+            return None
+
         return self._layer.outputs
 
     @staticmethod

@@ -192,12 +192,12 @@ class BackwardGraph(AcyclicDirectedGraph):
                 grad_outputs_args_kwargs=grad_outputs.inputs,
             )
 
-        if isinstance(module, BackwardFunction):
-            grad_inputs = module.backward(*grad_outputs.inputs.args, **grad_outputs.inputs.kwargs)
+        if isinstance(module, Layer) and module.backward_function is not None:
+            grad_inputs = module.backward_function.backward(*grad_outputs.inputs.args, **grad_outputs.inputs.kwargs)
             return ArgsKwargs.to_args_kwargs_object(grad_inputs)
 
-        if isinstance(module, Layer) and module.get_backward_module() is not None:
-            grad_inputs = module.get_backward_module().backward(*grad_outputs.inputs.args, **grad_outputs.inputs.kwargs)
+        if isinstance(module, BackwardFunction):
+            grad_inputs = module.backward(*grad_outputs.inputs.args, **grad_outputs.inputs.kwargs)
             return ArgsKwargs.to_args_kwargs_object(grad_inputs)
 
         grad_dict = {}
