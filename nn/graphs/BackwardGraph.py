@@ -8,7 +8,7 @@ from nn.graphs.AccumulateGrad import AccumulateGrad
 from nn.graphs.AcyclicDirectedGraph import AcyclicDirectedGraph
 from nn.graphs.ArgsKwargs import ArgsKwargs, InputOutput
 from nn.graphs.GraphEnum import GraphEnum
-from nn.modules.Layer import BackwardFunction, Layer
+from nn.modules.Layer import BackwardModule, Layer
 
 
 class BackwardGraph(AcyclicDirectedGraph):
@@ -196,7 +196,7 @@ class BackwardGraph(AcyclicDirectedGraph):
             grad_inputs = module.backward_function.backward(*grad_outputs.inputs.args, **grad_outputs.inputs.kwargs)
             return ArgsKwargs.to_args_kwargs_object(grad_inputs)
 
-        if isinstance(module, BackwardFunction):
+        if isinstance(module, BackwardModule):
             grad_inputs = module.backward(*grad_outputs.inputs.args, **grad_outputs.inputs.kwargs)
             return ArgsKwargs.to_args_kwargs_object(grad_inputs)
 

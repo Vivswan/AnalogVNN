@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import abc
-from typing import Union, Type
+import inspect
+from typing import Union, Type, Callable, Any
 
 from torch import nn, Tensor
 
@@ -13,7 +14,7 @@ class Layer(nn.Module):
         super(Layer, self).__init__()
         self._inputs = None
         self._outputs = None
-        self._backward_module: Union[None, BackwardFunction] = None
+        self._backward_module: Union[None, BackwardModule] = None
         self._parent_module_attr = lambda x: None
 
     def __call__(self, *inputs, **kwargs):
@@ -34,28 +35,35 @@ class Layer(nn.Module):
         return self._outputs
 
     @property
-    def backward_function(self) -> Union[None, BackwardFunction]:
+    def backward_function(self) -> Union[None, BackwardModule]:
         return self._backward_module
 
     @backward_function.setter
     def backward_function(self, function):
         self.set_backward_function(function)
 
-    def set_backward_function(self, backward_class: Type[BackwardFunction]) -> Layer:
-        if not issubclass(backward_class, BackwardFunction):
+    def set_backward_function(self, backward_class: Union[BackwardModule, Type[BackwardModule], Callable]) -> Layer:
+        if issubclass(backward_class, BackwardModule):
+            self._backward_module = backward_class(self)
+        elif isinstance(backward_class, BackwardModule):
+            self._backward_module = backward_class
+        elif callable(backward_class):
+            self._backward_module = BackwardFunction(backward_class, self)
+        else:
             raise Exception(f"Backward Module is not set for '{self}'")
 
-        self._backward_module = backward_class(self)
         return self
 
 
-class BackwardFunction(abc.ABC):
+class BackwardModule(abc.ABC):
     def __init__(self, layer: Layer = None):
         self._layer = None
         self.set_layer(layer)
 
     def backward(self, *grad_output: Union[None, Tensor], **grad_output_kwarg) -> Union[None, Tensor]:
         raise NotImplementedError
+
+    __call__: Callable[..., Any] = backward
 
     @property
     def layer(self):
@@ -105,3 +113,32 @@ class BackwardFunction(abc.ABC):
             tensor.grad += grad
 
         return tensor.grad
+
+
+class BackwardFunction(BackwardModule):
+    def __init__(self, backward_function: Callable = None, layer: Layer = None):
+        super().__init__(layer)
+        self._backward_function = None
+        self.set_backward_function(backward_function)
+
+    @property
+    def backward_function(self):
+        return self._backward_function
+
+    @backward_function.setter
+    def backward_function(self, backward_function: Callable):
+        self.set_backward_function(backward_function)
+
+    def set_backward_function(self, backward_function: Callable):
+        if backward_function is None or callable(backward_function):
+            self._backward_function = backward_function
+        else:
+            raise ValueError('"function" must be Callable')
+
+        return self
+
+    def backward(self, *grad_output: Union[None, Tensor], **grad_output_kwarg) -> Union[None, Tensor]:
+        if self._backward_function is None:
+            raise ValueError("set backward_function first before invoking backward")
+
+        return self._backward_function(*grad_output, **grad_output_kwarg)

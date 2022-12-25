@@ -2,10 +2,10 @@ from typing import Type, Union
 
 from torch import Tensor
 
-from nn.modules.Layer import BackwardFunction, Layer
+from nn.modules.Layer import BackwardModule, Layer
 
 
-class BackwardUsingForward(BackwardFunction):
+class BackwardUsingForward(BackwardModule):
     def backward(self: Type[Layer], grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
         mode = self._layer.training
 

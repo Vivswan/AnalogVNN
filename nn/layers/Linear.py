@@ -4,12 +4,12 @@ from typing import Union
 import torch
 from torch import nn, Tensor
 
-from nn.fn.BackwardIdentity import BackwardFunction
+from nn.fn.BackwardIdentity import BackwardModule
 from nn.fn.to_matrix import to_matrix
 from nn.modules.Layer import Layer
 
 
-class LinearBackpropagation(BackwardFunction):
+class LinearBackpropagation(BackwardModule):
     @property
     def weight(self):
         return self.get_parameter("weight")
