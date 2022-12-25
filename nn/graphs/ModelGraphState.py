@@ -3,8 +3,8 @@ from typing import Union, Dict
 import torch
 from torch import Tensor
 
+from nn.graphs.ArgsKwargs import InputOutput
 from nn.graphs.GraphEnum import GraphEnum
-from nn.graphs.InputOutput import InputOutput
 
 
 class ModelGraphState:

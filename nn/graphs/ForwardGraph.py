@@ -4,9 +4,8 @@ import torch
 from torch import Tensor
 
 from nn.graphs.AcyclicDirectedGraph import AcyclicDirectedGraph
-from nn.graphs.ArgsKwargs import ArgsKwargs
+from nn.graphs.ArgsKwargs import ArgsKwargs, InputOutput
 from nn.graphs.GraphEnum import GraphEnum
-from nn.graphs.InputOutput import InputOutput
 
 
 class ForwardGraph(AcyclicDirectedGraph):

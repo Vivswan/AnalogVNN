@@ -1,4 +1,3 @@
-import inspect
 import uuid
 from typing import Dict, Any
 
@@ -7,9 +6,8 @@ import torch
 
 from nn.graphs.AccumulateGrad import AccumulateGrad
 from nn.graphs.AcyclicDirectedGraph import AcyclicDirectedGraph
-from nn.graphs.ArgsKwargs import ArgsKwargs
+from nn.graphs.ArgsKwargs import ArgsKwargs, InputOutput
 from nn.graphs.GraphEnum import GraphEnum
-from nn.graphs.InputOutput import InputOutput
 from nn.modules.Layer import BackwardFunction, Layer
 
 
@@ -200,10 +198,6 @@ class BackwardGraph(AcyclicDirectedGraph):
 
         if isinstance(module, Layer) and module.get_backward_module() is not None:
             grad_inputs = module.get_backward_module().backward(*grad_outputs.inputs.args, **grad_outputs.inputs.kwargs)
-            return ArgsKwargs.to_args_kwargs_object(grad_inputs)
-
-        if (inspect.ismethod(module) or inspect.isfunction(module)) and not inspect.isclass(module):
-            grad_inputs = module(*grad_outputs.inputs.args, **grad_outputs.inputs.kwargs)
             return ArgsKwargs.to_args_kwargs_object(grad_inputs)
 
         grad_dict = {}

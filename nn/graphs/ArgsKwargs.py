@@ -5,6 +5,12 @@ from typing import List, Dict, Any, Union
 
 
 @dataclass
+class InputOutput:
+    inputs: Union[ArgsKwargs, None] = None
+    outputs: Union[ArgsKwargs, None] = None
+
+
+@dataclass
 class ArgsKwargs:
     def __init__(self, args=None, kwargs=None):
         if args is None:
