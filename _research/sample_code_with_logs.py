@@ -159,6 +159,8 @@ class WeightModel(FullSequential):
 def run_linear3_model():
     """ The main function to train photonics image classifier with 3 linear/dense layers for MNIST dataset
     """
+    torch.backends.cudnn.benchmark = True
+    torch.manual_seed(0)
     data_path = Path("C:/X/_data").joinpath(str(int(time.time())))
     if not data_path.exists():
         data_path.mkdir()
