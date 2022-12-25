@@ -22,6 +22,9 @@ class PoissonNoise(Layer, BackwardIdentity):
     ):
         super(PoissonNoise, self).__init__()
 
+        if (scale is None) + (max_leakage is None) + (precision is None) != 1:
+            raise ValueError("only 2 out of 3 arguments are needed (scale, max_leakage, precision)")
+
         self.scale, self.max_leakage, self.precision = to_float_tensor(
             scale, max_leakage, precision
         )

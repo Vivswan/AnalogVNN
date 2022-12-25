@@ -23,20 +23,8 @@ class GaussianNoise(Layer, BackwardIdentity):
     ):
         super(GaussianNoise, self).__init__()
 
-        if std is not None and precision is not None and leakage is not None:
-            raise ValueError("only 2 out of 3 arguments are needed (std, precision, leakage)")
-
-        if std is None and precision is None and leakage is None:
-            raise ValueError("only 2 out of 3 arguments are needed (std, precision, leakage)")
-
-        if std is None and precision is None:
-            raise ValueError("only 2 out of 3 arguments are needed (std, precision, leakage)")
-
-        if precision is None and leakage is None:
-            raise ValueError("only 2 out of 3 arguments are needed (std, precision, leakage)")
-
-        if leakage is None and std is None:
-            raise ValueError("only 2 out of 3 arguments are needed (std, precision, leakage)")
+        if (std is None) + (leakage is None) + (precision is None) != 1:
+            raise ValueError("only 2 out of 3 arguments are needed (std, leakage, precision)")
 
         self.std, self.leakage, self.precision = to_float_tensor(
             std, leakage, precision
