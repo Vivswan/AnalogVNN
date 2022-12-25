@@ -52,10 +52,6 @@ class Model(Layer):
         self.graphs.compile()
         self.to(device=self.device)
 
-        for module in self.children():
-            if isinstance(module, Layer):
-                module._parent_module_attr = lambda name: getattr(self, name) if hasattr(self, name) else None
-
         self._compiled = True
         if self.tensorboard is not None:
             self.tensorboard.on_compile(layer_data=layer_data)

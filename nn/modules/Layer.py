@@ -15,7 +15,6 @@ class Layer(nn.Module):
         self._inputs = None
         self._outputs = None
         self._backward_module: Union[None, BackwardModule] = None
-        self._parent_module_attr = lambda x: None
 
     def __call__(self, *inputs, **kwargs):
         outputs = super().__call__(*inputs, **kwargs)
