@@ -7,7 +7,7 @@ from nn.layers.activations.Activation import Activation
 
 class Identity(Activation):
     def __init__(self, name=None):
-        super().__init__()
+        super(Identity, self).__init__()
         self.name = name
 
     def extra_repr(self) -> str:

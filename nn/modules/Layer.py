@@ -1,114 +1,55 @@
-from abc import ABC
-from typing import Union, Type
+from __future__ import annotations
 
-import torch
-from torch import nn, Tensor
+from typing import Union, Type, Callable
+
+from torch import nn
+
+from nn.graphs.ArgsKwargs import ArgsKwargs
+from nn.modules.BackwardFunction import BackwardFunction
+from nn.modules.BackwardModule import BackwardModule
 
 
 class Layer(nn.Module):
     def __init__(self):
         super(Layer, self).__init__()
-        self._saved_tensor = {}
-        self._backward_module: Union[None, BackwardFunction] = None
+        self._inputs = None
+        self._outputs = None
+        self._backward_module: Union[None, BackwardModule] = None
         self._parent_module_attr = lambda x: None
 
-    def set_backward_module(self, backward_class: Type['BackwardFunction']) -> 'Layer':
-        if not issubclass(backward_class, BackwardFunction):
-            raise Exception(f"Backward Module is not set for '{self}'")
-        self._backward_module = backward_class(self)
-        return self
+    def __call__(self, *inputs, **kwargs):
+        outputs = super().__call__(*inputs, **kwargs)
 
-    def get_backward_module(self) -> Union[None, 'BackwardFunction']:
+        if self.training:
+            self._inputs = ArgsKwargs.from_args_kwargs_object(ArgsKwargs(args=inputs, kwargs=kwargs))
+            self._outputs = outputs
+
+        return outputs
+
+    @property
+    def inputs(self):
+        return self._inputs
+
+    @property
+    def outputs(self):
+        return self._outputs
+
+    @property
+    def backward_function(self) -> Union[None, BackwardModule]:
         return self._backward_module
 
-    def use(self, *args) -> 'Layer':
-        for i in args:
-            if issubclass(i, BackwardFunction):
-                self.set_backward_module(i)
+    @backward_function.setter
+    def backward_function(self, function):
+        self.set_backward_function(function)
+
+    def set_backward_function(self, backward_class: Union[BackwardModule, Type[BackwardModule], Callable]) -> Layer:
+        if issubclass(backward_class, BackwardModule):
+            self._backward_module = backward_class(self)
+        elif isinstance(backward_class, BackwardModule):
+            self._backward_module = backward_class
+        elif callable(backward_class):
+            self._backward_module = BackwardFunction(backward_class, self)
+        else:
+            raise Exception(f"Backward Module is not set for '{self}'")
+
         return self
-
-    @torch.no_grad()
-    def save_tensor(self, name: str, tensor: Tensor, attached=False):
-        if not self.training:
-            return
-
-        if not isinstance(tensor, Tensor):
-            raise Exception("Not a tensor")
-        if attached:
-            self._saved_tensor[name] = tensor
-        else:
-            self._saved_tensor[name] = tensor.clone()
-        return self._saved_tensor[name]
-
-    def save_x(self, x: Tensor, attached=False):
-        return self.save_tensor("input", x, attached=attached)
-
-    def save_y(self, y: Tensor, attached=False):
-        return self.save_tensor("output", y, attached=attached)
-
-    def save_xy(self, x: Tensor, y: Tensor, attached=False):
-        return self.save_x(x, attached=attached), self.save_y(y, attached=attached)
-
-    def get_tensor(self, name: str) -> Union[None, Tensor]:
-        if self.has_tensor(name):
-            return self._saved_tensor[name]
-        else:
-            return None
-
-    @property
-    def x(self):
-        return self.get_tensor("input")
-
-    @property
-    def y(self):
-        return self.get_tensor("output")
-
-    def has_tensor(self, name: str) -> bool:
-        return name in self._saved_tensor
-
-    def clear_tensors(self):
-        self._saved_tensor = {}
-
-
-class BackwardFunction(ABC):
-    def __init__(self, layer: Layer):
-        if not isinstance(layer, Layer):
-            raise Exception(f'layer not instance of BaseLayer class')
-
-        self._layer = layer
-        self.reset_parameters()
-
-    def get_parameter(self, name: str) -> Union[None, Tensor]:
-        if self._layer.has_tensor(name):
-            return self._layer.get_tensor(name)
-
-        if hasattr(self._layer, name):
-            return getattr(self._layer, name)
-
-        raise Exception(f'"{name}" is not found')
-
-    def reset_parameters(self):
-        pass
-
-    def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
-        raise NotImplementedError
-
-    @property
-    def x(self):
-        return self.get_parameter("input")
-
-    @property
-    def y(self):
-        return self.get_parameter("output")
-
-    @staticmethod
-    def set_grad_of(tensor: Tensor, grad: Tensor):
-        if tensor is None or tensor.requires_grad is False:
-            return
-
-        if tensor.grad is None:
-            tensor.grad = grad
-        else:
-            tensor.grad += grad
-
-        return tensor.grad

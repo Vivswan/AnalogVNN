@@ -12,7 +12,7 @@ def test(model, test_loader: DataLoader, test_run=False):
         for data, target in test_loader:
             data, target = data.to(model.device), target.to(model.device)
 
-            output = model.output(data)
+            output = model(data)
             loss, accuracy = model.loss(output, target)
 
             total_loss += loss.item() * len(data)

@@ -4,7 +4,6 @@ from torch import optim, nn
 from torch.utils.data import DataLoader
 from torchvision.transforms import transforms
 
-from nn.layers.BackwardWrapper import BackwardWrapper
 from nn.layers.Linear import Linear
 from nn.layers.activations.Gaussian import GeLU
 from nn.layers.functionals.Normalize import Clamp
@@ -101,7 +100,7 @@ class LinearModel(FullSequential):
         self.leakage = leakage
 
         self.all_layers = []
-        self.all_layers.append(BackwardWrapper(nn.Flatten(start_dim=1)))
+        self.all_layers.append(nn.Flatten(start_dim=1))
         self.add_layer(Linear(in_features=28 * 28, out_features=256))
         self.add_layer(Linear(in_features=256, out_features=128))
         self.add_layer(Linear(in_features=128, out_features=10))
@@ -190,6 +189,8 @@ def run_linear3_model():
     nn_model.accuracy_function = cross_entropy_accuracy
     nn_model.compile(device=device)
     weight_model.compile(device=device)
+    nn_model.graphs.forward_graph.render("_data/forward", real_label=True)
+    nn_model.graphs.backward_graph.render("_data/backward", real_label=True)
     nn_model.to(device=device)
     weight_model.to(device=device)
 

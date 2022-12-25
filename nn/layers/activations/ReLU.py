@@ -17,11 +17,10 @@ class PReLU(Activation):
         self._zero = nn.Parameter(torch.tensor(0), requires_grad=False)
 
     def forward(self, x: Tensor) -> Tensor:
-        self.save_tensor("input", x)
         return torch.minimum(self._zero, x) * self.alpha + torch.maximum(self._zero, x)
 
     def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
-        x = self.get_tensor("input")
+        x = self.inputs
         grad = (x < 0).type(torch.float) * self.alpha + (x >= 0).type(torch.float)
         return grad_output * grad
 

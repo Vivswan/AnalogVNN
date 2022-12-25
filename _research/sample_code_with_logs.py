@@ -10,7 +10,6 @@ from torch.utils.data import DataLoader
 from torchvision.transforms import transforms
 
 from _research.utils.save_graph import save_graph
-from nn.layers.BackwardWrapper import BackwardWrapper
 from nn.layers.Linear import Linear
 from nn.layers.activations.Gaussian import GeLU
 from nn.layers.functionals.Normalize import Clamp
@@ -108,7 +107,7 @@ class LinearModel(FullSequential):
         self.leakage = leakage
 
         self.all_layers = []
-        self.all_layers.append(BackwardWrapper(nn.Flatten(start_dim=1)))
+        self.all_layers.append(nn.Flatten(start_dim=1))
         self.add_layer(Linear(in_features=28 * 28, out_features=256))
         self.add_layer(Linear(in_features=256, out_features=128))
         self.add_layer(Linear(in_features=128, out_features=10))
@@ -160,7 +159,7 @@ class WeightModel(FullSequential):
 def run_linear3_model():
     """ The main function to train photonics image classifier with 3 linear/dense layers for MNIST dataset
     """
-    data_path = Path("../_data").joinpath(str(int(time.time())))
+    data_path = Path("C:/X/_data").joinpath(str(int(time.time())))
     if not data_path.exists():
         data_path.mkdir()
 
@@ -172,7 +171,7 @@ def run_linear3_model():
     print(f"Loading Data...")
     train_loader, test_loader, input_shape, classes = load_vision_dataset(
         dataset=torchvision.datasets.MNIST,
-        path="../_data/",
+        path="C:/X/_data/",
         batch_size=128,
         is_cuda=is_cuda
     )

@@ -1,8 +1,8 @@
 import torch
 from torch import nn, Tensor
 
-from nn.fn.BackwardIdentity import BackwardIdentity
 from nn.fn.reduce_precision import stochastic_reduce_precision
+from nn.layers.BackwardIdentity import BackwardIdentity
 from nn.modules.Layer import Layer
 
 

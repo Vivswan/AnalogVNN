@@ -4,12 +4,12 @@ from typing import Union
 import torch
 from torch import nn, Tensor
 
-from nn.fn.BackwardIdentity import BackwardFunction
 from nn.fn.to_matrix import to_matrix
+from nn.modules.BackwardModule import BackwardModule
 from nn.modules.Layer import Layer
 
 
-class LinearBackpropagation(BackwardFunction):
+class LinearBackpropagation(BackwardModule):
     @property
     def weight(self):
         return self.get_parameter("weight")
@@ -24,7 +24,7 @@ class LinearBackpropagation(BackwardFunction):
         weight = to_matrix(self.weight if weight is None else weight)
         grad_input = grad_output @ weight
 
-        self.set_grad_of(self.weight, torch.mm(grad_output.t(), self.x))
+        self.set_grad_of(self.weight, torch.mm(grad_output.t(), self.inputs))
         self.set_grad_of(self.bias, grad_output.sum(0))
         return grad_input
 
@@ -53,7 +53,7 @@ class Linear(Layer):
         else:
             self.register_parameter('bias', None)
 
-        self.use(LinearBackpropagation)
+        self.set_backward_function(LinearBackpropagation)
         self.reset_parameters()
 
     def reset_parameters(self) -> None:
@@ -69,7 +69,6 @@ class Linear(Layer):
         else:
             y = torch.mm(x, self.weight.t())
 
-        self.save_xy(x, y)
         return y
 
     def extra_repr(self) -> str:

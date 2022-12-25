@@ -19,7 +19,6 @@ from _research.dataloaders.load_vision_dataset import load_vision_dataset
 from _research.utils.data_dirs import data_dirs
 from _research.utils.path_functions import path_join
 from _research.utils.save_graph import save_graph
-from nn.layers.BackwardWrapper import BackwardWrapper
 from nn.layers.Linear import Linear
 from nn.layers.activations.Activation import Activation
 from nn.layers.functionals.Normalize import *
@@ -127,47 +126,45 @@ class ParneetModel(FullSequential):
         self.all_layers: List[nn.Module] = []
 
         self.add_doa_layers()
-        self.all_layers.append(BackwardWrapper(nn.Conv2d(
+        self.all_layers.append(nn.Conv2d(
             in_channels=self.input_shape[1],
             out_channels=48,
             kernel_size=(3, 3),
             padding=(1, 1)
-        )))
+        ))
         self.add_aod_layers()
         self.add_doa_layers()
-        self.all_layers.append(BackwardWrapper(nn.Conv2d(in_channels=48, out_channels=48, kernel_size=(3, 3))))
+        self.all_layers.append(nn.Conv2d(in_channels=48, out_channels=48, kernel_size=(3, 3)))
         self.add_aod_layers()
-        self.all_layers.append(BackwardWrapper(nn.MaxPool2d(2, 2)))
-        self.all_layers.append(BackwardWrapper(nn.Dropout(0.25)))
+        self.all_layers.append(nn.MaxPool2d(2, 2))
+        self.all_layers.append(nn.Dropout(0.25))
         self.add_doa_layers()
-        self.all_layers.append(
-            BackwardWrapper(nn.Conv2d(in_channels=48, out_channels=96, kernel_size=(3, 3), padding=(1, 1))))
-        self.add_aod_layers()
-        self.add_doa_layers()
-        self.all_layers.append(BackwardWrapper(nn.Conv2d(in_channels=96, out_channels=96, kernel_size=(3, 3))))
-        self.add_aod_layers()
-        self.all_layers.append(BackwardWrapper(nn.MaxPool2d(2, 2)))
-        self.all_layers.append(BackwardWrapper(nn.Dropout(0.25)))
-        self.add_doa_layers()
-        self.all_layers.append(
-            BackwardWrapper(nn.Conv2d(in_channels=96, out_channels=192, kernel_size=(3, 3), padding=(1, 1))))
+        self.all_layers.append(nn.Conv2d(in_channels=48, out_channels=96, kernel_size=(3, 3), padding=(1, 1)))
         self.add_aod_layers()
         self.add_doa_layers()
-        self.all_layers.append(BackwardWrapper(nn.Conv2d(in_channels=192, out_channels=192, kernel_size=(3, 3))))
+        self.all_layers.append(nn.Conv2d(in_channels=96, out_channels=96, kernel_size=(3, 3)))
         self.add_aod_layers()
-        self.all_layers.append(BackwardWrapper(nn.MaxPool2d(2, 2)))
-        self.all_layers.append(BackwardWrapper(nn.Dropout(0.25)))
+        self.all_layers.append(nn.MaxPool2d(2, 2))
+        self.all_layers.append(nn.Dropout(0.25))
+        self.add_doa_layers()
+        self.all_layers.append(nn.Conv2d(in_channels=96, out_channels=192, kernel_size=(3, 3), padding=(1, 1)))
+        self.add_aod_layers()
+        self.add_doa_layers()
+        self.all_layers.append(nn.Conv2d(in_channels=192, out_channels=192, kernel_size=(3, 3)))
+        self.add_aod_layers()
+        self.all_layers.append(nn.MaxPool2d(2, 2))
+        self.all_layers.append(nn.Dropout(0.25))
 
-        self.all_layers.append(BackwardWrapper(Flatten(start_dim=1)))
+        self.all_layers.append(Flatten(start_dim=1))
 
         self.add_doa_layers()
         self.all_layers.append(Linear(in_features=self.get_in_shape(input_shape)[1], out_features=512))
         self.add_aod_layers()
-        self.all_layers.append(BackwardWrapper(nn.Dropout(0.5)))
+        self.all_layers.append(nn.Dropout(0.5))
         self.add_doa_layers()
         self.all_layers.append(Linear(in_features=512, out_features=256))
         self.add_aod_layers()
-        self.all_layers.append(BackwardWrapper(nn.Dropout(0.5)))
+        self.all_layers.append(nn.Dropout(0.5))
         self.add_doa_layers()
         self.all_layers.append(Linear(in_features=256, out_features=num_classes))
         self.add_aod_layers()

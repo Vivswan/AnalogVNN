@@ -1,7 +1,7 @@
 from typing import Union, Callable
 
 import torch
-from torch import nn, Tensor
+from torch import nn
 from torch.utils.data import DataLoader
 
 from nn.fn.test import test
@@ -64,11 +64,9 @@ class Model(Layer):
     def forward(self, *inputs):
         return self.graphs.forward_graph(inputs, self.training)
 
+    @torch.no_grad()
     def backward(self, *inputs):
         return self.graphs.backward_graph(inputs)
-
-    def output(self, x: Tensor) -> Tensor:
-        return self(x)
 
     def loss(self, output, target):
         if self.loss_function is None:

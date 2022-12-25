@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import operator
 from collections import OrderedDict
 from itertools import islice
@@ -44,7 +46,7 @@ class Sequential(Model):
         idx %= size
         return next(islice(iterator, idx, None))
 
-    def __getitem__(self, idx) -> Union['Sequential', T]:
+    def __getitem__(self, idx) -> Union[Sequential, T]:
         if isinstance(idx, slice):
             return self.__class__(OrderedDict(list(self._runtime_module_list.items())[idx]))
         else:

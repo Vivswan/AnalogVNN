@@ -7,12 +7,12 @@ from nn.layers.activations.Activation import Activation
 
 
 class Tanh(Activation):
-    def forward(self, x: Tensor) -> Tensor:
-        self.save_tensor("input", x)
+    @staticmethod
+    def forward(x: Tensor) -> Tensor:
         return torch.tanh(x)
 
     def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
-        x = self.get_tensor("input")
+        x = self.inputs
         grad = 1 - torch.pow(torch.tanh(x), 2)
         return grad_output * grad
 

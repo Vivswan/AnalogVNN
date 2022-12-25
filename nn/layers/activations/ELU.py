@@ -17,14 +17,13 @@ class SELU(Activation):
         self.scale_factor = nn.Parameter(torch.tensor(scale_factor), requires_grad=False)
 
     def forward(self, x: Tensor) -> Tensor:
-        self.save_tensor("input", x)
         return self.scale_factor * (
                 (x <= 0).type(torch.float) * self.alpha * (torch.exp(x) - 1) +
                 (x > 0).type(torch.float) * x
         )
 
     def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
-        x = self.get_tensor("input")
+        x = self.inputs
         grad = self.scale_factor * ((x < 0).type(torch.float) * self.alpha * torch.exp(x) + (x >= 0).type(torch.float))
         return grad_output * grad
 

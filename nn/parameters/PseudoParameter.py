@@ -39,7 +39,7 @@ class PseudoParameter(Parameter):
                f', transform:{self.transformation}' \
                f', original:{self.original}' \
                f'): ' \
-               + super(PseudoParameter, self).__repr__().replace("\n", " ")
+            + super(PseudoParameter, self).__repr__().replace("\n", " ")
 
     @property
     def original(self):

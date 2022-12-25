@@ -18,8 +18,7 @@ from _research.dataloaders.load_vision_dataset import load_vision_dataset
 from _research.utils.data_dirs import data_dirs
 from _research.utils.path_functions import path_join
 from _research.utils.save_graph import save_graph
-from nn.fn.BackwardUsingForward import BackwardUsingForward
-from nn.layers.BackwardWrapper import BackwardWrapper
+from nn.layers.BackwardUsingForward import BackwardUsingForward
 from nn.layers.Linear import Linear
 from nn.layers.activations.Activation import Activation
 from nn.layers.functionals.Normalize import *
@@ -158,17 +157,17 @@ class ConvLinearModel(FullSequential):
             )
 
             self.add_doa_layers()
-            self.all_layers.append(BackwardWrapper(conv_layer))
+            self.all_layers.append(conv_layer)
             self.add_aod_layers()
 
             temp_x = conv_layer(temp_x)
 
             max_pool = nn.MaxPool2d(2, 2)
-            self.all_layers.append(BackwardWrapper(max_pool))
+            self.all_layers.append(max_pool)
             temp_x = max_pool(temp_x)
 
         flatten = Flatten(start_dim=1)
-        self.all_layers.append(BackwardWrapper(flatten))
+        self.all_layers.append(flatten)
         temp_x = flatten(temp_x)
 
         for i in range(len(linear_features_sizes)):
@@ -195,9 +194,9 @@ class ConvLinearModel(FullSequential):
         if approach == "use_autograd_graph":
             self.backward.use_autograd_graph = True
         if approach == "no_norm_grad":
-            [i.use(BackwardIdentity) for i in self.norm_layers]
+            [i.set_backward_function(BackwardIdentity) for i in self.norm_layers]
         if approach == "norm_grad_by_forward":
-            [i.use(BackwardUsingForward) for i in self.norm_layers]
+            [i.set_backward_function(BackwardUsingForward) for i in self.norm_layers]
 
         self.add_sequence(*self.all_layers)
 

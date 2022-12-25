@@ -8,11 +8,10 @@ from nn.layers.activations.Activation import Activation
 
 class Logistic(Activation):
     def forward(self, x: Tensor) -> Tensor:
-        self.save_tensor("input", x)
         return 1 / (1 + torch.exp(-x))
 
     def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
-        x = self.get_tensor("input")
+        x = self.inputs
         grad = self.forward(x) * (1 - self.forward(x))
         return grad_output * grad
 

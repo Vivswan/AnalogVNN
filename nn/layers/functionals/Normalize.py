@@ -4,7 +4,7 @@ from typing import Union
 import torch
 from torch import Tensor, nn
 
-from nn.fn.BackwardIdentity import BackwardIdentity
+from nn.layers.BackwardIdentity import BackwardIdentity
 from nn.modules.Layer import Layer
 
 
@@ -22,7 +22,6 @@ class LPNorm(Normalize):
         self.make_max_1 = nn.Parameter(torch.tensor(make_max_1), requires_grad=False)
 
     def forward(self, x: Tensor):
-        self.save_tensor("input", x)
         norm = x
         if len(x.shape) > 1:
             norm = torch.flatten(norm, start_dim=1)
@@ -34,14 +33,11 @@ class LPNorm(Normalize):
         if self.make_max_1:
             x = torch.div(x, torch.max(torch.abs(x)))
 
-        self.save_tensor("norm", norm)
         return x
 
 
 class LPNormW(LPNorm):
     def forward(self, x: Tensor):
-        self.save_tensor("input", x)
-
         norm = torch.norm(x, self.p)
         norm = torch.clamp(norm, min=1e-4)
         x = torch.div(x, norm)
@@ -49,7 +45,6 @@ class LPNormW(LPNorm):
         if self.make_max_1:
             x = torch.div(x, torch.max(torch.abs(x)))
 
-        self.save_tensor("norm", norm)
         return x
 
 
@@ -94,22 +89,22 @@ class L2NormWM(LPNormW):
 
 
 class Clamp(Normalize):
-    def forward(self, x: Tensor):
-        self.save_tensor("input", x)
+    @staticmethod
+    def forward(x: Tensor):
         return torch.clamp(x, min=-1, max=1)
 
     def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
-        x = self.get_tensor("input")
+        x = self.inputs
         grad = ((-1 <= x) * (x <= 1.)).type(torch.float)
         return grad_output * grad
 
 
 class Clamp01(Normalize):
+    @staticmethod
     def forward(self, x: Tensor):
-        self.save_tensor("input", x)
         return torch.clamp(x, min=0, max=1)
 
     def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
-        x = self.get_tensor("input")
+        x = self.inputs
         grad = ((0 <= x) * (x <= 1.)).type(torch.float)
         return grad_output * grad
