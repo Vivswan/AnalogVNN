@@ -3,7 +3,7 @@ from typing import Union
 import torch
 from torch import Tensor
 
-from nn.fn.BackwardIdentity import BackwardIdentity
+from nn.layers.BackwardIdentity import BackwardIdentity
 from nn.modules.Layer import Layer
 from nn.utils.to_tensor_parameter import to_float_tensor, to_nongrad_parameter
 

@@ -18,7 +18,7 @@ from _research.dataloaders.load_vision_dataset import load_vision_dataset
 from _research.utils.data_dirs import data_dirs
 from _research.utils.path_functions import path_join
 from _research.utils.save_graph import save_graph
-from nn.fn.BackwardUsingForward import BackwardUsingForward
+from nn.layers.BackwardUsingForward import BackwardUsingForward
 from nn.layers.Linear import Linear
 from nn.layers.activations.Activation import Activation
 from nn.layers.functionals.Normalize import *

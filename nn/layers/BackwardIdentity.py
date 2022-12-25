@@ -2,7 +2,7 @@ from typing import Union
 
 from torch import Tensor
 
-from nn.modules.Layer import BackwardModule
+from nn.modules.BackwardModule import BackwardModule
 
 
 class BackwardIdentity(BackwardModule):

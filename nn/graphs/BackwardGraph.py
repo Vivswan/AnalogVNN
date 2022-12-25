@@ -8,7 +8,8 @@ from nn.graphs.AccumulateGrad import AccumulateGrad
 from nn.graphs.AcyclicDirectedGraph import AcyclicDirectedGraph
 from nn.graphs.ArgsKwargs import ArgsKwargs, InputOutput
 from nn.graphs.GraphEnum import GraphEnum
-from nn.modules.Layer import BackwardModule, Layer
+from nn.modules.BackwardModule import BackwardModule
+from nn.modules.Layer import Layer
 
 
 class BackwardGraph(AcyclicDirectedGraph):

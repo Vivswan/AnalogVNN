@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-import abc
-import inspect
-from typing import Union, Type, Callable, Any
+from typing import Union, Type, Callable
 
-from torch import nn, Tensor
+from torch import nn
 
 from nn.graphs.ArgsKwargs import ArgsKwargs
+from nn.modules.BackwardFunction import BackwardFunction
+from nn.modules.BackwardModule import BackwardModule
 
 
 class Layer(nn.Module):
@@ -53,92 +53,3 @@ class Layer(nn.Module):
             raise Exception(f"Backward Module is not set for '{self}'")
 
         return self
-
-
-class BackwardModule(abc.ABC):
-    def __init__(self, layer: Layer = None):
-        self._layer = None
-        self.set_layer(layer)
-
-    def backward(self, *grad_output: Union[None, Tensor], **grad_output_kwarg) -> Union[None, Tensor]:
-        raise NotImplementedError
-
-    __call__: Callable[..., Any] = backward
-
-    @property
-    def layer(self):
-        return self._layer
-
-    @layer.setter
-    def layer(self, layer: Union[None, Layer]):
-        self.set_layer(layer)
-
-    def set_layer(self, layer: Union[None, Layer]):
-        if layer is not None and not isinstance(layer, Layer):
-            raise Exception(f'layer not instance of Layer class')
-
-        self._layer = layer
-
-    def get_parameter(self, name: str) -> Union[None, Tensor]:
-        if self._layer is None:
-            return None
-
-        if hasattr(self._layer, name):
-            return getattr(self._layer, name)
-
-        raise Exception(f'"{name}" is not found')
-
-    @property
-    def inputs(self):
-        if self._layer is None:
-            return None
-
-        return self._layer.inputs
-
-    @property
-    def outputs(self):
-        if self._layer is None:
-            return None
-
-        return self._layer.outputs
-
-    @staticmethod
-    def set_grad_of(tensor: Tensor, grad: Tensor):
-        if tensor is None or tensor.requires_grad is False:
-            return
-
-        if tensor.grad is None:
-            tensor.grad = grad
-        else:
-            tensor.grad += grad
-
-        return tensor.grad
-
-
-class BackwardFunction(BackwardModule):
-    def __init__(self, backward_function: Callable = None, layer: Layer = None):
-        super().__init__(layer)
-        self._backward_function = None
-        self.set_backward_function(backward_function)
-
-    @property
-    def backward_function(self):
-        return self._backward_function
-
-    @backward_function.setter
-    def backward_function(self, backward_function: Callable):
-        self.set_backward_function(backward_function)
-
-    def set_backward_function(self, backward_function: Callable):
-        if backward_function is None or callable(backward_function):
-            self._backward_function = backward_function
-        else:
-            raise ValueError('"function" must be Callable')
-
-        return self
-
-    def backward(self, *grad_output: Union[None, Tensor], **grad_output_kwarg) -> Union[None, Tensor]:
-        if self._backward_function is None:
-            raise ValueError("set backward_function first before invoking backward")
-
-        return self._backward_function(*grad_output, **grad_output_kwarg)

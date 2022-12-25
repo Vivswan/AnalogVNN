@@ -4,8 +4,8 @@ from typing import Union
 import torch
 from torch import nn, Tensor
 
-from nn.fn.BackwardIdentity import BackwardModule
 from nn.fn.to_matrix import to_matrix
+from nn.modules.BackwardModule import BackwardModule
 from nn.modules.Layer import Layer
 
 

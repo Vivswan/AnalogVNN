@@ -6,8 +6,8 @@ import torch
 from scipy.optimize import *
 from torch import Tensor
 
-from nn.fn.BackwardIdentity import BackwardIdentity
 from nn.fn.dirac_delta import dirac_delta
+from nn.layers.BackwardIdentity import BackwardIdentity
 from nn.modules.Layer import Layer
 from nn.utils.common_types import TENSOR_OPERABLE
 from nn.utils.to_tensor_parameter import to_float_tensor, to_nongrad_parameter

@@ -2,7 +2,8 @@ from typing import Type, Union
 
 from torch import Tensor
 
-from nn.modules.Layer import BackwardModule, Layer
+from nn.modules.BackwardModule import BackwardModule
+from nn.modules.Layer import Layer
 
 
 class BackwardUsingForward(BackwardModule):

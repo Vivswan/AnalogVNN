@@ -2,7 +2,7 @@ import abc
 
 from torch import Tensor, nn
 
-from nn.fn.BackwardIdentity import BackwardModule
+from nn.modules.BackwardModule import BackwardModule
 from nn.modules.Layer import Layer
 
 
