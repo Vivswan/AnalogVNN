@@ -64,6 +64,7 @@ class Model(Layer):
     def forward(self, *inputs):
         return self.graphs.forward_graph(inputs, self.training)
 
+    @torch.no_grad()
     def backward(self, *inputs):
         return self.graphs.backward_graph(inputs)
 
