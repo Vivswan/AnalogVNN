@@ -22,10 +22,7 @@ class BackwardGraph(AcyclicDirectedGraph):
             gradient = gradient[0]
 
         if self.graph_state.use_autograd_graph:
-            result = self.graph_state.loss.backward(
-                gradient=gradient,
-                inputs=self.graph_state.output.args
-            )
+            result = self.graph_state.loss.backward(gradient=gradient)
         else:
             grad_outputs = torch.autograd.grad(
                 outputs=self.graph_state.loss,

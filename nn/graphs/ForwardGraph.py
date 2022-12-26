@@ -31,12 +31,9 @@ class ForwardGraph(AcyclicDirectedGraph):
             for i in inputs:
                 i.requires_grad = True
 
+        input_output_graph = self._pass(self.INPUT, *inputs)
         if is_training:
-            input_output_graph = self._pass(self.INPUT, *inputs)
             self.graph_state.forward_input_output_graph = input_output_graph
-        else:
-            with torch.no_grad():
-                input_output_graph = self._pass(self.INPUT, *inputs)
 
         outputs = input_output_graph[self.OUTPUT].outputs
         return ArgsKwargs.from_args_kwargs_object(outputs)
