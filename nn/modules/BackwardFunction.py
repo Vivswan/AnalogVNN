@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Callable, Union
+from typing import Callable, Optional
 
 from torch import nn, Tensor
 
@@ -8,10 +8,11 @@ from nn.modules.BackwardModule import BackwardModule
 
 
 class BackwardFunction(BackwardModule):
-    def __init__(self, backward_function: Callable = None, layer: nn.Module = None):
+    _backward_function: Callable
+
+    def __init__(self, backward_function: Callable, layer: nn.Module = None):
         super().__init__(layer)
-        self._backward_function = None
-        self.set_backward_function(backward_function)
+        self._backward_function = backward_function
 
     @property
     def backward_function(self):
@@ -22,14 +23,10 @@ class BackwardFunction(BackwardModule):
         self.set_backward_function(backward_function)
 
     def set_backward_function(self, backward_function: Callable):
-        if backward_function is None or callable(backward_function):
-            self._backward_function = backward_function
-        else:
-            raise ValueError('"function" must be Callable')
-
+        self._backward_function = backward_function
         return self
 
-    def backward(self, *grad_output: Union[None, Tensor], **grad_output_kwarg) -> Union[None, Tensor]:
+    def backward(self, *grad_output: Optional[Tensor], **grad_output_kwarg) -> Optional[Tensor]:
         if self._backward_function is None:
             raise ValueError("set backward_function first before invoking backward")
 
