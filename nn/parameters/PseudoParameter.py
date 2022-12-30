@@ -22,18 +22,19 @@ class PseudoParameter(Parameter):
 
     def _initialise(self, data):
         if self.initialise_zero_pseudo:
-            self.original = torch.zeros_like(data, requires_grad=False)
+            self._original = torch.zeros_like(data, requires_grad=False)
         else:
-            self.original = torch.clone(data)
-            self.original.detach_()
+            self._original = torch.clone(data)
+            self._original.detach_()
 
-        self.original.parent = self
-        self.original.requires_grad_(self.requires_grad)
+        self._original.parent = self
+        self._original.requires_grad_(self.requires_grad)
+        self.grad_hook = self.register_hook(self.return_grad_to_original)
         self.update()
         return self
 
     def __repr__(self):
-        return f'PseudoParameter(' \
+        return f'{PseudoParameter.__name__}(' \
                f'initialise_zero_pseudo:{self.initialise_zero_pseudo}' \
                f', transform:{self.transformation}' \
                f', original:{self.original}' \
@@ -62,6 +63,10 @@ class PseudoParameter(Parameter):
     @transformation.setter
     def transformation(self, transform):
         self.set_transformation(transform)
+
+    def return_grad_to_original(self, grad):
+        self.original.grad = grad
+        return grad
 
     def zero_grad(self, set_to_none: bool = False):
         set_grad_zero(self, set_to_none=set_to_none)

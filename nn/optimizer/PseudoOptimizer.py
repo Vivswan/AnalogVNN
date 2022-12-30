@@ -44,15 +44,12 @@ class PseudoOptimizer(BaseOptimizer):
             if 'optimizer' not in group:
                 self.add_optimizer_to_param_group(group)
 
-            for p in group['params']:
-                if p.grad is None:
-                    continue
-
-                if isinstance(p, group['parameter_class']):
-                    if p.original.grad is None:
-                        p.original.grad = p.grad
-                    else:
-                        p.original.grad += p.grad
+            # for p in group['params']:
+            #     if p.grad is None:
+            #         continue
+            #
+            #     if isinstance(p, group['parameter_class']):
+            #         p.original.grad = p.grad
 
             group['optimizer'].step()
 
