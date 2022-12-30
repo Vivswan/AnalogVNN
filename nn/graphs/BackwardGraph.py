@@ -36,11 +36,11 @@ class BackwardGraph(AcyclicDirectedGraph):
 
         return result
 
-    def compile(self, is_static=True, **kwargs):
+    def compile(self, is_static=True):
         if not self.graph.has_node(self.OUTPUT):
             raise Exception("OUTPUT doesn't exist in the forward graph")
 
-        return super().compile(self.OUTPUT, is_static)
+        return super().compile(is_static=is_static)
 
     def from_forward(self, forward_graph):
         if isinstance(forward_graph, AcyclicDirectedGraph):
@@ -148,7 +148,7 @@ class BackwardGraph(AcyclicDirectedGraph):
         return None
 
     def _pass(self, from_node, *args, **kwargs) -> Dict[Any, InputOutput]:
-        static_graph = self._static_graph or self._create_sub_graph(from_node)
+        static_graph = self._create_sub_graph(from_node)
         input_output_graph = {
             from_node: InputOutput(inputs=ArgsKwargs(
                 args=args,
@@ -190,12 +190,11 @@ class BackwardGraph(AcyclicDirectedGraph):
                 grad_outputs_args_kwargs=grad_outputs.inputs,
             )
 
-        if isinstance(module, Layer) and module.backward_function is not None:
-            grad_inputs = module.backward_function.backward(*grad_outputs.inputs.args, **grad_outputs.inputs.kwargs)
-            return ArgsKwargs.to_args_kwargs_object(grad_inputs)
+        if isinstance(module, Layer) and isinstance(module.backward_function, BackwardModule):
+            module = module.backward_function
 
         if isinstance(module, BackwardModule):
-            grad_inputs = module.backward(*grad_outputs.inputs.args, **grad_outputs.inputs.kwargs)
+            grad_inputs = module._call_impl_backward(*grad_outputs.inputs.args, **grad_outputs.inputs.kwargs)
             return ArgsKwargs.to_args_kwargs_object(grad_inputs)
 
         grad_dict = {}
