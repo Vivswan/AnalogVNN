@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Optional
 
 import torch
 from torch import Tensor, nn
@@ -10,7 +10,7 @@ class Logistic(Activation):
     def forward(self, x: Tensor) -> Tensor:
         return 1 / (1 + torch.exp(-x))
 
-    def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
+    def backward(self, grad_output: Optional[Tensor]) -> Optional[Tensor]:
         x = self.inputs
         grad = self.forward(x) * (1 - self.forward(x))
         return grad_output * grad

@@ -8,6 +8,9 @@ from nn.utils.make_dot import make_dot
 
 
 class ModelGraph(ModelGraphState):
+    forward_graph: ForwardGraph
+    backward_graph: BackwardGraph
+
     def __init__(self, use_autograd_graph: bool = False, allow_loops=False):
         super(ModelGraph, self).__init__(use_autograd_graph, allow_loops)
         self.forward_graph = ForwardGraph(self)

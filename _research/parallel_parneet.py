@@ -15,8 +15,8 @@ from pathlib import Path
 import torchvision
 from natsort import natsorted, ns
 
-from nn.layers.activations import ELU
-from nn.layers.activations import GeLU
+from nn.layers.activations.ELU import ELU
+from nn.layers.activations.Gaussian import GeLU
 from nn.layers.activations.ReLU import LeakyReLU, ReLU
 from nn.layers.activations.SiLU import SiLU
 from nn.layers.activations.Tanh import Tanh

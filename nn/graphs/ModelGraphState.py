@@ -1,4 +1,4 @@
-from typing import Union, Dict
+from typing import Union, Dict, Optional
 
 import torch
 from torch import Tensor
@@ -8,16 +8,21 @@ from nn.graphs.GraphEnum import GraphEnum
 
 
 class ModelGraphState:
+    allow_loops: bool
+    use_autograd_graph: bool
+    forward_input_output_graph: Optional[Dict[Union[GraphEnum, torch.nn.Module], InputOutput]]
+    _loss: Optional[Tensor]
+
     INPUT = GraphEnum.INPUT
     OUTPUT = GraphEnum.OUTPUT
     STOP = GraphEnum.STOP
 
     def __init__(self, use_autograd_graph: bool = False, allow_loops=False):
         self.allow_loops = allow_loops
-        self.use_autograd_graph: bool = use_autograd_graph
+        self.use_autograd_graph = use_autograd_graph
 
-        self.forward_input_output_graph: Dict[Union[GraphEnum, torch.nn.Module], InputOutput] = None
-        self._loss: Union[None, Tensor] = None
+        self.forward_input_output_graph = None
+        self._loss = None
 
     def ready_for_forward(self, exception=False):
         pass

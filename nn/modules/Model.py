@@ -1,4 +1,4 @@
-from typing import Union, Callable
+from typing import Union, Callable, Optional
 
 import torch
 from torch import nn, optim
@@ -6,6 +6,8 @@ from torch.utils.data import DataLoader
 
 from nn.fn.test import test
 from nn.fn.train import train
+from nn.graphs.BackwardGraph import BackwardGraph
+from nn.graphs.ForwardGraph import ForwardGraph
 from nn.graphs.ModelGraph import ModelGraph
 from nn.modules.Layer import Layer
 from nn.utils.TensorboardModelLog import TensorboardModelLog
@@ -13,14 +15,27 @@ from nn.utils.is_cpu_cuda import is_cpu_cuda
 
 
 class Model(Layer):
-    __constants__ = ['in_features', 'device']
+    __constants__ = ['device']
+
+    _compiled: bool
+
+    tensorboard: Optional[TensorboardModelLog]
+
+    graphs: ModelGraph
+    forward_graph: ForwardGraph
+    backward_graph: BackwardGraph
+
+    optimizer: Optional[optim.Optimizer]
+    loss_function: Union[None, nn.Module, Callable]
+    accuracy_function: Union[None, nn.Module, Callable]
+    device: torch.device
 
     def __init__(self, tensorboard_log_dir=None, device=is_cpu_cuda.get_device()):
         super(Model, self).__init__()
 
-        self._compiled: bool = False
+        self._compiled = False
 
-        self.tensorboard: Union[None, TensorboardModelLog] = None
+        self.tensorboard = None
         if tensorboard_log_dir is not None:
             self.create_tensorboard(tensorboard_log_dir)
 
@@ -28,10 +43,10 @@ class Model(Layer):
         self.forward_graph = self.graphs.forward_graph
         self.backward_graph = self.graphs.backward_graph
 
-        self.optimizer: Union[None, optim.Optimizer] = None
-        self.loss_function: Union[None, nn.Module, Callable] = None
-        self.accuracy_function: Union[None, nn.Module, Callable] = None
-        self.device: torch.device = device
+        self.optimizer = None
+        self.loss_function = None
+        self.accuracy_function = None
+        self.device = device
 
     @property
     def use_autograd_graph(self):

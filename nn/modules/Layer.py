@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from typing import Union, Type, Callable
+from typing import Union, Type, Callable, Sequence, Optional
 
-from torch import nn
+from torch import nn, Tensor
 
 from nn.graphs.ArgsKwargs import ArgsKwargs
 from nn.modules.BackwardFunction import BackwardFunction
@@ -10,11 +10,15 @@ from nn.modules.BackwardModule import BackwardModule
 
 
 class Layer(nn.Module):
+    _inputs: Union[None, Tensor, Sequence[Tensor]]
+    _outputs: Union[None, Tensor, Sequence[Tensor]]
+    _backward_module: Optional[BackwardModule]
+
     def __init__(self):
         super(Layer, self).__init__()
         self._inputs = None
         self._outputs = None
-        self._backward_module: Union[None, BackwardModule] = None
+        self._backward_module = None
 
     def __call__(self, *inputs, **kwargs):
         outputs = super().__call__(*inputs, **kwargs)
@@ -34,7 +38,7 @@ class Layer(nn.Module):
         return self._outputs
 
     @property
-    def backward_function(self) -> Union[None, BackwardModule]:
+    def backward_function(self) -> Optional[BackwardModule]:
         return self._backward_module
 
     @backward_function.setter

@@ -1,7 +1,7 @@
-from typing import Union
+from typing import Union, Optional
 
 import torch
-from torch import Tensor
+from torch import Tensor, nn
 
 from nn.layers.BackwardIdentity import BackwardIdentity
 from nn.modules.Layer import Layer
@@ -9,14 +9,18 @@ from nn.utils.to_tensor_parameter import to_float_tensor, to_nongrad_parameter
 
 
 class UniformNoise(Layer, BackwardIdentity):
-    __constants__ = ['std', 'leakage', 'precision']
+    __constants__ = ['low', 'high', 'leakage', 'precision']
+    low: nn.Parameter
+    high: nn.Parameter
+    leakage: nn.Parameter
+    precision: nn.Parameter
 
     def __init__(
             self,
-            low: Union[None, int, float] = None,
-            high: Union[None, int, float] = None,
-            leakage: Union[None, int, float] = None,
-            precision: Union[None, int] = None
+            low: Optional[float] = None,
+            high: Optional[float] = None,
+            leakage: Optional[float] = None,
+            precision: Optional[int] = None
     ):
         super(UniformNoise, self).__init__()
 

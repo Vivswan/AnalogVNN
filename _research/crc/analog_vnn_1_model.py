@@ -3,7 +3,7 @@ import hashlib
 import json
 import math
 from dataclasses import dataclass
-from typing import Type, List
+from typing import Type, List, Union
 
 import numpy as np
 import torch.backends.cudnn
@@ -45,24 +45,24 @@ CONV_LAYER_SIZES = {
 
 @dataclass
 class RunParametersAnalogVNN1:
-    name: Union[None, str] = None
-    data_folder: Union[None, str] = None
+    name: Optional[str] = None
+    data_folder: Optional[str] = None
 
-    num_conv_layer: Union[None, int] = 0
-    num_linear_layer: Union[None, int] = 1
-    activation_class: Union[None, Type[Activation]] = None
-    approach: Union[None, str] = "default"
-    norm_class: Union[None, Type[Normalize]] = None
+    num_conv_layer: Optional[int] = 0
+    num_linear_layer: Optional[int] = 1
+    activation_class: Optional[Type[Activation]] = None
+    approach: Optional[str] = "default"
+    norm_class: Optional[Type[Normalize]] = None
     precision_class: Type[Layer] = None
-    precision: Union[None, int] = None
+    precision: Optional[int] = None
     noise_class: Type[Layer] = None
-    leakage: Union[None, float] = None
+    leakage: Optional[float] = None
 
-    w_norm_class: Union[None, Type[Normalize]] = None
+    w_norm_class: Optional[Type[Normalize]] = None
     w_precision_class: Type[Layer] = None
-    w_precision: Union[None, int] = None
+    w_precision: Optional[int] = None
     w_noise_class: Type[Layer] = None
-    w_leakage: Union[None, float] = None
+    w_leakage: Optional[float] = None
 
     optimiser_class: Type[Optimizer] = optim.Adam
     optimiser_parameters: dict = None
@@ -70,7 +70,7 @@ class RunParametersAnalogVNN1:
     batch_size: int = 128
     epochs: int = 10
 
-    device: Union[None, torch.device] = None
+    device: Optional[torch.device] = None
     test_logs: bool = False
     test_run: bool = False
     tensorboard: bool = False

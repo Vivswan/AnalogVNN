@@ -1,9 +1,9 @@
 import math
-from typing import Union
+from typing import Optional
 
 import numpy as np
 import torch
-from torch import Tensor
+from torch import Tensor, nn
 
 from nn.layers.BackwardIdentity import BackwardIdentity
 from nn.modules.Layer import Layer
@@ -13,12 +13,15 @@ from nn.utils.to_tensor_parameter import to_float_tensor, to_nongrad_parameter
 
 class LaplacianNoise(Layer, BackwardIdentity):
     __constants__ = ['scale', 'leakage', 'precision']
+    scale: nn.Parameter
+    leakage: nn.Parameter
+    precision: nn.Parameter
 
     def __init__(
             self,
-            scale: Union[None, float] = None,
-            leakage: Union[None, float] = None,
-            precision: Union[None, int] = None
+            scale: Optional[float] = None,
+            leakage: Optional[float] = None,
+            precision: Optional[int] = None
     ):
         super(LaplacianNoise, self).__init__()
 

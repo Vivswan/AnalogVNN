@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Union
+from typing import Optional
 
 import torch
 from torch import Tensor, nn
@@ -13,8 +13,9 @@ class Normalize(Layer, BackwardIdentity, ABC):
 
 
 class LPNorm(Normalize):
-    __constants__ = ['p']
+    __constants__ = ['p', 'make_max_1']
     p: nn.Parameter
+    make_max_1: nn.Parameter
 
     def __init__(self, p: int, make_max_1=False):
         super(LPNorm, self).__init__()
@@ -93,7 +94,7 @@ class Clamp(Normalize):
     def forward(x: Tensor):
         return torch.clamp(x, min=-1, max=1)
 
-    def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
+    def backward(self, grad_output: Optional[Tensor]) -> Optional[Tensor]:
         x = self.inputs
         grad = ((-1 <= x) * (x <= 1.)).type(torch.float)
         return grad_output * grad
@@ -101,10 +102,10 @@ class Clamp(Normalize):
 
 class Clamp01(Normalize):
     @staticmethod
-    def forward(self, x: Tensor):
+    def forward(x: Tensor):
         return torch.clamp(x, min=0, max=1)
 
-    def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
+    def backward(self, grad_output: Optional[Tensor]) -> Optional[Tensor]:
         x = self.inputs
         grad = ((0 <= x) * (x <= 1.)).type(torch.float)
         return grad_output * grad

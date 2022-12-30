@@ -1,9 +1,15 @@
+from typing import Dict, Union, Callable
+
 import torch
+from torch import nn
 
 from nn.graphs.ArgsKwargs import ArgsKwargs
 
 
 class AccumulateGrad:
+    locations: Dict
+    module: Union[nn.Module, Callable]
+
     def __init__(self, module):
         self.locations = {}
         self.module = module

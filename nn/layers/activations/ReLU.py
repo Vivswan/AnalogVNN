@@ -1,5 +1,5 @@
 import math
-from typing import Union
+from typing import Optional
 
 import torch
 from torch import Tensor, nn
@@ -8,8 +8,9 @@ from nn.layers.activations.Activation import Activation
 
 
 class PReLU(Activation):
-    __constants__ = ['alpha']
+    __constants__ = ['alpha', '_zero']
     alpha: nn.Parameter
+    _zero: nn.Parameter
 
     def __init__(self, alpha: float):
         super(PReLU, self).__init__()
@@ -19,7 +20,7 @@ class PReLU(Activation):
     def forward(self, x: Tensor) -> Tensor:
         return torch.minimum(self._zero, x) * self.alpha + torch.maximum(self._zero, x)
 
-    def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
+    def backward(self, grad_output: Optional[Tensor]) -> Optional[Tensor]:
         x = self.inputs
         grad = (x < 0).type(torch.float) * self.alpha + (x >= 0).type(torch.float)
         return grad_output * grad

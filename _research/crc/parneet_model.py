@@ -3,7 +3,7 @@ import hashlib
 import json
 import math
 from dataclasses import dataclass
-from typing import Type, List
+from typing import Type, List, Union
 
 import numpy as np
 import torch.backends.cudnn
@@ -33,21 +33,21 @@ from nn.utils.summary import summary
 
 @dataclass
 class RunParametersParneet:
-    name: Union[None, str] = None
-    data_folder: Union[None, str] = None
+    name: Optional[str] = None
+    data_folder: Optional[str] = None
 
-    activation_class: Union[None, Type[Activation]] = None
-    norm_class: Union[None, Type[Normalize]] = None
+    activation_class: Optional[Type[Activation]] = None
+    norm_class: Optional[Type[Normalize]] = None
     precision_class: Type[Layer] = None
-    precision: Union[None, int] = None
+    precision: Optional[int] = None
     noise_class: Type[Layer] = None
-    leakage: Union[None, float] = None
+    leakage: Optional[float] = None
 
-    w_norm_class: Union[None, Type[Normalize]] = None
+    w_norm_class: Optional[Type[Normalize]] = None
     w_precision_class: Type[Layer] = None
-    w_precision: Union[None, int] = None
+    w_precision: Optional[int] = None
     w_noise_class: Type[Layer] = None
-    w_leakage: Union[None, float] = None
+    w_leakage: Optional[float] = None
 
     optimiser_class: Type[Optimizer] = optim.Adam
     optimiser_parameters: dict = None
@@ -56,7 +56,7 @@ class RunParametersParneet:
     batch_size: int = 128
     epochs: int = 200
 
-    device: Union[None, torch.device] = None
+    device: Optional[torch.device] = None
     test_logs: bool = False
     test_run: bool = False
     tensorboard: bool = False
