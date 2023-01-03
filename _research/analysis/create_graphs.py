@@ -12,7 +12,7 @@ import seaborn
 from matplotlib import pyplot as plt
 from seaborn.palettes import _color_to_rgb, _ColorPalette
 
-from nn.layers.noise.GaussianNoise import GaussianNoise
+from analogvnn.nn.noise.GaussianNoise import GaussianNoise
 
 
 def main_color_palette(n_colors=6, as_cmap=False):  # noqa

@@ -16,11 +16,12 @@ from matplotlib.pyplot import figure, close
 from torch import nn
 from torch.utils.data import DataLoader
 
+import analogvnn.nn.normalize.Normalize
 from _research.dataloaders.load_vision_dataset import load_vision_dataset
-from nn.layers.functional.Normalize import Clamp, Clamp01
-from nn.layers.functional.ReducePrecision import ReducePrecision
-from nn.layers.noise.GaussianNoise import GaussianNoise
-from nn.utils.is_cpu_cuda import is_cpu_cuda
+from analogvnn.nn.noise.GaussianNoise import GaussianNoise
+from analogvnn.nn.normalize.Clamp import Clamp, Clamp01
+from analogvnn.nn.precision.ReducePrecision import ReducePrecision
+from analogvnn.utils.is_cpu_cuda import is_cpu_cuda
 
 
 def collect_parameters_to_json(path, destination=None):
@@ -48,7 +49,7 @@ def collect_parameters_to_json(path, destination=None):
                 "train_accuracy": {},
                 "test_loss": {},
                 "train_loss": {},
-                "parameters": {},
+                "parameter": {},
                 "raw": [],
             }
 
@@ -73,7 +74,7 @@ def collect_parameters_to_json(path, destination=None):
                     hparams = dict(ssi.session_start_info.hparams)
                     for k in hparams:
                         hparams[k] = hparams[k].ListFields()[0][1]
-                    this_data["parameters"] = hparams
+                    this_data["parameter"] = hparams
             # this_data["raw"].append(event)
 
         # if c:
@@ -110,7 +111,7 @@ def create_violin_figure(json_file_path, order_by, size_factor=2.85, int_index=F
         #     max_accuracies[key] = max(*value["test_accuracy"].values(), max_accuracies[key])
         # else:
         max_accuracies[key] = max(value["test_accuracy"].values())
-        parameters_map[key] = value["parameters"]
+        parameters_map[key] = value["parameter"]
 
     if not (isinstance(order_by, list) or isinstance(order_by, tuple)):
         order_by = (order_by,)
@@ -218,7 +219,7 @@ def create_line_figure(json_file_path, order_by, size_factor=2.85):
         #     max_accuracies[key] = max(*value["test_accuracy"].values(), max_accuracies[key])
         # else:
         max_accuracies[key] = value["test_accuracy"].values()
-        parameters_map[key] = value["parameters"]
+        parameters_map[key] = value["parameter"]
 
     if not (isinstance(order_by, list) or isinstance(order_by, tuple)):
         order_by = (order_by,)
@@ -232,7 +233,7 @@ def create_line_figure(json_file_path, order_by, size_factor=2.85):
         parameters = parameters_map[key]
         if not all([x in parameters for x in order_by]):
             continue
-        # print(parameters)
+        # print(parameter)
         for epoch, accuracy in enumerate(np.array(list(value)) * 100):
             plot_data["x"].append(epoch + 1)
             plot_data["y"].append(accuracy)
@@ -399,7 +400,7 @@ def create_scatter_figure(json_file_path, size_factor=2.85):
         #     max_accuracies[key] = max(*value["test_accuracy"].values(), max_accuracies[key])
         # else:
         max_accuracies[key] = max(value["test_accuracy"].values())
-        parameters_map[key] = value["parameters"]
+        parameters_map[key] = value["parameter"]
 
     plot_data = {
         "x": [],
@@ -416,24 +417,24 @@ def create_scatter_figure(json_file_path, size_factor=2.85):
         parameters = parameters_map[key]
         if not all([x in parameters for x in ["leakage_y", "precision_y", "leakage_w", "precision_w", ]]):
             continue
-        # if not (parameters["dataset"] == "FashionMNIST"):
+        # if not (parameter["dataset"] == "FashionMNIST"):
         #     m = max(m, value)
         #     continue
         # fm = max(fm, value)
-        # if not (parameters["leakage_w"] == "0.2"):
+        # if not (parameter["leakage_w"] == "0.2"):
         #     continue
-        # if not (parameters["precision_y"] == "16"):
+        # if not (parameter["precision_y"] == "16"):
         #     continue
-        # if not (parameters["optimiser_class"] == "StochasticReducePrecisionOptimizer"):
+        # if not (parameter["optimiser_class"] == "StochasticReducePrecisionOptimizer"):
         #     continue
-        # if not (parameters["model_class"] == "Linear3"):
+        # if not (parameter["model_class"] == "Linear3"):
         #     continue
-        # if not (parameters["activation_class"] == "Tanh"):
+        # if not (parameter["activation_class"] == "Tanh"):
         #     continue
-        # if not (parameters["activation_class"] == "LeakyReLU"):
+        # if not (parameter["activation_class"] == "LeakyReLU"):
         #     continue
 
-        # print(parameters)
+        # print(parameter)
         x_value = 10 * math.log10(
             calculate_snr(parameters["leakage_y"], parameters["precision_y"], parameters["dataset"])[1])
         hue = 10 * math.log10(calculate_snr(parameters["leakage_w"], parameters["precision_w"], "Weights")[0])
@@ -479,7 +480,7 @@ def create_scatter_figure(json_file_path, size_factor=2.85):
     plt.yticks(np.arange(0, 101, 20))
     # plt.xticks(np.arange(0, 41, 7.5))
     plt.ylim([0, 100])
-    norm = matplotlib.colors.Normalize(vmin=min(plot_data["hue"]), vmax=max(plot_data["hue"]))
+    norm = analogvnn.nn.normalize.Normalize.Normalize(vmin=min(plot_data["hue"]), vmax=max(plot_data["hue"]))
     sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
     cbar = plt.colorbar(
         sm,

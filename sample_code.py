@@ -4,14 +4,14 @@ from torch import optim, nn
 from torch.utils.data import DataLoader
 from torchvision.transforms import transforms
 
-from nn.layers.Linear import Linear
-from nn.layers.activation.Gaussian import GeLU
-from nn.layers.functional.Normalize import Clamp
-from nn.layers.functional.ReducePrecision import ReducePrecision
-from nn.layers.noise.GaussianNoise import GaussianNoise
-from nn.modules.FullSequential import FullSequential
-from nn.parameters.PseudoParameter import PseudoParameter
-from nn.utils.is_cpu_cuda import is_cpu_cuda
+from analogvnn.nn.Linear import Linear
+from analogvnn.nn.activation.Gaussian import GeLU
+from analogvnn.nn.module.FullSequential import FullSequential
+from analogvnn.nn.noise.GaussianNoise import GaussianNoise
+from analogvnn.nn.normalize.Clamp import Clamp
+from analogvnn.nn.precision.ReducePrecision import ReducePrecision
+from analogvnn.parameter.PseudoParameter import PseudoParameter
+from analogvnn.utils.is_cpu_cuda import is_cpu_cuda
 
 
 def load_vision_dataset(dataset, path, batch_size, is_cuda=False, grayscale=True):
@@ -77,7 +77,7 @@ def cross_entropy_accuracy(output, target) -> float:
 
 class LinearModel(FullSequential):
     def __init__(self, activation_class, norm_class, precision_class, precision, noise_class, leakage):
-        """ Linear Model with 3 dense layers
+        """ Linear Model with 3 dense nn
 
         Args:
             activation_class: Activation Class
@@ -150,7 +150,7 @@ class WeightModel(FullSequential):
 
 
 def run_linear3_model():
-    """ The main function to train photonics image classifier with 3 linear/dense layers for MNIST dataset
+    """ The main function to train photonics image classifier with 3 linear/dense nn for MNIST dataset
     """
     torch.backends.cudnn.benchmark = True
     torch.manual_seed(0)

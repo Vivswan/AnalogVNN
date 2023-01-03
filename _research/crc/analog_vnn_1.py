@@ -5,16 +5,17 @@ import torchvision
 
 from _research.crc.analog_vnn_1_model import run_analog_vnn1_model, RunParametersAnalogVNN1
 from _research.utils.path_functions import get_relative_path
-from nn.layers.activation.ELU import ELU
-from nn.layers.activation.Gaussian import GeLU
-from nn.layers.activation.ReLU import ReLU, LeakyReLU
-from nn.layers.activation.SiLU import SiLU
-from nn.layers.activation.Tanh import Tanh
-from nn.layers.functional.Normalize import *
-from nn.layers.functional.ReducePrecision import ReducePrecision
-from nn.layers.functional.StochasticReducePrecision import StochasticReducePrecision
-from nn.layers.noise.GaussianNoise import GaussianNoise
-from nn.layers.noise.PoissonNoise import PoissonNoise
+from analogvnn.nn.activation.ELU import ELU
+from analogvnn.nn.activation.Gaussian import GeLU
+from analogvnn.nn.activation.ReLU import ReLU, LeakyReLU
+from analogvnn.nn.activation.SiLU import SiLU
+from analogvnn.nn.activation.Tanh import Tanh
+from analogvnn.nn.noise.GaussianNoise import GaussianNoise
+from analogvnn.nn.noise.PoissonNoise import PoissonNoise
+from analogvnn.nn.normalize.Clamp import *
+from analogvnn.nn.normalize.LPNorm import L1Norm, L2Norm, L1NormW, L2NormW, L1NormM, L2NormM, L1NormWM, L2NormWM
+from analogvnn.nn.precision.ReducePrecision import ReducePrecision
+from analogvnn.nn.precision.StochasticReducePrecision import StochasticReducePrecision
 
 analogvnn1_parameters_list = {
     "nn_model_params": {
@@ -114,7 +115,7 @@ def run_analog_vnn1(kwargs):
             analogvnn1_parameters_list["weight_model_params"]["precision"])
     __check(parameters, "w_noise_class", "w_leakage", analogvnn1_parameters_list["weight_model_params"]["leakage"])
 
-    # print(parameters)
+    # print(parameter)
     run_analog_vnn1_model(parameters)
 
 

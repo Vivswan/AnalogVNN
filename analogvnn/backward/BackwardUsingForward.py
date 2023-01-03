@@ -1,0 +1,11 @@
+from typing import Type, Optional
+
+from torch import Tensor
+
+from analogvnn.backward.BackwardModule import BackwardModule
+from analogvnn.nn.module.Layer import Layer
+
+
+class BackwardUsingForward(BackwardModule):
+    def backward(self: Type[Layer], grad_output: Optional[Tensor]) -> Optional[Tensor]:
+        return self._layer.forward(grad_output)

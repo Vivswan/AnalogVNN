@@ -18,18 +18,19 @@ from _research.dataloaders.load_vision_dataset import load_vision_dataset
 from _research.utils.data_dirs import data_dirs
 from _research.utils.path_functions import path_join
 from _research.utils.save_graph import save_graph
-from nn.layers.BackwardUsingForward import BackwardUsingForward
-from nn.layers.Linear import Linear
-from nn.layers.activation.Activation import Activation
-from nn.layers.functional.Normalize import *
-from nn.layers.functional.ReducePrecision import ReducePrecision
-from nn.layers.functional.StochasticReducePrecision import StochasticReducePrecision
-from nn.layers.noise.GaussianNoise import GaussianNoise
-from nn.modules.FullSequential import FullSequential
-from nn.modules.Sequential import Sequential
-from nn.parameters.PseudoParameter import PseudoParameter
-from nn.utils.is_cpu_cuda import is_cpu_cuda
-from nn.utils.summary import summary
+from analogvnn.backward.BackwardUsingForward import BackwardUsingForward
+from analogvnn.nn.Linear import Linear
+from analogvnn.nn.activation.Activation import Activation
+from analogvnn.nn.module.FullSequential import FullSequential
+from analogvnn.nn.module.Sequential import Sequential
+from analogvnn.nn.noise.GaussianNoise import GaussianNoise
+from analogvnn.nn.normalize.Clamp import *
+from analogvnn.nn.normalize.Normalize import Normalize
+from analogvnn.nn.precision.ReducePrecision import ReducePrecision
+from analogvnn.nn.precision.StochasticReducePrecision import StochasticReducePrecision
+from analogvnn.parameter.PseudoParameter import PseudoParameter
+from analogvnn.utils.is_cpu_cuda import is_cpu_cuda
+from analogvnn.utils.summary import summary
 
 LINEAR_LAYER_SIZES = {
     1: [],
@@ -374,7 +375,7 @@ def run_analog_vnn1_model(parameters: RunParametersAnalogVNN1):
         file.write(summary(weight_model, input_size=(1, 1)) + "\n\n")
 
     if parameters.tensorboard:
-        nn_model.tensorboard.tensorboard.add_text("parameters", json.dumps(parameters.json, sort_keys=True, indent=2))
+        nn_model.tensorboard.tensorboard.add_text("parameter", json.dumps(parameters.json, sort_keys=True, indent=2))
     data: Tensor = next(iter(train_loader))[0]
 
     print(f"Saving Graphs...")

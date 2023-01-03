@@ -1,7 +1,7 @@
 from torch import Tensor, nn
 
-from nn.utils.is_cpu_cuda import is_cpu_cuda
-from nn.utils.make_dot import make_dot
+from analogvnn.utils.is_cpu_cuda import is_cpu_cuda
+from analogvnn.utils.make_dot import make_dot
 
 
 def save_graph(filename, module: nn.Module, data: Tensor):

@@ -3,16 +3,17 @@ import json
 
 from _research.crc.parneet_model import run_parneet_model, RunParametersParneet
 from _research.utils.path_functions import get_relative_path
-from nn.layers.activation.ELU import ELU
-from nn.layers.activation.Gaussian import GeLU
-from nn.layers.activation.ReLU import ReLU, LeakyReLU
-from nn.layers.activation.SiLU import SiLU
-from nn.layers.activation.Tanh import Tanh
-from nn.layers.functional.Normalize import *
-from nn.layers.functional.ReducePrecision import ReducePrecision
-from nn.layers.functional.StochasticReducePrecision import StochasticReducePrecision
-from nn.layers.noise.GaussianNoise import GaussianNoise
-from nn.layers.noise.PoissonNoise import PoissonNoise
+from analogvnn.nn.activation.ELU import ELU
+from analogvnn.nn.activation.Gaussian import GeLU
+from analogvnn.nn.activation.ReLU import ReLU, LeakyReLU
+from analogvnn.nn.activation.SiLU import SiLU
+from analogvnn.nn.activation.Tanh import Tanh
+from analogvnn.nn.noise.GaussianNoise import GaussianNoise
+from analogvnn.nn.noise.PoissonNoise import PoissonNoise
+from analogvnn.nn.normalize.Clamp import *
+from analogvnn.nn.normalize.LPNorm import L1Norm, L2Norm, L1NormW, L2NormW, L1NormM, L2NormM, L1NormWM, L2NormWM
+from analogvnn.nn.precision.ReducePrecision import ReducePrecision
+from analogvnn.nn.precision.StochasticReducePrecision import StochasticReducePrecision
 
 parneet_parameters_list = {
     "nn_model_params": {
@@ -80,7 +81,7 @@ def run_parneet(kwargs):
     __check(parameters, "w_precision_class", "w_precision")
     __check(parameters, "w_noise_class", "w_leakage")
 
-    # print(parameters)
+    # print(parameter)
     run_parneet_model(parameters)
 
 

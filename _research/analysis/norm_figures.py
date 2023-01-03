@@ -5,7 +5,8 @@ import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 
-from nn.layers.functional.Normalize import *
+from analogvnn.nn.normalize.Clamp import *
+from analogvnn.nn.normalize.LPNorm import L1NormM, L2NormM, L1NormWM, L2NormWM
 
 
 def main():
