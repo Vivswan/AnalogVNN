@@ -7,7 +7,8 @@ from analogvnn.nn.activation.Activation import Activation
 
 
 class BinaryStep(Activation):
-    def forward(self, x: Tensor) -> Tensor:
+    @staticmethod
+    def forward(x: Tensor) -> Tensor:
         return (x >= 0).type(torch.float)
 
     def backward(self, grad_output: Optional[Tensor]) -> Optional[Tensor]:

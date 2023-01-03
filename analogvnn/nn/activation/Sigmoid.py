@@ -7,7 +7,8 @@ from analogvnn.nn.activation.Activation import Activation
 
 
 class Logistic(Activation):
-    def forward(self, x: Tensor) -> Tensor:
+    @staticmethod
+    def forward(x: Tensor) -> Tensor:
         return 1 / (1 + torch.exp(-x))
 
     def backward(self, grad_output: Optional[Tensor]) -> Optional[Tensor]:

@@ -18,7 +18,8 @@ class Identity(Activation):
         else:
             return ''
 
-    def forward(self, x: Tensor) -> Tensor:
+    @staticmethod
+    def forward(x: Tensor) -> Tensor:
         return x
 
     def backward(self, grad_output: Optional[Tensor]) -> Optional[Tensor]:
