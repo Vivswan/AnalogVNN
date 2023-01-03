@@ -3,7 +3,7 @@ from typing import Optional
 import torch
 from torch import Tensor, nn
 
-from nn.layers.activations.Activation import Activation
+from nn.layers.activation.Activation import Activation
 
 
 class Tanh(Activation):

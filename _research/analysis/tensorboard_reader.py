@@ -17,8 +17,8 @@ from torch import nn
 from torch.utils.data import DataLoader
 
 from _research.dataloaders.load_vision_dataset import load_vision_dataset
-from nn.layers.functionals.Normalize import Clamp, Clamp01
-from nn.layers.functionals.ReducePrecision import ReducePrecision
+from nn.layers.functional.Normalize import Clamp, Clamp01
+from nn.layers.functional.ReducePrecision import ReducePrecision
 from nn.layers.noise.GaussianNoise import GaussianNoise
 from nn.utils.is_cpu_cuda import is_cpu_cuda
 

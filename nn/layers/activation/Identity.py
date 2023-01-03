@@ -2,7 +2,7 @@ from typing import Optional
 
 from torch import Tensor
 
-from nn.layers.activations.Activation import Activation
+from nn.layers.activation.Activation import Activation
 
 
 class Identity(Activation):

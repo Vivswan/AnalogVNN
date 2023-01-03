@@ -5,9 +5,9 @@ from torch.utils.data import DataLoader
 from torchvision.transforms import transforms
 
 from nn.layers.Linear import Linear
-from nn.layers.activations.Gaussian import GeLU
-from nn.layers.functionals.Normalize import Clamp
-from nn.layers.functionals.ReducePrecision import ReducePrecision
+from nn.layers.activation.Gaussian import GeLU
+from nn.layers.functional.Normalize import Clamp
+from nn.layers.functional.ReducePrecision import ReducePrecision
 from nn.layers.noise.GaussianNoise import GaussianNoise
 from nn.modules.FullSequential import FullSequential
 from nn.parameters.PseudoParameter import PseudoParameter

@@ -16,7 +16,7 @@ import torchvision
 from natsort import natsorted, ns
 
 from _research.crc.analog_vnn_1 import analogvnn1_parameters_list
-from nn.layers.functionals.Normalize import *
+from nn.layers.functional.Normalize import *
 
 
 def prepare_data_folder(folder_path):

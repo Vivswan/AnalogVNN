@@ -13,7 +13,7 @@ from scipy import integrate
 from scipy.io import savemat
 
 from nn.fn.dirac_delta import dirac_delta
-from nn.layers.functionals.ReducePrecision import ReducePrecision
+from nn.layers.functional.ReducePrecision import ReducePrecision
 from nn.layers.noise.GaussianNoise import GaussianNoise
 from nn.layers.noise.LaplacianNoise import LaplacianNoise
 from nn.layers.noise.PoissonNoise import PoissonNoise

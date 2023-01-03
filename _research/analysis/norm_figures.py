@@ -5,7 +5,7 @@ import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 
-from nn.layers.functionals.Normalize import *
+from nn.layers.functional.Normalize import *
 
 
 def main():
