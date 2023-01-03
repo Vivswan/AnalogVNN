@@ -1,4 +1,5 @@
 import abc
+from typing import Dict
 
 import networkx as nx
 
@@ -9,14 +10,20 @@ from nn.graphs.to_graph_viz_digraph import to_digraph
 
 
 class AcyclicDirectedGraph(abc.ABC):
+    graph: nx.MultiDiGraph
+    graph_state: ModelGraphState
+    _is_static: bool
+    _static_graphs: Dict
+
     INPUT = GraphEnum.INPUT
     OUTPUT = GraphEnum.OUTPUT
     STOP = GraphEnum.STOP
 
     def __init__(self, graph_state: ModelGraphState = None):
         self.graph = nx.MultiDiGraph()
-        self.graph_state: ModelGraphState = graph_state
-        self._static_graph = None
+        self.graph_state = graph_state
+        self._is_static = False
+        self._static_graphs = {}
 
         if self.graph_state.allow_loops:
             raise NotImplementedError("Loops are not implemented yet. Coming soon...")
@@ -158,15 +165,13 @@ class AcyclicDirectedGraph(abc.ABC):
 
         return label
 
-    def compile(self, from_node, is_static=True):
+    def compile(self, is_static=True):
         for i in nx.simple_cycles(self.graph):
             raise Exception(f"There is cyclic loop between {i}")
 
         self.graph = self._remove_missing_args(self.graph)
-        if is_static:
-            self._static_graph = self._create_sub_graph(from_node)
-        else:
-            self._static_graph = False
+        self._is_static = is_static
+        self._static_graphs = {}
 
     @staticmethod
     def _remove_missing_args(graph: nx.MultiDiGraph):
@@ -190,6 +195,9 @@ class AcyclicDirectedGraph(abc.ABC):
         return graph
 
     def _create_sub_graph(self, from_node):
+        if self._is_static and from_node in self._static_graphs:
+            return self._static_graphs[from_node]
+
         nodes = nx.descendants(self.graph, from_node)
         nodes.add(from_node)
 
@@ -199,7 +207,11 @@ class AcyclicDirectedGraph(abc.ABC):
 
         for i in sorted_graph:
             dependent_sorted_graph.append((i, list(sub_graph.predecessors(i))))
-        return dependent_sorted_graph
+
+        if self._is_static:
+            self._static_graphs[from_node] = dependent_sorted_graph
+
+        return self._static_graphs[from_node]
 
     def get_args_kwargs(self, input_output_graph, module, predecessors) -> ArgsKwargs:
         args = {}

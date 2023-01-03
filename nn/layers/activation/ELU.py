@@ -1,9 +1,9 @@
-from typing import Union
+from typing import Optional
 
 import torch
 from torch import Tensor, nn
 
-from nn.layers.activations.Activation import Activation
+from nn.layers.activation.Activation import Activation
 
 
 class SELU(Activation):
@@ -22,7 +22,7 @@ class SELU(Activation):
                 (x > 0).type(torch.float) * x
         )
 
-    def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
+    def backward(self, grad_output: Optional[Tensor]) -> Optional[Tensor]:
         x = self.inputs
         grad = self.scale_factor * ((x < 0).type(torch.float) * self.alpha * torch.exp(x) + (x >= 0).type(torch.float))
         return grad_output * grad

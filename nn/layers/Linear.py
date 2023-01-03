@@ -1,5 +1,5 @@
 import math
-from typing import Union
+from typing import Optional
 
 import torch
 from torch import nn, Tensor
@@ -18,7 +18,7 @@ class LinearBackpropagation(BackwardModule):
     def bias(self):
         return self.get_parameter("bias")
 
-    def backward(self, grad_output: Union[None, Tensor], weight: Union[None, Tensor] = None) -> Union[None, Tensor]:
+    def backward(self, grad_output: Optional[Tensor], weight: Optional[Tensor] = None) -> Optional[Tensor]:
         grad_output = to_matrix(grad_output)
 
         weight = to_matrix(self.weight if weight is None else weight)
@@ -33,9 +33,8 @@ class Linear(Layer):
     __constants__ = ['in_features', 'out_features']
     in_features: int
     out_features: int
-
     weight: nn.Parameter
-    bias: Union[None, nn.Parameter]
+    bias: Optional[nn.Parameter]
 
     def __init__(
             self,

@@ -3,14 +3,14 @@ import json
 
 from _research.crc.parneet_model import run_parneet_model, RunParametersParneet
 from _research.utils.path_functions import get_relative_path
-from nn.layers.activations.ELU import ELU
-from nn.layers.activations.Gaussian import GeLU
-from nn.layers.activations.ReLU import ReLU, LeakyReLU
-from nn.layers.activations.SiLU import SiLU
-from nn.layers.activations.Tanh import Tanh
-from nn.layers.functionals.Normalize import *
-from nn.layers.functionals.ReducePrecision import ReducePrecision
-from nn.layers.functionals.StochasticReducePrecision import StochasticReducePrecision
+from nn.layers.activation.ELU import ELU
+from nn.layers.activation.Gaussian import GeLU
+from nn.layers.activation.ReLU import ReLU, LeakyReLU
+from nn.layers.activation.SiLU import SiLU
+from nn.layers.activation.Tanh import Tanh
+from nn.layers.functional.Normalize import *
+from nn.layers.functional.ReducePrecision import ReducePrecision
+from nn.layers.functional.StochasticReducePrecision import StochasticReducePrecision
 from nn.layers.noise.GaussianNoise import GaussianNoise
 from nn.layers.noise.PoissonNoise import PoissonNoise
 

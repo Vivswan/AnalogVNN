@@ -12,14 +12,13 @@ Sample code
     from torch.utils.data import DataLoader
     from torchvision.transforms import transforms
 
-    from nn.layers.BackwardWrapper import BackwardWrapper
     from nn.layers.Linear import Linear
-    from nn.layers.activations.Gaussian import GeLU
-    from nn.layers.functionals.Normalize import Clamp
-    from nn.layers.functionals.ReducePrecision import ReducePrecision
+    from nn.layers.activation.Gaussian import GeLU
+    from nn.layers.functional.Normalize import Clamp
+    from nn.layers.functional.ReducePrecision import ReducePrecision
     from nn.layers.noise.GaussianNoise import GaussianNoise
     from nn.modules.FullSequential import FullSequential
-    from nn.optimizer.PseudoOptimizer import PseudoOptimizer
+    from nn.parameters.PseudoParameter import PseudoParameter
     from nn.utils.is_cpu_cuda import is_cpu_cuda
 
 
@@ -109,7 +108,7 @@ Sample code
             self.leakage = leakage
 
             self.all_layers = []
-            self.all_layers.append(BackwardWrapper(nn.Flatten(start_dim=1)))
+            self.all_layers.append(nn.Flatten(start_dim=1))
             self.add_layer(Linear(in_features=28 * 28, out_features=256))
             self.add_layer(Linear(in_features=256, out_features=128))
             self.add_layer(Linear(in_features=128, out_features=10))
@@ -162,6 +161,7 @@ Sample code
         """ The main function to train photonics image classifier with 3 linear/dense layers for MNIST dataset
         """
         torch.backends.cudnn.benchmark = True
+        torch.manual_seed(0)
         device, is_cuda = is_cpu_cuda.is_using_cuda()
         print(f"Device: {device}")
         print()
@@ -198,14 +198,13 @@ Sample code
         nn_model.accuracy_function = cross_entropy_accuracy
         nn_model.compile(device=device)
         weight_model.compile(device=device)
+        nn_model.graphs.forward_graph.render("_data/forward", real_label=True)
+        nn_model.graphs.backward_graph.render("_data/backward", real_label=True)
         nn_model.to(device=device)
         weight_model.to(device=device)
 
-        PseudoOptimizer.parameter_type.convert_model(nn_model, transform=weight_model)
-        nn_model.optimizer = PseudoOptimizer(
-            optimizer_cls=optim.Adam,
-            params=nn_model.parameters(),
-        )
+        PseudoParameter.parametrize_module(nn_model, transformation=weight_model)
+        nn_model.optimizer = optim.Adam(params=nn_model.parameters())
 
         # Training
         print(f"Starting Training...")

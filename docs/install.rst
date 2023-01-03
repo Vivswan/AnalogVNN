@@ -41,6 +41,7 @@ Install the required dependencies:
     - dataclasses
     - scipy
     - numpy
+    - networkx
     - tensorboard (optional)
     - graphviz (optional)
     - python-graphviz (optional)

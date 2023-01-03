@@ -1,9 +1,9 @@
-from typing import Union
+from typing import Optional
 
 import torch
 from torch import Tensor, nn
 
-from nn.layers.activations.Activation import Activation
+from nn.layers.activation.Activation import Activation
 
 
 class Tanh(Activation):
@@ -11,7 +11,7 @@ class Tanh(Activation):
     def forward(x: Tensor) -> Tensor:
         return torch.tanh(x)
 
-    def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
+    def backward(self, grad_output: Optional[Tensor]) -> Optional[Tensor]:
         x = self.inputs
         grad = 1 - torch.pow(torch.tanh(x), 2)
         return grad_output * grad

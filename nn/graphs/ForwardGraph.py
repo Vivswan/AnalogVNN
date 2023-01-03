@@ -14,14 +14,14 @@ class ForwardGraph(AcyclicDirectedGraph):
         outputs = self.calculate_graph(inputs, is_training)
         return outputs
 
-    def compile(self, is_static=True, **kwargs):
+    def compile(self, is_static=True):
         if not self.graph.has_node(self.INPUT):
             raise Exception("INPUT doesn't exist in the forward graph")
 
         if not self.graph.has_node(self.OUTPUT):
             raise Exception("OUTPUT doesn't exist in the forward graph")
 
-        return super().compile(self.INPUT, is_static)
+        return super().compile(is_static=is_static)
 
     def calculate_graph(self, inputs: Union[Tensor, Sequence[Tensor]], is_training=True, **kwargs):
         if not isinstance(inputs, Sequence):
@@ -31,18 +31,15 @@ class ForwardGraph(AcyclicDirectedGraph):
             for i in inputs:
                 i.requires_grad = True
 
+        input_output_graph = self._pass(self.INPUT, *inputs)
         if is_training:
-            input_output_graph = self._pass(self.INPUT, *inputs)
             self.graph_state.forward_input_output_graph = input_output_graph
-        else:
-            with torch.no_grad():
-                input_output_graph = self._pass(self.INPUT, *inputs)
 
         outputs = input_output_graph[self.OUTPUT].outputs
         return ArgsKwargs.from_args_kwargs_object(outputs)
 
     def _pass(self, from_node: GraphEnum, *inputs: Tensor) -> Dict[Any, InputOutput]:
-        static_graph = self._static_graph or self._create_sub_graph(from_node)
+        static_graph = self._create_sub_graph(from_node)
         input_output_graph = {
             from_node: InputOutput(inputs=ArgsKwargs(args=[*inputs]))
         }

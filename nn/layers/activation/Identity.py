@@ -1,11 +1,13 @@
-from typing import Union
+from typing import Optional
 
 from torch import Tensor
 
-from nn.layers.activations.Activation import Activation
+from nn.layers.activation.Activation import Activation
 
 
 class Identity(Activation):
+    name: Optional[str]
+
     def __init__(self, name=None):
         super(Identity, self).__init__()
         self.name = name
@@ -19,5 +21,5 @@ class Identity(Activation):
     def forward(self, x: Tensor) -> Tensor:
         return x
 
-    def backward(self, grad_output: Union[None, Tensor]) -> Union[None, Tensor]:
+    def backward(self, grad_output: Optional[Tensor]) -> Optional[Tensor]:
         return grad_output

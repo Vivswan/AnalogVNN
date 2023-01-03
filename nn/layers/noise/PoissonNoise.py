@@ -1,10 +1,10 @@
-from typing import Union
+from typing import Optional
 
 import numpy as np
 import scipy.special
 import torch
 from scipy.optimize import *
-from torch import Tensor
+from torch import Tensor, nn
 
 from nn.fn.dirac_delta import dirac_delta
 from nn.layers.BackwardIdentity import BackwardIdentity
@@ -14,11 +14,16 @@ from nn.utils.to_tensor_parameter import to_float_tensor, to_nongrad_parameter
 
 
 class PoissonNoise(Layer, BackwardIdentity):
+    __constants__ = ['scale', 'max_leakage', 'precision']
+    scale: nn.Parameter
+    max_leakage: nn.Parameter
+    precision: nn.Parameter
+
     def __init__(
             self,
-            scale: Union[None, float] = None,
-            max_leakage: Union[None, float] = None,
-            precision: Union[None, int] = None,
+            scale: Optional[float] = None,
+            max_leakage: Optional[float] = None,
+            precision: Optional[int] = None,
     ):
         super(PoissonNoise, self).__init__()
 

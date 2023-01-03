@@ -1,17 +1,20 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, Dict, Any, Union
+from typing import List, Dict, Any, Union, Optional
 
 
 @dataclass
 class InputOutput:
-    inputs: Union[ArgsKwargs, None] = None
-    outputs: Union[ArgsKwargs, None] = None
+    inputs: Optional[ArgsKwargs] = None
+    outputs: Optional[ArgsKwargs] = None
 
 
 @dataclass
 class ArgsKwargs:
+    args: List
+    kwargs: Dict
+
     def __init__(self, args=None, kwargs=None):
         if args is None:
             args = []
@@ -24,8 +27,8 @@ class ArgsKwargs:
         if not isinstance(args, List):
             args = [args]
 
-        self.args: List = args
-        self.kwargs: Dict = kwargs
+        self.args = args
+        self.kwargs = kwargs
 
     def is_empty(self):
         return len(self.args) == 0 and not bool(self.kwargs)

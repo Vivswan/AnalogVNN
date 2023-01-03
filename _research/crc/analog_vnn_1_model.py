@@ -3,7 +3,7 @@ import hashlib
 import json
 import math
 from dataclasses import dataclass
-from typing import Type, List
+from typing import Type, List, Union
 
 import numpy as np
 import torch.backends.cudnn
@@ -20,14 +20,14 @@ from _research.utils.path_functions import path_join
 from _research.utils.save_graph import save_graph
 from nn.layers.BackwardUsingForward import BackwardUsingForward
 from nn.layers.Linear import Linear
-from nn.layers.activations.Activation import Activation
-from nn.layers.functionals.Normalize import *
-from nn.layers.functionals.ReducePrecision import ReducePrecision
-from nn.layers.functionals.StochasticReducePrecision import StochasticReducePrecision
+from nn.layers.activation.Activation import Activation
+from nn.layers.functional.Normalize import *
+from nn.layers.functional.ReducePrecision import ReducePrecision
+from nn.layers.functional.StochasticReducePrecision import StochasticReducePrecision
 from nn.layers.noise.GaussianNoise import GaussianNoise
 from nn.modules.FullSequential import FullSequential
 from nn.modules.Sequential import Sequential
-from nn.optimizer.PseudoOptimizer import PseudoOptimizer
+from nn.parameters.PseudoParameter import PseudoParameter
 from nn.utils.is_cpu_cuda import is_cpu_cuda
 from nn.utils.summary import summary
 
@@ -45,24 +45,24 @@ CONV_LAYER_SIZES = {
 
 @dataclass
 class RunParametersAnalogVNN1:
-    name: Union[None, str] = None
-    data_folder: Union[None, str] = None
+    name: Optional[str] = None
+    data_folder: Optional[str] = None
 
-    num_conv_layer: Union[None, int] = 0
-    num_linear_layer: Union[None, int] = 1
-    activation_class: Union[None, Type[Activation]] = None
-    approach: Union[None, str] = "default"
-    norm_class: Union[None, Type[Normalize]] = None
+    num_conv_layer: Optional[int] = 0
+    num_linear_layer: Optional[int] = 1
+    activation_class: Optional[Type[Activation]] = None
+    approach: Optional[str] = "default"
+    norm_class: Optional[Type[Normalize]] = None
     precision_class: Type[Layer] = None
-    precision: Union[None, int] = None
+    precision: Optional[int] = None
     noise_class: Type[Layer] = None
-    leakage: Union[None, float] = None
+    leakage: Optional[float] = None
 
-    w_norm_class: Union[None, Type[Normalize]] = None
+    w_norm_class: Optional[Type[Normalize]] = None
     w_precision_class: Type[Layer] = None
-    w_precision: Union[None, int] = None
+    w_precision: Optional[int] = None
     w_noise_class: Type[Layer] = None
-    w_leakage: Union[None, float] = None
+    w_leakage: Optional[float] = None
 
     optimiser_class: Type[Optimizer] = optim.Adam
     optimiser_parameters: dict = None
@@ -70,7 +70,7 @@ class RunParametersAnalogVNN1:
     batch_size: int = 128
     epochs: int = 10
 
-    device: Union[None, torch.device] = None
+    device: Optional[torch.device] = None
     test_logs: bool = False
     test_run: bool = False
     tensorboard: bool = False
@@ -350,12 +350,8 @@ def run_analog_vnn1_model(parameters: RunParametersAnalogVNN1):
     nn_model.accuracy_function = cross_entropy_loss_accuracy
     nn_model.to(device=device)
     weight_model.to(device=device)
-    PseudoOptimizer.parameter_type.convert_model(nn_model, transform=weight_model)
-    nn_model.set_optimizer(
-        super_optimizer_cls=PseudoOptimizer,
-        optimizer_cls=parameters.optimiser_class,
-        **parameters.optimiser_parameters
-    )
+    PseudoParameter.parametrize_module(nn_model, transformation=weight_model)
+    nn_model.optimizer = parameters.optimiser_class(params=nn_model.parameters())
 
     parameter_log = {
         'dataset': parameters.dataset.__name__,
@@ -405,7 +401,6 @@ def run_analog_vnn1_model(parameters: RunParametersAnalogVNN1):
             train_loader,
             epoch=epoch,
             test_run=parameters.test_run,
-            # parameters_to_apply_fn=[PseudoOptimizer.parameter_type.update_params]
         )
         test_loss, test_accuracy = nn_model.test_on(
             test_loader,

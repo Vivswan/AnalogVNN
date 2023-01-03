@@ -1,10 +1,10 @@
 import math
 from numbers import Real
-from typing import Union
+from typing import Union, Optional
 
 import scipy.special
 import torch
-from torch import Tensor
+from torch import Tensor, nn
 
 from nn.layers.BackwardIdentity import BackwardIdentity
 from nn.modules.Layer import Layer
@@ -14,12 +14,15 @@ from nn.utils.to_tensor_parameter import to_nongrad_parameter, to_float_tensor
 
 class GaussianNoise(Layer, BackwardIdentity):
     __constants__ = ['std', 'leakage', 'precision']
+    std: nn.Parameter
+    leakage: nn.Parameter
+    precision: nn.Parameter
 
     def __init__(
             self,
-            std: Union[None, int, float] = None,
-            leakage: Union[None, int, float] = None,
-            precision: Union[None, int] = None
+            std: Optional[float] = None,
+            leakage: Optional[float] = None,
+            precision: Optional[int] = None
     ):
         super(GaussianNoise, self).__init__()
 

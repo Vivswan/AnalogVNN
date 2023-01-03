@@ -11,12 +11,12 @@ from torchvision.transforms import transforms
 
 from _research.utils.save_graph import save_graph
 from nn.layers.Linear import Linear
-from nn.layers.activations.Gaussian import GeLU
-from nn.layers.functionals.Normalize import Clamp
-from nn.layers.functionals.ReducePrecision import ReducePrecision
+from nn.layers.activation.Gaussian import GeLU
+from nn.layers.functional.Normalize import Clamp
+from nn.layers.functional.ReducePrecision import ReducePrecision
 from nn.layers.noise.GaussianNoise import GaussianNoise
 from nn.modules.FullSequential import FullSequential
-from nn.optimizer.PseudoOptimizer import PseudoOptimizer
+from nn.parameters.PseudoParameter import PseudoParameter
 from nn.utils.is_cpu_cuda import is_cpu_cuda
 from nn.utils.summary import summary
 
@@ -159,6 +159,8 @@ class WeightModel(FullSequential):
 def run_linear3_model():
     """ The main function to train photonics image classifier with 3 linear/dense layers for MNIST dataset
     """
+    torch.backends.cudnn.benchmark = True
+    torch.manual_seed(0)
     data_path = Path("C:/X/_data").joinpath(str(int(time.time())))
     if not data_path.exists():
         data_path.mkdir()
@@ -197,17 +199,16 @@ def run_linear3_model():
     # Setting Model Parameters
     nn_model.loss_function = nn.CrossEntropyLoss()
     nn_model.accuracy_function = cross_entropy_accuracy
+    # nn_model.use_autograd_graph = True
+    # weight_model.use_autograd_graph = True
     nn_model.compile(device=device)
     weight_model.compile(device=device)
     nn_model.create_tensorboard(str(data_path.joinpath("tensorboard")))
     nn_model.to(device=device)
     weight_model.to(device=device)
 
-    PseudoOptimizer.parameter_type.convert_model(nn_model, transform=weight_model)
-    nn_model.optimizer = PseudoOptimizer(
-        optimizer_cls=optim.Adam,
-        params=nn_model.parameters(),
-    )
+    PseudoParameter.parametrize_module(nn_model, transformation=weight_model)
+    nn_model.optimizer = optim.Adam(params=nn_model.parameters())
 
     print(f"Creating Log File...")
     with open(data_path.joinpath("logfile.log"), "a+") as file:

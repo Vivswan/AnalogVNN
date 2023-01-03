@@ -1,11 +1,13 @@
-from typing import Union, Callable
+from typing import Union, Callable, Optional
 
 import torch
-from torch import nn
+from torch import nn, optim
 from torch.utils.data import DataLoader
 
 from nn.fn.test import test
 from nn.fn.train import train
+from nn.graphs.BackwardGraph import BackwardGraph
+from nn.graphs.ForwardGraph import ForwardGraph
 from nn.graphs.ModelGraph import ModelGraph
 from nn.modules.Layer import Layer
 from nn.utils.TensorboardModelLog import TensorboardModelLog
@@ -13,11 +15,20 @@ from nn.utils.is_cpu_cuda import is_cpu_cuda
 
 
 class Model(Layer):
-    __constants__ = ['in_features', 'device']
+    __constants__ = ['device']
 
+    _compiled: bool
+
+    tensorboard: Optional[TensorboardModelLog]
+
+    graphs: ModelGraph
+    forward_graph: ForwardGraph
+    backward_graph: BackwardGraph
+
+    optimizer: Optional[optim.Optimizer]
+    loss_function: Union[None, nn.Module, Callable]
+    accuracy_function: Union[None, nn.Module, Callable]
     device: torch.device
-
-    # tensorboard: Union[None, TensorboardModelLog]
 
     def __init__(self, tensorboard_log_dir=None, device=is_cpu_cuda.get_device()):
         super(Model, self).__init__()
@@ -51,10 +62,6 @@ class Model(Layer):
 
         self.graphs.compile()
         self.to(device=self.device)
-
-        for module in self.children():
-            if isinstance(module, Layer):
-                module._parent_module_attr = lambda name: getattr(self, name) if hasattr(self, name) else None
 
         self._compiled = True
         if self.tensorboard is not None:

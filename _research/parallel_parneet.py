@@ -15,14 +15,14 @@ from pathlib import Path
 import torchvision
 from natsort import natsorted, ns
 
-from nn.layers.activations import ELU
-from nn.layers.activations import GeLU
-from nn.layers.activations.ReLU import LeakyReLU, ReLU
-from nn.layers.activations.SiLU import SiLU
-from nn.layers.activations.Tanh import Tanh
-from nn.layers.functionals.Normalize import *
-from nn.layers.functionals.ReducePrecision import ReducePrecision
-from nn.layers.functionals.StochasticReducePrecision import StochasticReducePrecision
+from nn.layers.activation.ELU import ELU
+from nn.layers.activation.Gaussian import GeLU
+from nn.layers.activation.ReLU import LeakyReLU, ReLU
+from nn.layers.activation.SiLU import SiLU
+from nn.layers.activation.Tanh import Tanh
+from nn.layers.functional.Normalize import *
+from nn.layers.functional.ReducePrecision import ReducePrecision
+from nn.layers.functional.StochasticReducePrecision import StochasticReducePrecision
 from nn.layers.noise.GaussianNoise import GaussianNoise
 
 combination_dict = OrderedDict({
