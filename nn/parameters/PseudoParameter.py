@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Callable
 
+import torch
 import torch.nn as nn
 from torch.nn import ModuleDict
 from torch.nn.utils import parametrize
@@ -145,7 +146,6 @@ class PseudoParameter(Parameter):
 
 
 if __name__ == '__main__':
-    import torch
     import torch.nn as nn
     from torch import Tensor
     from torch.optim import Adam
