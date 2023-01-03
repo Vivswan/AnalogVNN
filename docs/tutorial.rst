@@ -20,7 +20,7 @@ To convert a digital model to its analog counterpart the following steps needs t
                     self.leakage = leakage
 
                     self.all_layers = []
-                    self.all_layers.append(BackwardWrapper(nn.Flatten(start_dim=1)))
+                    self.all_layers.append(nn.Flatten(start_dim=1))
                     self.add_layer(Linear(in_features=28 * 28, out_features=256))
                     self.add_layer(Linear(in_features=256, out_features=128))
                     self.add_layer(Linear(in_features=128, out_features=10))
@@ -107,15 +107,12 @@ To convert a digital model to its analog counterpart the following steps needs t
 #. Using Analog Parameters Model to convert digital parameters to analog parameters
     .. code-block:: python
 
-        PseudoParameter.convert_model(nn_model, transform=weight_model)
+        PseudoParameter.parametrize_module(nn_model, transformation=weight_model)
 
-#. Converting the digital optimizer to analog optimizer
+#. Adding optimizer
     .. code-block:: python
 
-        nn_model.optimizer = PseudoOptimizer(
-            optimizer_cls=optim.Adam,
-            params=nn_model.parameters(),
-        )
+        nn_model.optimizer = optim.Adam(params=nn_model.parameters())
 
 #. Then you are good to go to train and test the model
     .. code-block:: python

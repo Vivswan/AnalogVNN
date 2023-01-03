@@ -31,32 +31,16 @@ To convert parameters of a layer or model to use PseudoParameters, then use:
 
     .. code-block:: python
 
-        PseudoParameters.convert_model(Model, transform=ParameterizingModel)
+        PseudoParameters.parameterize(Model, "parameter_name", transformation=ParameterizingModel)
 
     OR
 
     .. code-block:: python
 
-        PseudoOptimizer.parameter_type.convert_model(Model, transform=ParameterizingModel)
-
-
-PseudoOptimizers
-================
-"PseudoOptimizers" is a subclass of "Optimizer" class of PyTorch.
-
-For "PseudoParameters" to properly work we will need to modify the PyTorch's Optimizer class. We can do so by using the
-following code. Here we are using Adam optimizer with lr=0.01 as an example:
-
-    .. code-block:: python
-
-        new_optimizer = PseudoOptimizer(
-            optimizer_cls=optim.Adam,
-            params=Model.parameters(),
-            lr=0.01
-        )
+        PseudoParameters.parametrize_module(Model, transformation=ParameterizingModel)
 
 
 Forward and Backward Graphs
 ===========================
-Coming Soon...
+Documentation Coming Soon...
 
