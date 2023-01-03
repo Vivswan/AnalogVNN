@@ -26,7 +26,7 @@ from nn.layers.functionals.ReducePrecision import ReducePrecision
 from nn.layers.functionals.StochasticReducePrecision import StochasticReducePrecision
 from nn.layers.noise.GaussianNoise import GaussianNoise
 from nn.modules.FullSequential import FullSequential
-from nn.optimizer.PseudoOptimizer import PseudoOptimizer
+from nn.parameters.PseudoParameter import PseudoParameter
 from nn.utils.is_cpu_cuda import is_cpu_cuda
 from nn.utils.summary import summary
 
@@ -297,12 +297,8 @@ def run_parneet_model(parameters: RunParametersParneet):
     nn_model.accuracy_function = cross_entropy_loss_accuracy
     nn_model.to(device=device)
     weight_model.to(device=device)
-    PseudoOptimizer.parameter_type.convert_model(nn_model, transform=weight_model)
-    nn_model.set_optimizer(
-        super_optimizer_cls=PseudoOptimizer,
-        optimizer_cls=parameters.optimiser_class,
-        **parameters.optimiser_parameters
-    )
+    PseudoParameter.parametrize_module(nn_model, transformation=weight_model)
+    nn_model.optimizer = parameters.optimiser_class(params=nn_model.parameters())
 
     parameter_log = {
         'dataset': parameters.dataset.__name__,
@@ -354,7 +350,6 @@ def run_parneet_model(parameters: RunParametersParneet):
             train_loader,
             epoch=epoch,
             test_run=parameters.test_run,
-            parameters_to_apply_fn=[PseudoOptimizer.parameter_type.update_params]
         )
         test_loss, test_accuracy = nn_model.test_on(
             test_loader,

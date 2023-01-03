@@ -16,7 +16,7 @@ from nn.layers.functionals.Normalize import Clamp
 from nn.layers.functionals.ReducePrecision import ReducePrecision
 from nn.layers.noise.GaussianNoise import GaussianNoise
 from nn.modules.FullSequential import FullSequential
-from nn.optimizer.PseudoOptimizer import PseudoOptimizer
+from nn.parameters.PseudoParameter import PseudoParameter
 from nn.utils.is_cpu_cuda import is_cpu_cuda
 from nn.utils.summary import summary
 
@@ -199,17 +199,16 @@ def run_linear3_model():
     # Setting Model Parameters
     nn_model.loss_function = nn.CrossEntropyLoss()
     nn_model.accuracy_function = cross_entropy_accuracy
+    # nn_model.use_autograd_graph = True
+    # weight_model.use_autograd_graph = True
     nn_model.compile(device=device)
     weight_model.compile(device=device)
     nn_model.create_tensorboard(str(data_path.joinpath("tensorboard")))
     nn_model.to(device=device)
     weight_model.to(device=device)
 
-    PseudoOptimizer.parameter_type.convert_model(nn_model, transform=weight_model)
-    nn_model.optimizer = PseudoOptimizer(
-        optimizer_cls=optim.Adam,
-        params=nn_model.parameters(),
-    )
+    PseudoParameter.parametrize_module(nn_model, transformation=weight_model)
+    nn_model.optimizer = optim.Adam(params=nn_model.parameters())
 
     print(f"Creating Log File...")
     with open(data_path.joinpath("logfile.log"), "a+") as file:

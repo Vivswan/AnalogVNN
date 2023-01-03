@@ -10,7 +10,7 @@ from nn.layers.functionals.Normalize import Clamp
 from nn.layers.functionals.ReducePrecision import ReducePrecision
 from nn.layers.noise.GaussianNoise import GaussianNoise
 from nn.modules.FullSequential import FullSequential
-from nn.optimizer.PseudoOptimizer import PseudoOptimizer
+from nn.parameters.PseudoParameter import PseudoParameter
 from nn.utils.is_cpu_cuda import is_cpu_cuda
 
 
@@ -195,11 +195,8 @@ def run_linear3_model():
     nn_model.to(device=device)
     weight_model.to(device=device)
 
-    PseudoOptimizer.parameter_type.convert_model(nn_model, transform=weight_model)
-    nn_model.optimizer = PseudoOptimizer(
-        optimizer_cls=optim.Adam,
-        params=nn_model.parameters(),
-    )
+    PseudoParameter.parametrize_module(nn_model, transformation=weight_model)
+    nn_model.optimizer = optim.Adam(params=nn_model.parameters())
 
     # Training
     print(f"Starting Training...")
