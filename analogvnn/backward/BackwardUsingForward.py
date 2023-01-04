@@ -7,5 +7,5 @@ from analogvnn.nn.module.Layer import Layer
 
 
 class BackwardUsingForward(BackwardModule):
-    def backward(self: Type[Layer], grad_output: Optional[Tensor]) -> Optional[Tensor]:
-        return self._layer.forward(grad_output)
+    def backward(self: Type[Layer], *grad_output, **grad_output_kwarg) -> Optional[Tensor]:
+        return self._layer.forward(*grad_output, **grad_output_kwarg)

@@ -85,4 +85,7 @@ class UniformNoise(Layer, BackwardIdentity):
         return torch.distributions.Uniform(low=x + self.low, high=x + self.high).sample()
 
     def extra_repr(self) -> str:
-        return f'high={float(self.high):.4f}, low={float(self.low):.4f}, leakage={float(self.leakage):.4f}, precision={int(self.precision)}'
+        return f'high={float(self.high):.4f}' \
+               f', low={float(self.low):.4f}' \
+               f', leakage={float(self.leakage):.4f}' \
+               f', precision={int(self.precision)}'

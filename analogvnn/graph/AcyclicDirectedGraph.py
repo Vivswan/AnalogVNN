@@ -141,7 +141,7 @@ class AcyclicDirectedGraph(abc.ABC):
     @staticmethod
     def _create_edge_label(in_arg=None, in_kwarg=None, out_arg=None, out_kwarg=None, **kwargs):
         label = ""
-        if in_arg == in_kwarg == out_arg == out_kwarg == True:
+        if in_arg == in_kwarg == out_arg == out_kwarg is True:
             return "* -> *"
 
         if in_arg is True:

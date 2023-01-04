@@ -66,7 +66,7 @@ class BackwardModule(abc.ABC):
 
         try:
             tensor.backward(gradient=grad, inputs=tensor)
-        except Exception as e:
+        except Exception:
             for key, value in tensor._backward_hooks.items():
                 grad = value(grad)
 

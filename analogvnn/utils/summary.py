@@ -14,12 +14,12 @@ def summary(model: nn.Module, input_size, include_self=False):
     device = is_cpu_cuda.get_module_device(model)
 
     def register_hook(module):
-        def hook(module, input, output):
+        def hook(module, inputs, output):
             class_name = str(module.__class__).split(".")[-1].split("'")[0]
 
             m_key = f"{class_name}-{len(summary) + 1:d}"
             summary[m_key] = OrderedDict()
-            summary[m_key]["input_shape"] = list(input[0].size())
+            summary[m_key]["input_shape"] = list(inputs[0].size())
             summary[m_key]["input_shape"][0] = -1
             if isinstance(output, (list, tuple)):
                 summary[m_key]["output_shape"] = [

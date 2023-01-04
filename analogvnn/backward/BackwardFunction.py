@@ -26,7 +26,7 @@ class BackwardFunction(BackwardModule):
         self._backward_function = backward_function
         return self
 
-    def backward(self, *grad_output: Optional[Tensor], **grad_output_kwarg) -> Optional[Tensor]:
+    def backward(self, *grad_output, **grad_output_kwarg) -> Optional[Tensor]:
         if self._backward_function is None:
             raise ValueError("set backward_function first before invoking backward")
 

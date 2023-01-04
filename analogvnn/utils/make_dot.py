@@ -95,7 +95,7 @@ def make_dot(var, params=None, show_attrs=True, show_saved=True, max_attr_chars=
     seen = set()
 
     def size_to_str(size):
-        return '(' + (', ').join(['%d' % v for v in size]) + ')'
+        return '(' + ', '.join(['%d' % v for v in size]) + ')'
 
     def get_var_name(var, name=None):
         if not name:
@@ -162,7 +162,7 @@ def make_dot(var, params=None, show_attrs=True, show_saved=True, max_attr_chars=
             return
         seen.add(var)
         dot.node(str(id(var)), get_var_name(var), fillcolor=color)
-        if (var.grad_fn):
+        if var.grad_fn:
             add_nodes(var.grad_fn)
             dot.edge(str(id(var.grad_fn)), str(id(var)))
         if var._is_view():
