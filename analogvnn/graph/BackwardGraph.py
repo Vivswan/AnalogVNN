@@ -218,7 +218,7 @@ class BackwardGraph(AcyclicDirectedGraph):
             outputs.append(module_inputs_outputs.outputs.kwargs[i])
             outputs_grads.append(grad_outputs.inputs.kwargs[i])
 
-        if hasattr(module, nn.Module):
+        if isinstance(module, nn.Module):
             module_parameters = list(module.parameters())
             inputs += module_parameters
 
