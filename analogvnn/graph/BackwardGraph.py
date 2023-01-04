@@ -3,6 +3,7 @@ from typing import Dict, Any
 
 import networkx as nx
 import torch
+from torch import nn
 
 from analogvnn.backward.BackwardModule import BackwardModule
 from analogvnn.graph.AccumulateGrad import AccumulateGrad
@@ -60,7 +61,7 @@ class BackwardGraph(AcyclicDirectedGraph):
 
             if len(all_predecessors) == 1 and len(graph.get_edge_data(all_predecessors[0], v)) == 1:
                 attr = graph.get_edge_data(all_predecessors[0], v)[0]
-                if attr["in_arg"] == attr["in_kwarg"] == attr["in_arg"] == attr["in_arg"] == True:
+                if attr["in_arg"] == attr["in_kwarg"] == attr["in_arg"] == attr["in_arg"] is True:
                     new_graph.add_edge(all_predecessors[0], v, **attr)
                     continue
 
@@ -201,6 +202,7 @@ class BackwardGraph(AcyclicDirectedGraph):
         inputs = module_inputs_outputs.inputs.args + list(module_inputs_outputs.inputs.kwargs.values())
         outputs = []
         outputs_grads = []
+        module_parameters = []
 
         if len(inputs) == 0:
             return ArgsKwargs(
@@ -216,6 +218,10 @@ class BackwardGraph(AcyclicDirectedGraph):
             outputs.append(module_inputs_outputs.outputs.kwargs[i])
             outputs_grads.append(grad_outputs.inputs.kwargs[i])
 
+        if hasattr(module, nn.Module):
+            module_parameters = list(module.parameters())
+            inputs += module_parameters
+
         out_grads = torch.autograd.grad(
             outputs=outputs,
             inputs=inputs,
@@ -229,6 +235,15 @@ class BackwardGraph(AcyclicDirectedGraph):
         # print(f"grad_outputs: {outputs_grads}")
         for i, v in enumerate(out_grads):
             grad_dict[inputs[i]] = v
+
+        for i in module_parameters:
+            if grad_dict[i] is None:
+                continue
+
+            if i.grad is None:
+                i.grad = grad_dict[i]
+            else:
+                i.grad += grad_dict[i]
 
         return ArgsKwargs(
             args=[grad_dict[i] for i in module_inputs_outputs.inputs.args],
