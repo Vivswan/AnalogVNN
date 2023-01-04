@@ -10,14 +10,6 @@ from analogvnn.nn.module.Layer import Layer
 
 
 class LinearBackpropagation(BackwardModule):
-    @property
-    def weight(self):
-        return self.get_parameter("weight")
-
-    @property
-    def bias(self):
-        return self.get_parameter("bias")
-
     def backward(self, grad_output: Optional[Tensor], weight: Optional[Tensor] = None) -> Optional[Tensor]:
         grad_output = to_matrix(grad_output)
 
