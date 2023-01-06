@@ -10,6 +10,14 @@ from analogvnn.nn.module.Layer import Layer
 
 
 class LinearBackpropagation(BackwardModule):
+    def forward(self, x: Tensor):
+        if self.bias is not None:
+            y = torch.addmm(self.bias, x, self.weight.t())
+        else:
+            y = torch.mm(x, self.weight.t())
+
+        return y
+
     def backward(self, grad_output: Optional[Tensor], weight: Optional[Tensor] = None) -> Optional[Tensor]:
         grad_output = to_matrix(grad_output)
 
@@ -53,14 +61,6 @@ class Linear(Layer):
             fan_in, _ = nn.init._calculate_fan_in_and_fan_out(self.weight)
             bound = 1 / math.sqrt(fan_in) if fan_in > 0 else 0
             nn.init.uniform_(self.bias, -bound, bound)
-
-    def forward(self, x: Tensor):
-        if self.bias is not None:
-            y = torch.addmm(self.bias, x, self.weight.t())
-        else:
-            y = torch.mm(x, self.weight.t())
-
-        return y
 
     def extra_repr(self) -> str:
         return f'in_features={self.in_features}, out_features={self.out_features}, bias={self.bias is not None}'

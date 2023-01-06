@@ -1,3 +1,4 @@
+from abc import ABC
 from typing import Sequence, Union
 
 from torch import Tensor
@@ -5,7 +6,7 @@ from torch import Tensor
 from analogvnn.backward.BackwardModule import BackwardModule
 
 
-class BackwardIdentity(BackwardModule):
+class BackwardIdentity(BackwardModule, ABC):
     def backward(self, *grad_output) -> Union[None, Tensor, Sequence[Tensor]]:
         if len(grad_output) == 0:
             return None

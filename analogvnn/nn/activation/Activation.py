@@ -16,5 +16,5 @@ class InitImplement:
         return nn.init.xavier_uniform_(tensor)
 
 
-class Activation(Layer, BackwardModule, InitImplement, metaclass=abc.ABCMeta):
+class Activation(Layer, BackwardModule, InitImplement, abc.ABC):
     pass

@@ -61,6 +61,10 @@ class Model(Layer):
             self.device = device
 
         self.graphs.compile()
+        for i in self.modules():
+            if isinstance(i, Layer) and i != self:
+                i.graphs = self.graphs
+
         self.to(device=self.device)
 
         self._compiled = True

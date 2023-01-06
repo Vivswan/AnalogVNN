@@ -42,7 +42,8 @@ class PseudoParameter(Parameter):
         super().__init__(data, requires_grad, *args, **kwargs)
         self._transformed = nn.Parameter(data=data, requires_grad=requires_grad)
         self._transformed.original = self
-        self._transformation = transformation
+        self._transformation = self.identity
+        self.set_transformation(transformation)
 
         self._module = PseudoParameterList(
             original=self,
@@ -50,7 +51,10 @@ class PseudoParameter(Parameter):
         )
 
     def __call__(self, *args, **kwargs):
-        self._transformed.data = self._transformation(self)
+        try:
+            self._transformed.data = self._transformation(self)
+        except Exception as e:
+            raise Exception(f"here: {e.args}") from e
         return self._transformed
 
     def __repr__(self):
@@ -69,13 +73,12 @@ class PseudoParameter(Parameter):
 
     @property
     def transformation(self):
-        if self._transformation is None:
-            return self.identity
-
         return self._transformation
 
     def set_transformation(self, transformation):
         self._transformation = transformation
+        if isinstance(self._transformation, nn.Module):
+            self._transformation.eval()
         return self
 
     @transformation.setter
@@ -168,7 +171,7 @@ if __name__ == '__main__':
             return x + (torch.ones_like(x) * self.weight)
 
 
-    class Symmetric(Model, BackwardIdentity):
+    class Symmetric(BackwardIdentity, Model):
         def forward(self, x):
             return torch.rand((1, x.size()[0])) @ x @ torch.rand((x.size()[1], 1))
 
