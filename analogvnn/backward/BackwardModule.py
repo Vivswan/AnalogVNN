@@ -6,7 +6,7 @@ from typing import Callable, Any, Optional, Sequence
 import torch
 from torch import nn, Tensor, autograd
 
-__all__ = ['BackwardFunction']
+__all__ = ['BackwardModule']
 
 
 class BackwardModule(abc.ABC):
