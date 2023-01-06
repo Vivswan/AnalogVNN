@@ -100,8 +100,6 @@ To convert a digital model to its analog counterpart the following steps needs t
         nn_model.accuracy_function = cross_entropy_accuracy
         nn_model.compile(device=device)
         weight_model.compile(device=device)
-        nn_model.to(device=device)
-        weight_model.to(device=device)
 
 
 #. Using Analog Parameters Model to convert digital parameters to analog parameters

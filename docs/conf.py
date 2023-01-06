@@ -14,8 +14,8 @@ project = 'AnalogVNN'
 copyright = str(now.year) + ', Vivswan Shah (vivswanshah@pitt.edu)'
 author = 'Vivswan Shah'
 
-release = '0.1'
-version = '0.1.0'
+release = '0.0.1'
+version = '0.0.1'
 
 # -- General configuration
 

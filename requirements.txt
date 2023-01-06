@@ -1,21 +1,26 @@
-#
 --extra-index-url https://download.pytorch.org/whl/cu116
 torch
 torchvision~=0.14.0
 torchaudio
-numpy
+numpy>=1.16.5
 scipy
 networkx
 
-# dataclasses
-# numpy
-# matplotlib
-# tabulate
-# pillow
-# graphviz
+# Development
+setuptools==65.6.3
+build # building the package {pyproject-build}
+twine # to publish on pypi {twine upload --repository-url=https://test.pypi.org/legacy/ dist/*}
+johnnydep # to see dependencies {johnnydep <package>}
+
+# Research
+tensorflow>=2.0.0
+tensorboard
+torchviz
+matplotlib
+tabulate
+pillow
+# conda install python-graphviz graphviz
+graphviz
 # python-graphviz
-# scipy
-# seaborn
-# natsort
-# conda install python-graphviz graphviz numpy matplotlib tabulate pillow scipy seaborn natsort
-# pip install tensorflow tensorboard torchviz dataclasses
+seaborn
+natsort

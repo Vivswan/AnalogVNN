@@ -1,8 +1,94 @@
+# pyproject-build
+
 [build-system]
-requires = ["flit_core >=3.2,<4"]
-build-backend = "flit_core.buildapi"
+# These are the assumed default build requirements from pip:
+# https://pip.pypa.io/en/stable/reference/pip/#pep-517-and-518-support
+requires = ["setuptools>=61.0.0", "wheel", "flit_core >=3.2,<4"]
+build-backend = "setuptools.build_meta"
+#build-backend = "flit_core.buildapi"
 
 [project]
-name = "AnalogVNN"
-authors = [{ name = "Vivswan Shah", email = "vivswanshah@pitt.edu" }]
-dynamic = ["version", "description"]
+# $ pip install analogvnn
+name = "AnalogVNN"  # Required
+version = "0.0.1"  # Required
+description = "A fully modular framework for modeling and optimizing analog/photonic neural networks"  # Optional
+readme = "README.md"
+requires-python = ">=3.7"
+license = { file = "LICENSE" }
+keywords = ["deep-learning", "analog", "photonics", "neural-network", "framework", "pytorch"]
+authors = [
+    { name = "Vivswan Shah", email = "vivswanshah@pitt.edu" }
+]
+maintainers = [
+    { name = "Vivswan Shah", email = "vivswanshah@pitt.edu" }
+]
+# For a list of valid classifiers, see https://pypi.org/classifiers/
+classifiers = [# Optional
+    # How mature is this project? Common values are
+    #   3 - Alpha
+    #   4 - Beta
+    #   5 - Production/Stable
+    "Development Status :: 4 - Beta",
+    # Indicate who your project is intended for
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    # Pick your license as you wish
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    # Specify the Python versions you support here. In particular, ensure
+    # that you indicate you support Python 3. These classifiers are *not*
+    # checked by "pip install". See instead "python_requires" below.
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3 :: Only",
+]
+
+# This field lists other packages that your project depends on to run.
+# Any package you put here will be installed by pip when your project is
+# installed, so they must be valid existing projects.
+#
+# For an analysis of this field vs pip's requirements files see:
+# https://packaging.python.org/discussions/install-requires-vs-requirements/
+dependencies = [# Optional
+    "dataclasses",
+    "scipy",
+    "numpy>=1.16.5",
+    "networkx"
+]
+
+# List additional groups of dependencies here (e.g. development
+# dependencies). Users will be able to install these using the "extras"
+# syntax, for example:
+#
+#   $ pip install analogvnn[dev]
+#
+# Similar to `dependencies` above, these must be valid existing
+# projects.
+[project.optional-dependencies]
+dev = ["setuptools>=61.0.0"]
+#test = ["coverage"]
+
+[project.urls]
+"Homepage" = "https://github.com/Vivswan/AnalogVNN"
+"Bug Reports" = "https://github.com/Vivswan/AnalogVNN/issues"
+#"Funding" = "https://vivswan.github.io/"
+"Say Thanks!" = "https://github.com/Vivswan"
+"Source" = "https://github.com/Vivswan/AnalogVNN"
+
+# The following would provide a command line executable called `sample`
+# which executes the function `main` from this package when invoked.
+#[project.scripts]  # Optional
+#sample = "sample:main"
+
+# This is configuration specific to the `setuptools` build backend.
+# If you are using a different build backend, you will need to change this.
+#[tool.setuptools]
+# If there are data files included in your packages that need to be
+# installed, specify them here.
+#package-data = {"sample" = ["*.dat"]}

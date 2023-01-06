@@ -12,6 +12,7 @@ from collections import OrderedDict
 from multiprocessing.pool import ThreadPool
 from pathlib import Path
 
+import torch
 import torchvision
 from natsort import natsorted, ns
 

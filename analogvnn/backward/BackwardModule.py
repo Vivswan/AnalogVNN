@@ -12,6 +12,7 @@ __all__ = ['BackwardModule']
 class BackwardModule(abc.ABC):
     _layer: Optional[nn.Module]
 
+    # noinspection PyAbstractClass
     class AutogradBackward(autograd.Function):
         # noinspection PyMethodOverriding
         @staticmethod

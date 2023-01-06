@@ -3,12 +3,12 @@ import hashlib
 import json
 import math
 from dataclasses import dataclass
-from typing import Type, List, Union
+from typing import Type, List, Union, Optional
 
 import numpy as np
 import torch.backends.cudnn
 import torchvision
-from torch import optim
+from torch import optim, nn, Tensor
 from torch.nn import Flatten
 from torch.optim import Optimizer
 from torchvision.datasets import VisionDataset
@@ -22,8 +22,8 @@ from _research.utils.save_graph import save_graph
 from analogvnn.nn.Linear import Linear
 from analogvnn.nn.activation.Activation import Activation
 from analogvnn.nn.module.FullSequential import FullSequential
+from analogvnn.nn.module.Layer import Layer
 from analogvnn.nn.noise.GaussianNoise import GaussianNoise
-from analogvnn.nn.normalize.Clamp import *
 from analogvnn.nn.normalize.Normalize import Normalize
 from analogvnn.nn.precision.ReducePrecision import ReducePrecision
 from analogvnn.nn.precision.StochasticReducePrecision import StochasticReducePrecision

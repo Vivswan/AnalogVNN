@@ -45,7 +45,7 @@ def make_dot(var, params=None, show_attrs=True, show_saved=True, max_attr_chars=
     try:
         from graphviz import Digraph
     except ImportError as e:
-        raise ImportError("requires graphviz " "http://pygraphviz.github.io/") from e
+        raise ImportError("requires graphviz: https://pygraphviz.github.io/") from e
 
     """ Produces Graphviz representation of PyTorch autograd graph.
 

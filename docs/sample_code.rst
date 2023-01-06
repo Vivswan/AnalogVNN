@@ -198,10 +198,6 @@ Sample code
         nn_model.accuracy_function = cross_entropy_accuracy
         nn_model.compile(device=device)
         weight_model.compile(device=device)
-        nn_model.graphs.forward_graph.render("_data/forward", real_label=True)
-        nn_model.graphs.backward_graph.render("_data/backward", real_label=True)
-        nn_model.to(device=device)
-        weight_model.to(device=device)
 
         PseudoParameter.parametrize_module(nn_model, transformation=weight_model)
         nn_model.optimizer = optim.Adam(params=nn_model.parameters())

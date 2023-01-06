@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+import typing
 from typing import Union, Callable, Optional
 
 import torch
@@ -10,8 +13,10 @@ from analogvnn.graph.BackwardGraph import BackwardGraph
 from analogvnn.graph.ForwardGraph import ForwardGraph
 from analogvnn.graph.ModelGraph import ModelGraph
 from analogvnn.nn.module.Layer import Layer
-from analogvnn.utils.TensorboardModelLog import TensorboardModelLog
 from analogvnn.utils.is_cpu_cuda import is_cpu_cuda
+
+if typing.TYPE_CHECKING:
+    from analogvnn.utils.TensorboardModelLog import TensorboardModelLog
 
 __all__ = ['Model']
 
@@ -132,6 +137,11 @@ class Model(Layer):
         return train_loss, train_accuracy, test_loss, test_accuracy
 
     def create_tensorboard(self, log_dir: str):
+        try:
+            from analogvnn.utils.TensorboardModelLog import TensorboardModelLog
+        except ImportError as e:
+            raise ImportError("requires tensorboard https://www.tensorflow.org/") from e
+
         self.tensorboard = TensorboardModelLog(self, log_dir=log_dir)
         self.subscribe_tensorboard(self.tensorboard)
 

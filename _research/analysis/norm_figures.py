@@ -1,11 +1,11 @@
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+import torch
 import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 
-from analogvnn.nn.normalize.Clamp import *
 from analogvnn.nn.normalize.LPNorm import L1NormM, L2NormM, L1NormWM, L2NormWM
 
 

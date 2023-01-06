@@ -29,11 +29,11 @@ def to_digraph(from_graph, real_label=False):
     try:
         import pygraphviz
     except ImportError as e:
-        raise ImportError("requires pygraphviz " "http://pygraphviz.github.io/") from e
+        raise ImportError("requires pygraphviz: https://pygraphviz.github.io/") from e
     try:
         from graphviz import Digraph
     except ImportError as e:
-        raise ImportError("requires graphviz " "http://pygraphviz.github.io/") from e
+        raise ImportError("requires graphviz: https://pygraphviz.github.io/") from e
     strict = nx.number_of_selfloops(from_graph) == 0 and not from_graph.is_multigraph()
     node_attr = dict(style='filled',
                      shape='box',
