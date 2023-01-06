@@ -13,12 +13,6 @@ from torch.nn import Flatten
 from torch.optim import Optimizer
 from torchvision.datasets import VisionDataset
 
-from _research.crc._common import pick_instanceof_module
-from _research.crc.analog_vnn_1_model import WeightModel
-from _research.dataloaders.load_vision_dataset import load_vision_dataset
-from _research.utils.data_dirs import data_dirs
-from _research.utils.path_functions import path_join
-from _research.utils.save_graph import save_graph
 from analogvnn.nn.Linear import Linear
 from analogvnn.nn.activation.Activation import Activation
 from analogvnn.nn.module.FullSequential import FullSequential
@@ -30,6 +24,12 @@ from analogvnn.nn.precision.StochasticReducePrecision import StochasticReducePre
 from analogvnn.parameter.PseudoParameter import PseudoParameter
 from analogvnn.utils.is_cpu_cuda import is_cpu_cuda
 from analogvnn.utils.summary import summary
+from research.crc._common import pick_instanceof_module
+from research.crc.analog_vnn_1_model import WeightModel
+from research.dataloaders.load_vision_dataset import load_vision_dataset
+from research.utils.data_dirs import data_dirs
+from research.utils.path_functions import path_join
+from research.utils.save_graph import save_graph
 
 
 @dataclass

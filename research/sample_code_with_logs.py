@@ -9,7 +9,6 @@ from torch import optim, nn
 from torch.utils.data import DataLoader
 from torchvision.transforms import transforms
 
-from _research.utils.save_graph import save_graph
 from analogvnn.nn.Linear import Linear
 from analogvnn.nn.activation.Gaussian import GeLU
 from analogvnn.nn.module.FullSequential import FullSequential
@@ -19,6 +18,7 @@ from analogvnn.nn.precision.ReducePrecision import ReducePrecision
 from analogvnn.parameter.PseudoParameter import PseudoParameter
 from analogvnn.utils.is_cpu_cuda import is_cpu_cuda
 from analogvnn.utils.summary import summary
+from research.utils.save_graph import save_graph
 
 
 def load_vision_dataset(dataset, path, batch_size, is_cuda=False, grayscale=True):

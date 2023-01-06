@@ -3,7 +3,7 @@ import shutil
 import time
 from dataclasses import dataclass
 
-from _research.utils.path_functions import path_join
+from research.utils.path_functions import path_join
 
 
 @dataclass

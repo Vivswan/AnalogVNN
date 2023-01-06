@@ -1,7 +1,7 @@
 import numpy as np
 import torchvision
 
-from _research.dataloaders.load_vision_dataset import load_vision_dataset
+from research.dataloaders.load_vision_dataset import load_vision_dataset
 
 
 def main():
