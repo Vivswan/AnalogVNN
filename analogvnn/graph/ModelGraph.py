@@ -6,6 +6,8 @@ from analogvnn.graph.ForwardGraph import ForwardGraph
 from analogvnn.graph.ModelGraphState import ModelGraphState
 from analogvnn.utils.make_dot import make_dot
 
+__all__ = ['ModelGraph']
+
 
 class ModelGraph(ModelGraphState):
     forward_graph: ForwardGraph

@@ -6,6 +6,8 @@ from torch import Tensor, nn
 
 from analogvnn.nn.activation.Activation import Activation
 
+__all__ = ['PReLU', 'ReLU', 'LeakyReLU']
+
 
 class PReLU(Activation):
     __constants__ = ['alpha', '_zero']

@@ -12,6 +12,7 @@ from analogvnn.nn.module.Model import Model
 
 T = TypeVar('T', bound=nn.Module)
 
+__all__ = ['Sequential']
 
 class Sequential(Model):
     def __init__(self, *args):

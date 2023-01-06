@@ -7,6 +7,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 from analogvnn.utils.summary import summary
 
+__all__ = ['TensorboardModelLog']
 
 class TensorboardModelLog:
     __constants__ = ['model', 'log_dir']

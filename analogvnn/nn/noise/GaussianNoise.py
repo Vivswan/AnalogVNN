@@ -11,6 +11,7 @@ from analogvnn.nn.module.Layer import Layer
 from analogvnn.utils.common_types import TENSOR_OPERABLE
 from analogvnn.utils.to_tensor_parameter import to_nongrad_parameter, to_float_tensor
 
+__all__ = ['GaussianNoise']
 
 class GaussianNoise(Layer, BackwardIdentity):
     __constants__ = ['std', 'leakage', 'precision']

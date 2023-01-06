@@ -13,6 +13,7 @@ from analogvnn.nn.module.Layer import Layer
 from analogvnn.utils.TensorboardModelLog import TensorboardModelLog
 from analogvnn.utils.is_cpu_cuda import is_cpu_cuda
 
+__all__ = ['Model']
 
 class Model(Layer):
     __constants__ = ['device']

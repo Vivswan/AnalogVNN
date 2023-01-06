@@ -8,6 +8,7 @@ from analogvnn.backward.BackwardModule import BackwardModule
 from analogvnn.fn.to_matrix import to_matrix
 from analogvnn.nn.module.Layer import Layer
 
+__all__ = ['Linear', 'LinearBackpropagation']
 
 class LinearBackpropagation(BackwardModule):
     def forward(self, x: Tensor):

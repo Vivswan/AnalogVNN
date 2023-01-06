@@ -5,6 +5,8 @@ from torch import Tensor
 
 from analogvnn.nn.activation.Activation import Activation
 
+__all__ = ['BinaryStep']
+
 
 class BinaryStep(Activation):
     @staticmethod

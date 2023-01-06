@@ -5,6 +5,8 @@ from distutils.version import LooseVersion
 import torch
 from torch import Tensor
 
+__all__ = ['make_dot']
+
 Node = namedtuple('Node', ('name', 'inputs', 'attr', 'op'))
 
 # Saved attrs for grad_fn (incl. saved variables) begin with `._saved_*`

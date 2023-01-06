@@ -5,6 +5,7 @@ from analogvnn.backward.BackwardIdentity import BackwardIdentity
 from analogvnn.fn.reduce_precision import stochastic_reduce_precision
 from analogvnn.nn.module.Layer import Layer
 
+__all__ = ['StochasticReducePrecision']
 
 class StochasticReducePrecision(Layer, BackwardIdentity):
     __constants__ = ['precision']

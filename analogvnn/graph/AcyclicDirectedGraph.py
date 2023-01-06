@@ -8,6 +8,8 @@ from analogvnn.graph.GraphEnum import GraphEnum
 from analogvnn.graph.ModelGraphState import ModelGraphState
 from analogvnn.graph.to_graph_viz_digraph import to_digraph
 
+__all__ = ['AcyclicDirectedGraph']
+
 
 class AcyclicDirectedGraph(abc.ABC):
     graph: nx.MultiDiGraph

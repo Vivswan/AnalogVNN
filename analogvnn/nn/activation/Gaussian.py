@@ -6,6 +6,8 @@ from torch import Tensor
 
 from analogvnn.nn.activation.Activation import Activation
 
+__all__ = ['Gaussian', 'GeLU']
+
 
 class Gaussian(Activation):
     @staticmethod

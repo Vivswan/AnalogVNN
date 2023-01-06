@@ -5,6 +5,8 @@ from torch import Tensor
 
 from analogvnn.nn.normalize.Normalize import Normalize
 
+__all__ = ['Clamp', 'Clamp01']
+
 
 class Clamp(Normalize):
     @staticmethod

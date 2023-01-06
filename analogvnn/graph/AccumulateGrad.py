@@ -5,6 +5,8 @@ from torch import nn
 
 from analogvnn.graph.ArgsKwargs import ArgsKwargs
 
+__all__ = ['AccumulateGrad']
+
 
 class AccumulateGrad:
     locations: Dict

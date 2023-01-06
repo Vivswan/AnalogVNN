@@ -7,6 +7,8 @@ from analogvnn.graph.AcyclicDirectedGraph import AcyclicDirectedGraph
 from analogvnn.graph.ArgsKwargs import ArgsKwargs, InputOutput
 from analogvnn.graph.GraphEnum import GraphEnum
 
+__all__ = ['ForwardGraph']
+
 
 class ForwardGraph(AcyclicDirectedGraph):
     def __call__(self, inputs, is_training):

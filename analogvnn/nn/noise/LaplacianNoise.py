@@ -10,6 +10,7 @@ from analogvnn.nn.module.Layer import Layer
 from analogvnn.utils.common_types import TENSOR_OPERABLE
 from analogvnn.utils.to_tensor_parameter import to_float_tensor, to_nongrad_parameter
 
+__all__ = ['LaplacianNoise']
 
 class LaplacianNoise(Layer, BackwardIdentity):
     __constants__ = ['scale', 'leakage', 'precision']

@@ -6,6 +6,8 @@ from torch import Tensor
 from analogvnn.graph.ArgsKwargs import InputOutput
 from analogvnn.graph.GraphEnum import GraphEnum
 
+__all__ = ['ModelGraphState']
+
 
 class ModelGraphState:
     allow_loops: bool

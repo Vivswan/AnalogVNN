@@ -5,6 +5,8 @@ from analogvnn.backward.BackwardIdentity import BackwardIdentity
 from analogvnn.fn.reduce_precision import reduce_precision
 from analogvnn.nn.module.Layer import Layer
 
+__all__ = ['ReducePrecision']
+
 
 class ReducePrecision(Layer, BackwardIdentity):
     __constants__ = ['precision', 'divide']

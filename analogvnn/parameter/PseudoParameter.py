@@ -9,6 +9,7 @@ from torch.nn.utils import parametrize
 
 from analogvnn.parameter.Parameter import Parameter
 
+__all__ = ['PseudoParameter']
 
 class PseudoParameterList(nn.Module):
     original: PseudoParameter

@@ -5,6 +5,8 @@ from torch import Tensor, nn
 
 from analogvnn.nn.activation.Activation import Activation
 
+__all__ = ['Logistic', 'Sigmoid']
+
 
 class Logistic(Activation):
     @staticmethod

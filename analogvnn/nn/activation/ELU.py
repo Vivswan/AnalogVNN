@@ -5,6 +5,8 @@ from torch import Tensor, nn
 
 from analogvnn.nn.activation.Activation import Activation
 
+__all__ = ['SELU', 'ELU']
+
 
 class SELU(Activation):
     __constants__ = ['alpha', 'scale_factor']

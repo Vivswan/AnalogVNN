@@ -7,6 +7,7 @@ from analogvnn.backward.BackwardIdentity import BackwardIdentity
 from analogvnn.nn.module.Layer import Layer
 from analogvnn.utils.to_tensor_parameter import to_float_tensor, to_nongrad_parameter
 
+__all__ = ['UniformNoise']
 
 class UniformNoise(Layer, BackwardIdentity):
     __constants__ = ['low', 'high', 'leakage', 'precision']

@@ -1,6 +1,8 @@
 import torch
 from torch.utils.data import DataLoader
 
+__all__ = ['test']
+
 
 def test(model, test_loader: DataLoader, test_run=False):
     model.eval()

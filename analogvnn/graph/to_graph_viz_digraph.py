@@ -2,6 +2,8 @@ import networkx as nx
 
 from analogvnn.graph.GraphEnum import GraphEnum
 
+__all__ = ['to_digraph']
+
 
 def to_digraph(from_graph, real_label=False):
     """Returns a pygraphviz graph from a NetworkX graph N.

@@ -5,6 +5,8 @@ from torch import Tensor
 
 from analogvnn.backward.BackwardModule import BackwardModule
 
+__all__ = ['BackwardIdentity']
+
 
 class BackwardIdentity(BackwardModule, ABC):
     def backward(self, *grad_output) -> Union[None, Tensor, Sequence[Tensor]]:

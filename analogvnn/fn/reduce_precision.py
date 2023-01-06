@@ -3,6 +3,8 @@ from torch import Tensor
 
 from analogvnn.utils.common_types import TENSOR_OPERABLE
 
+__all__ = ['reduce_precision', 'stochastic_reduce_precision']
+
 
 def reduce_precision(x: Tensor, precision: TENSOR_OPERABLE, divide: TENSOR_OPERABLE) -> Tensor:
     x = x if isinstance(x, Tensor) else torch.tensor(x, requires_grad=False)

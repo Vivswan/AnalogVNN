@@ -7,6 +7,8 @@ from torch import nn, Tensor
 
 from analogvnn.backward.BackwardModule import BackwardModule
 
+__all__ = ['BackwardFunction']
+
 
 class BackwardFunction(BackwardModule, ABC):
     _backward_function: Callable

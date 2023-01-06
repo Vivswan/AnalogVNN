@@ -4,6 +4,8 @@ from torch import Tensor
 
 from analogvnn.nn.activation.Activation import Activation
 
+__all__ = ['Identity']
+
 
 class Identity(Activation):
     name: Optional[str]

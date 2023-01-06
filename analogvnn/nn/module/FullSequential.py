@@ -1,5 +1,6 @@
 from analogvnn.nn.module.Sequential import Sequential
 
+__all__ = ['FullSequential']
 
 class FullSequential(Sequential):
     def compile(self, device=None, layer_data=True):

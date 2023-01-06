@@ -12,6 +12,8 @@ from analogvnn.graph.ArgsKwargs import ArgsKwargs, InputOutput
 from analogvnn.graph.GraphEnum import GraphEnum
 from analogvnn.nn.module.Layer import Layer
 
+__all__ = ['BackwardGraph']
+
 
 class BackwardGraph(AcyclicDirectedGraph):
     def __call__(self, gradient=None):

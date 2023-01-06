@@ -1,5 +1,7 @@
 from torch import Tensor
 
+__all__ = ['to_matrix']
+
 
 def to_matrix(tensor: Tensor):
     if len(tensor.size()) == 1:
