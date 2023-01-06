@@ -11,6 +11,7 @@ from analogvnn.parameter.Parameter import Parameter
 
 __all__ = ['PseudoParameter']
 
+
 class PseudoParameterList(nn.Module):
     original: PseudoParameter
     _transformed: nn.Parameter

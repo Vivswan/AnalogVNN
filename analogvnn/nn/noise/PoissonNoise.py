@@ -14,6 +14,7 @@ from analogvnn.utils.to_tensor_parameter import to_float_tensor, to_nongrad_para
 
 __all__ = ['PoissonNoise']
 
+
 class PoissonNoise(Layer, BackwardIdentity):
     __constants__ = ['scale', 'max_leakage', 'precision']
     scale: nn.Parameter

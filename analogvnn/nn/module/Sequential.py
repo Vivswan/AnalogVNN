@@ -14,6 +14,7 @@ T = TypeVar('T', bound=nn.Module)
 
 __all__ = ['Sequential']
 
+
 class Sequential(Model):
     def __init__(self, *args):
         super(Sequential, self).__init__()

@@ -8,6 +8,7 @@ from analogvnn.utils.is_cpu_cuda import is_cpu_cuda
 
 __all__ = ['summary']
 
+
 def summary(model: nn.Module, input_size, include_self=False):
     # training_status = model.training
     # model.train(True)

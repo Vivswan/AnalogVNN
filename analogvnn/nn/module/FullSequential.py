@@ -2,6 +2,7 @@ from analogvnn.nn.module.Sequential import Sequential
 
 __all__ = ['FullSequential']
 
+
 class FullSequential(Sequential):
     def compile(self, device=None, layer_data=True):
         arr = [self.graphs.INPUT, *list(self._runtime_module_list.values()), self.graphs.OUTPUT]

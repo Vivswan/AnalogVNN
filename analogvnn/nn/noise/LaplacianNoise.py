@@ -12,6 +12,7 @@ from analogvnn.utils.to_tensor_parameter import to_float_tensor, to_nongrad_para
 
 __all__ = ['LaplacianNoise']
 
+
 class LaplacianNoise(Layer, BackwardIdentity):
     __constants__ = ['scale', 'leakage', 'precision']
     scale: nn.Parameter

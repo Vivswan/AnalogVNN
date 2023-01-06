@@ -2,6 +2,7 @@ import torch
 
 __all__ = ['is_cpu_cuda']
 
+
 class CPUCuda:
     def __init__(self):
         self.device: torch.device = None

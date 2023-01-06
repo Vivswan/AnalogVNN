@@ -5,6 +5,7 @@ from analogvnn.nn.normalize.Normalize import Normalize
 
 __all__ = ['LPNorm', 'LPNormW', 'L1Norm', 'L2Norm', 'L1NormW', 'L2NormW', 'L1NormM', 'L2NormM', 'L1NormWM', 'L2NormWM']
 
+
 class LPNorm(Normalize):
     __constants__ = ['p', 'make_max_1']
     p: nn.Parameter

@@ -7,6 +7,7 @@ from analogvnn.nn.module.Layer import Layer
 
 __all__ = ['StochasticReducePrecision']
 
+
 class StochasticReducePrecision(Layer, BackwardIdentity):
     __constants__ = ['precision']
     precision: nn.Parameter

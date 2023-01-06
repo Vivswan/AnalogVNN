@@ -2,6 +2,7 @@ from torch import nn
 
 __all__ = ['Parameter']
 
+
 class Parameter(nn.Parameter):
     def __new__(cls, data=None, requires_grad=True, *args, **kwargs):
         return super(Parameter, cls).__new__(cls, data, requires_grad)

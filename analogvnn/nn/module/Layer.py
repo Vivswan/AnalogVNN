@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 
 __all__ = ['Layer']
 
+
 # https://github.com/pytorch/pytorch/pull/91819
 def __nn_Module_init_updated__(function):
     @functools.wraps(function)

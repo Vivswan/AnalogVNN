@@ -10,6 +10,7 @@ from analogvnn.nn.module.Layer import Layer
 
 __all__ = ['Linear', 'LinearBackpropagation']
 
+
 class LinearBackpropagation(BackwardModule):
     def forward(self, x: Tensor):
         if self.bias is not None:

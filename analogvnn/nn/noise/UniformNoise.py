@@ -9,6 +9,7 @@ from analogvnn.utils.to_tensor_parameter import to_float_tensor, to_nongrad_para
 
 __all__ = ['UniformNoise']
 
+
 class UniformNoise(Layer, BackwardIdentity):
     __constants__ = ['low', 'high', 'leakage', 'precision']
     low: nn.Parameter

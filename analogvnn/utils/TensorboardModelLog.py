@@ -9,6 +9,7 @@ from analogvnn.utils.summary import summary
 
 __all__ = ['TensorboardModelLog']
 
+
 class TensorboardModelLog:
     __constants__ = ['model', 'log_dir']
     log_dir: str
