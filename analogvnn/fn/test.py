@@ -1,10 +1,24 @@
+from typing import Tuple
+
 import torch
+from torch import nn
 from torch.utils.data import DataLoader
 
 __all__ = ['test']
 
 
-def test(model, test_loader: DataLoader, test_run=False):
+def test(model: nn.Module, test_loader: DataLoader, test_run: bool = False) -> Tuple[float, float]:
+    """Test the model on the test set.
+
+    Args:
+        model (torch.nn.Module): the model to test.
+        test_loader (DataLoader): the test set.
+        test_run (bool): is it a test run.
+
+    Returns:
+        tuple: the loss and accuracy of the model on the test set.
+    """
+
     model.eval()
     total_loss = 0
     total_accuracy = 0

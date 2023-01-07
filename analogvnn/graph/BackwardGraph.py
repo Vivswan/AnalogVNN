@@ -1,14 +1,16 @@
+from __future__ import annotations
+
 import uuid
-from typing import Dict, Any
+from typing import Dict, Any, Union, Sequence, Callable
 
 import networkx as nx
 import torch
-from torch import nn
+from torch import nn, Tensor
 
 from analogvnn.backward.BackwardModule import BackwardModule
 from analogvnn.graph.AccumulateGrad import AccumulateGrad
 from analogvnn.graph.AcyclicDirectedGraph import AcyclicDirectedGraph
-from analogvnn.graph.ArgsKwargs import ArgsKwargs, InputOutput
+from analogvnn.graph.ArgsKwargs import ArgsKwargs, InputOutput, ArgsKwargsOutput
 from analogvnn.graph.GraphEnum import GraphEnum
 from analogvnn.nn.module.Layer import Layer
 
@@ -16,7 +18,17 @@ __all__ = ['BackwardGraph']
 
 
 class BackwardGraph(AcyclicDirectedGraph):
-    def __call__(self, gradient=None):
+    """The backward graph."""
+
+    def __call__(self, gradient: Union[Tensor, Sequence[Tensor]] = None) -> ArgsKwargsOutput:
+        """Backward pass through the backward graph
+
+        Args:
+            gradient (Union[Tensor, Sequence[Tensor]]): gradient of the loss function w.r.t. the output of the forward graph
+
+        Returns:
+            ArgsKwargsOutput: gradient of the inputs function w.r.t. loss
+        """
         self.graph_state.ready_for_backward(exception=True)
 
         if len(gradient) == 0:
@@ -33,19 +45,35 @@ class BackwardGraph(AcyclicDirectedGraph):
                 grad_outputs=gradient,
                 retain_graph=True
             )
-            result = self.calculate_graph(*grad_outputs)
+            result = self.calculate(*grad_outputs)
 
         self.graph_state.set_loss(None)
 
         return result
 
-    def compile(self, is_static=True):
+    def compile(self, is_static=True) -> BackwardGraph:
+        """Compile the graph
+
+        Args:
+            is_static (bool): If True, the graph is not changing during runtime and will be cached.
+
+        Returns:
+            BackwardGraph: self.
+        """
         if not self.graph.has_node(self.OUTPUT):
             raise Exception("OUTPUT doesn't exist in the forward graph")
 
         return super().compile(is_static=is_static)
 
-    def from_forward(self, forward_graph):
+    def from_forward(self, forward_graph: Union[AcyclicDirectedGraph, nx.DiGraph]) -> BackwardGraph:
+        """Create a backward graph from inverting forward graph
+
+        Args:
+            forward_graph (Union[AcyclicDirectedGraph, nx.DiGraph]): The forward graph.
+
+        Returns:
+            BackwardGraph: self.
+        """
         if isinstance(forward_graph, AcyclicDirectedGraph):
             forward_graph = forward_graph.graph
 
@@ -132,7 +160,17 @@ class BackwardGraph(AcyclicDirectedGraph):
         return self
 
     @torch.no_grad()
-    def calculate_graph(self, *args, **kwargs):
+    def calculate(self, *args, **kwargs) -> ArgsKwargsOutput:
+        """Calculate the gradient of the whole graph w.r.t. loss
+
+        Args:
+            *args: The gradients args of outputs.
+            **kwargs: The gradients kwargs of outputs.
+
+        Returns:
+            ArgsKwargsOutput: The gradient of the inputs function w.r.t. loss.
+        """
+
         if self.graph_state.forward_input_output_graph is None:
             raise Exception("No forward pass has been performed yet")
 
@@ -140,17 +178,21 @@ class BackwardGraph(AcyclicDirectedGraph):
         self.graph_state.forward_input_output_graph = None
 
         if self.INPUT in input_output_graph:
-            inputs = input_output_graph[self.INPUT].outputs
-            if len(inputs.kwargs.keys()) > 0:
-                return inputs
-            elif len(inputs.args) > 1:
-                return inputs.args
-            elif len(inputs.args) == 1:
-                return inputs.args[0]
-
-        return None
+            return ArgsKwargs.from_args_kwargs_object(input_output_graph[self.INPUT].outputs)
+        else:
+            return None
 
     def _pass(self, from_node, *args, **kwargs) -> Dict[Any, InputOutput]:
+        """Perform the backward pass through the graph
+
+        Args:
+            from_node (Any): The node to start the backward pass from.
+            *args: The gradients args of outputs.
+            **kwargs: The gradients kwargs of outputs.
+
+        Returns:
+            Dict[Any, InputOutput]: The input and output gradients of each node.
+        """
         static_graph = self._create_sub_graph(from_node)
         input_output_graph = {
             from_node: InputOutput(inputs=ArgsKwargs(
@@ -178,7 +220,20 @@ class BackwardGraph(AcyclicDirectedGraph):
 
         return input_output_graph
 
-    def _gradient_wrapper(self, module, grad_outputs):
+    def _gradient_wrapper(
+            self,
+            module: Union[AccumulateGrad, Layer, BackwardModule, Callable],
+            grad_outputs: InputOutput
+    ) -> ArgsKwargs:
+        """Calculate the gradient of a module w.r.t. outputs of the module using the output's gradients.
+
+        Args:
+            module (Union[AccumulateGrad, Layer, BackwardModule, Callable]): The module to calculate the gradient of.
+            grad_outputs (InputOutput): The gradients of the output of the module.
+
+        Returns:
+            ArgsKwargs: The input gradients of the module.
+        """
         if module in self.graph_state.forward_input_output_graph:
             module_inputs_outputs = self.graph_state.forward_input_output_graph[module]
         else:

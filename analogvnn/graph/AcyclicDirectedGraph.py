@@ -6,7 +6,7 @@ import networkx as nx
 from analogvnn.graph.ArgsKwargs import ArgsKwargs
 from analogvnn.graph.GraphEnum import GraphEnum
 from analogvnn.graph.ModelGraphState import ModelGraphState
-from analogvnn.graph.to_graph_viz_digraph import to_digraph
+from analogvnn.graph.to_graph_viz_digraph import to_graphviz_digraph
 
 __all__ = ['AcyclicDirectedGraph']
 
@@ -174,6 +174,7 @@ class AcyclicDirectedGraph(abc.ABC):
         self.graph = self._remove_missing_args(self.graph)
         self._is_static = is_static
         self._static_graphs = {}
+        return self
 
     @staticmethod
     def _remove_missing_args(graph: nx.MultiDiGraph):
@@ -295,4 +296,4 @@ class AcyclicDirectedGraph(abc.ABC):
     #         print(f"{module} :o: {input_output_graph[module].outputs.kwargs}")
 
     def render(self, *args, real_label=False, **kwargs):
-        return to_digraph(self.graph, real_label=real_label).render(*args, **kwargs)
+        return to_graphviz_digraph(self.graph, real_label=real_label).render(*args, **kwargs)

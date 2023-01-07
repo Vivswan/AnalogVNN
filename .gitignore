@@ -9,6 +9,8 @@ _results/
 _data/
 .idea
 .idea/**
+.vscode
+.vscode/**
 
 # C extensions
 *.so

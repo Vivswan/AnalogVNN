@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from typing import Tuple
 
 import numpy as np
 import torch
@@ -9,7 +10,18 @@ from analogvnn.utils.is_cpu_cuda import is_cpu_cuda
 __all__ = ['summary']
 
 
-def summary(model: nn.Module, input_size, include_self=False):
+def summary(model: nn.Module, input_size: Tuple, include_self: bool = False):
+    """Print a summary of the model.
+
+    Args:
+        model (nn.Module): the model to print the summary of.
+        input_size (tuple): the input size.
+        include_self (bool): include itself in the summary of the model.
+
+    Returns:
+        str: the summary of the model.
+    """
+
     # training_status = model.training
     # model.train(True)
     result = ""

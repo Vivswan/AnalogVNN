@@ -1,30 +1,28 @@
-import networkx as nx
+import networkx
 
 from analogvnn.graph.GraphEnum import GraphEnum
 
-__all__ = ['to_digraph']
+__all__ = ['to_graphviz_digraph']
 
 
-def to_digraph(from_graph, real_label=False):
+def to_graphviz_digraph(from_graph: networkx.DiGraph, real_label: bool = False):
     """Returns a pygraphviz graph from a NetworkX graph N.
 
-    Parameters
-    ----------
-    from_graph : NetworkX graph
-      A graph created with NetworkX
-    real_label: bool
+    Examples:
+        >>> K5 = networkx.complete_graph(5)
+        >>> A = networkx.nx_agraph.to_agraph(K5)
 
-    Examples
-    --------
-    >>> K5 = nx.complete_graph(5)
-    >>> A = nx.nx_agraph.to_agraph(K5)
+    Notes:
+        If N has an dict N.graph_attr an attempt will be made first
+        to copy properties attached to the graph (see from_agraph)
+        and then updated with the calling arguments if any.
 
-    Notes
-    -----
-    If N has an dict N.graph_attr an attempt will be made first
-    to copy properties attached to the graph (see from_agraph)
-    and then updated with the calling arguments if any.
+    Args:
+        from_graph (networkx.DiGraph): the graph to convert.
+        real_label (bool): True to use the real label.
 
+    Returns:
+        graphviz.Digraph: the converted graph.
     """
     try:
         import pygraphviz
@@ -34,7 +32,7 @@ def to_digraph(from_graph, real_label=False):
         from graphviz import Digraph
     except ImportError as e:
         raise ImportError("requires graphviz: https://pygraphviz.github.io/") from e
-    strict = nx.number_of_selfloops(from_graph) == 0 and not from_graph.is_multigraph()
+    strict = networkx.number_of_selfloops(from_graph) == 0 and not from_graph.is_multigraph()
     node_attr = dict(style='filled',
                      shape='box',
                      align='left',

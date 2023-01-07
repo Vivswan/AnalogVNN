@@ -1,14 +1,28 @@
+from typing import Optional, Tuple
+
+from torch import nn
 from torch.utils.data import DataLoader
 
 __all__ = ['train']
 
 
 def train(
-        model,
+        model: nn.Module,
         train_loader: DataLoader,
-        epoch=None,
-        test_run=False
-):
+        epoch: Optional[int] = None,
+        test_run: bool = False
+) -> Tuple[float, float]:
+    """Train the model on the train set.
+
+    Args:
+        model (torch.nn.Module): the model to train.
+        train_loader (DataLoader): the train set.
+        epoch (int): the current epoch.
+        test_run (bool): is it a test run.
+
+    Returns:
+        tuple: the loss and accuracy of the model on the train set.
+    """
     model.train()
     total_loss = 0.0
     total_accuracy = 0

@@ -14,6 +14,17 @@ SAVED_PREFIX = "_saved_"
 
 
 def get_fn_name(fn, show_attrs, max_attr_chars):
+    """Get the name of a function.
+
+    Args:
+        fn: the function.
+        show_attrs (bool): whether to show the attributes.
+        max_attr_chars (int): the maximum number of characters to show for the attributes.
+
+    Returns:
+        str: the name of the function.
+    """
+
     name = str(type(fn).__name__)
     if not show_attrs:
         return name
@@ -42,11 +53,6 @@ def get_fn_name(fn, show_attrs, max_attr_chars):
 
 
 def make_dot(var, params=None, show_attrs=True, show_saved=True, max_attr_chars=50):
-    try:
-        from graphviz import Digraph
-    except ImportError as e:
-        raise ImportError("requires graphviz: https://pygraphviz.github.io/") from e
-
     """ Produces Graphviz representation of PyTorch autograd graph.
 
     If a node represents a backward function, it is gray. Otherwise, the node
@@ -69,7 +75,16 @@ def make_dot(var, params=None, show_attrs=True, show_saved=True, max_attr_chars=
             present, are always displayed. (Requires PyTorch version >= 1.9)
         max_attr_chars: if show_attrs is `True`, sets max number of characters
             to display for any given attribute.
+
+    Returns:
+        graphviz.Digraph: the graphviz object.
     """
+
+    try:
+        from graphviz import Digraph
+    except ImportError as e:
+        raise ImportError("requires graphviz: https://pygraphviz.github.io/") from e
+
     if LooseVersion(torch.__version__) < LooseVersion("1.9") and \
             (show_attrs or show_saved):
         warnings.warn(
@@ -186,6 +201,9 @@ def make_dot(var, params=None, show_attrs=True, show_saved=True, max_attr_chars=
 def make_dot_from_trace(trace):
     """ This functionality is not available in pytorch core at
     https://pytorch.org/docs/stable/tensorboard.html
+
+    Args:
+        trace (torch.jit.trace): the trace object to visualize.
     """
     # from tensorboardX
     raise NotImplementedError("This function has been moved to pytorch core and "
@@ -196,6 +214,12 @@ def resize_graph(dot, size_per_element=0.15, min_size=12):
     """Resize the graph according to how much content it contains.
 
     Modify the graph in place.
+
+    Args:
+        dot (graphviz.Digraph): graph to be resized
+        size_per_element (float): A "rank" in graphviz contains roughly
+            size_per_element**2 pixels.
+        min_size (float): Minimum size of graph.
     """
     # Get the approximate number of nodes and edges
     num_rows = len(dot.body)

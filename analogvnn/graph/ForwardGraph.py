@@ -1,22 +1,43 @@
-from typing import Dict, Any, Sequence, Union
+from __future__ import annotations
+
+from typing import Dict, Sequence, Union
 
 import torch
 from torch import Tensor
 
 from analogvnn.graph.AcyclicDirectedGraph import AcyclicDirectedGraph
-from analogvnn.graph.ArgsKwargs import ArgsKwargs, InputOutput
+from analogvnn.graph.ArgsKwargs import ArgsKwargs, InputOutput, ArgsKwargsOutput
 from analogvnn.graph.GraphEnum import GraphEnum
 
 __all__ = ['ForwardGraph']
 
 
 class ForwardGraph(AcyclicDirectedGraph):
-    def __call__(self, inputs, is_training):
+    """The forward graph."""
+
+    def __call__(self, inputs: Union[Tensor, Sequence[Tensor]], is_training: bool) -> ArgsKwargsOutput:
+        """Forward pass through the forward graph
+
+        Args:
+            inputs (Union[Tensor, Sequence[Tensor]]): Input to the graph
+            is_training (bool): Is training or not
+
+        Returns:
+            ArgsKwargsOutput: Output of the graph
+        """
         self.graph_state.ready_for_forward(exception=True)
-        outputs = self.calculate_graph(inputs, is_training)
+        outputs = self.calculate(inputs, is_training)
         return outputs
 
-    def compile(self, is_static=True):
+    def compile(self, is_static: bool = True) -> ForwardGraph:
+        """Compile the graph
+
+        Args:
+            is_static (bool): If True, the graph is not changing during runtime and will be cached.
+
+        Returns:
+            ForwardGraph: self.
+        """
         if not self.graph.has_node(self.INPUT):
             raise Exception("INPUT doesn't exist in the forward graph")
 
@@ -25,7 +46,22 @@ class ForwardGraph(AcyclicDirectedGraph):
 
         return super().compile(is_static=is_static)
 
-    def calculate_graph(self, inputs: Union[Tensor, Sequence[Tensor]], is_training=True, **kwargs):
+    def calculate(
+            self,
+            inputs: Union[Tensor, Sequence[Tensor]],
+            is_training: bool = True,
+            **kwargs
+    ) -> ArgsKwargsOutput:
+        """Calculate the output of the graph
+
+        Args:
+            inputs (Union[Tensor, Sequence[Tensor]]): Input to the graph
+            is_training (bool): Is training or not
+            **kwargs: Additional arguments
+
+        Returns:
+            ArgsKwargsOutput: Output of the graph
+        """
         if not isinstance(inputs, Sequence):
             inputs = (inputs,)
 
@@ -40,7 +76,16 @@ class ForwardGraph(AcyclicDirectedGraph):
         outputs = input_output_graph[self.OUTPUT].outputs
         return ArgsKwargs.from_args_kwargs_object(outputs)
 
-    def _pass(self, from_node: GraphEnum, *inputs: Tensor) -> Dict[Any, InputOutput]:
+    def _pass(self, from_node: GraphEnum, *inputs: Tensor) -> Dict[GraphEnum, InputOutput]:
+        """Perform the forward pass through the graph
+
+        Args:
+            from_node (GraphEnum): The node to  start the forward pass from
+            *inputs (Tensor): Input to the graph
+
+        Returns:
+            Dict[GraphEnum, InputOutput]: The input and output of each node
+        """
         static_graph = self._create_sub_graph(from_node)
         input_output_graph = {
             from_node: InputOutput(inputs=ArgsKwargs(args=[*inputs]))
@@ -69,6 +114,14 @@ class ForwardGraph(AcyclicDirectedGraph):
 
     @staticmethod
     def _detach_tensor(tensor: torch.Tensor) -> torch.Tensor:
+        """Detach the tensor from the autograd graph
+
+        Args:
+            tensor (torch.Tensor): Tensor to detach
+
+        Returns:
+            torch.Tensor: Detached tensor
+        """
         tensor: torch.Tensor = tensor.detach()
         tensor.requires_grad = True
         return tensor
