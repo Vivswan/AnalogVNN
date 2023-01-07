@@ -28,20 +28,20 @@ release = __version__
 # General configuration
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.doctest',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.todo',
-    'sphinx.ext.napoleon',
-    # 'sphinx.ext.viewcode',
-    'sphinx.ext.autosectionlabel',
-    'sphinx.ext.duration',
-    'sphinx.ext.mathjax',
-    'sphinx_copybutton',
-    'notfound.extension',
-    'sphinx_inline_tabs',
-    'sphinxext.opengraph',
+    # 'sphinx.ext.autodoc',
+    # 'sphinx.ext.autosummary',
+    # 'sphinx.ext.doctest',
+    # 'sphinx.ext.intersphinx',
+    # 'sphinx.ext.todo',
+    # 'sphinx.ext.napoleon',
+    'sphinx.ext.viewcode',
+    # 'sphinx.ext.autosectionlabel',
+    # 'sphinx.ext.duration',
+    # 'sphinx.ext.mathjax',
+    # 'sphinx_copybutton',
+    # 'notfound.extension',
+    # 'sphinx_inline_tabs',
+    # 'sphinxext.opengraph',
     'autoapi.extension',
     'myst_parser',
 ]
@@ -56,7 +56,7 @@ autoapi_type = 'python'
 autoapi_add_toctree_entry = True
 autoapi_member_order = 'groupwise'
 
-suppress_warnings = ['autoapi']
+suppress_warnings = ['myst_parser''autoapi']
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
