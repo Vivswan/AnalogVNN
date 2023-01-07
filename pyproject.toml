@@ -2,8 +2,8 @@
 
 [build-system]
 requires = ["wheel", "setuptools>=61.0.0", "flit_core >=3.2,<4"]
-build-backend = "setuptools.build_meta"
-#build-backend = "flit_core.buildapi"
+#build-backend = "setuptools.build_meta"
+build-backend = "flit_core.buildapi"
 
 [tool.flit.module]
 name = "analogvnn"
@@ -11,7 +11,7 @@ name = "analogvnn"
 [project]
 # $ pip install analogvnn
 name = "analogvnn"
-version = "0.0.1"
+version = "1.0.0"
 description = "A fully modular framework for modeling and optimizing analog/photonic neural networks"  # Optional
 readme = "README.md"
 requires-python = ">=3.7"

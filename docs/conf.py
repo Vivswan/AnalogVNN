@@ -58,7 +58,7 @@ autoapi_modules = {'analogvnn': {
 }}
 autoapi_type = 'python'
 autoapi_add_toctree_entry = True
-autoapi_member_order = 'groupwise'
+autoapi_member_order = 'bysource'
 
 # autosectionlabel throws warnings if section names are duplicated.
 # The following tells autosectionlabel to not throw a warning for

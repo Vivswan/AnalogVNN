@@ -25,6 +25,9 @@ sample_code
 tutorial
 extra_classes
 inner_workings
+changelog
+autoapi/analogvnn/index
+
 ```
 
 ## Indices and tables
