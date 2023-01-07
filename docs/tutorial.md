@@ -4,8 +4,8 @@ To convert a digital model to its analog counterpart the following steps needs t
 
 1. Adding the analog layers to the digital model. For example, to create the Photonic Linear Layer with Reduce
    Precision, Normalization and Noise:
-    1. Create the model similar to how you would create a digital model but using {py:
-       class}`analogvnn.nn.module.FullSequential.FullSequential` as superclass
+    1. Create the model similar to how you would create a digital model but using
+       {py:class}`analogvnn.nn.module.FullSequential.FullSequential` as superclass
         ```python
         class LinearModel(FullSequential):
             def __init__(self, activation_class, norm_class, precision_class, precision, noise_class, leakage):
@@ -104,8 +104,8 @@ To convert a digital model to its analog counterpart the following steps needs t
     nn_model.compile(device=device)
     weight_model.compile(device=device)
     ```
-4. Using Analog Parameters Model to convert digital parameters to analog parameters using {py:
-   func}`analogvnn.parameter.PseudoParameter.PseudoParameter.parametrize_module`
+4. Using Analog Parameters Model to convert digital parameters to analog parameters using
+   {py:func}`analogvnn.parameter.PseudoParameter.PseudoParameter.parametrize_module`
     ```python
     PseudoParameter.parametrize_module(nn_model, transformation=weight_model)
     ```
