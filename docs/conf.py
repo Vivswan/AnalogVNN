@@ -108,7 +108,7 @@ html_theme_options = {
     'light_logo': 'analogvnn-logo-wide-white.svg',
     'dark_logo': 'analogvnn-logo-wide-black.svg',
     'source_repository': 'https://github.com/Vivswan/AnalogVNN',
-    'source_branch': 'main',
+    'source_branch': 'master',
     'source_directory': 'docs/',
 }
 # html_logo = '_static/analogvnn-logo-wide-black.svg'
