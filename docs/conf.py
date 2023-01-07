@@ -28,11 +28,11 @@ release = __version__
 # General configuration
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 extensions = [
-    # 'sphinx.ext.autodoc',
-    # 'sphinx.ext.autosummary',
-    # 'sphinx.ext.doctest',
-    # 'sphinx.ext.intersphinx',
-    # 'sphinx.ext.todo',
+    'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.doctest',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.todo',
     # 'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
     'sphinx.ext.autosectionlabel',
@@ -47,10 +47,10 @@ extensions = [
 ]
 
 autosummary_generate = True
-napoleon_google_docstring = True
-napoleon_include_init_with_doc = True
-napoleon_include_private_with_doc = True
-napoleon_include_special_with_doc = True
+# napoleon_google_docstring = True
+# napoleon_include_init_with_doc = True
+# napoleon_include_private_with_doc = True
+# napoleon_include_special_with_doc = True
 autoapi_dirs = ['../analogvnn']
 autoapi_type = 'python'
 autoapi_add_toctree_entry = True
