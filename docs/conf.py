@@ -32,20 +32,25 @@ extensions = [
     'sphinx_copybutton',
     'sphinx.ext.duration',
     'sphinx.ext.autosectionlabel',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.napoleon',
     'notfound.extension',
     "sphinx_inline_tabs",
     "sphinxext.opengraph",
 
-    'sphinx.ext.doctest',
-    'sphinx.ext.autodoc',
+    # 'sphinx.ext.doctest',
+    # 'sphinx.ext.autodoc',
     # 'sphinx.ext.autosummary',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.extlinks',
-    'sphinx.ext.mathjax',
-    'sphinx.ext.todo',
-    'sphinx.ext.viewcode',
+    # 'sphinx.ext.extlinks',
+    # 'sphinx.ext.mathjax',
+    # 'sphinx.ext.todo',
+    # 'sphinx.ext.viewcode',
 ]
 
+napoleon_google_docstring = True
+napoleon_include_init_with_doc = True
+napoleon_include_private_with_doc = True
+napoleon_include_special_with_doc = True
 autoapi_dirs = ['../analogvnn']
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
@@ -54,6 +59,13 @@ intersphinx_mapping = {
     'python': ('https://docs.python.org/3.7', None),
     'sphinx': ('https://www.sphinx-doc.org/en/master', None),
     'markdown_it': ('https://markdown-it-py.readthedocs.io/en/latest', None),
+    'numpy': ('https://numpy.org/doc/stable/', None),
+    'scipy': ('https://docs.scipy.org/doc/scipy/', None),
+    'matplotlib': ('https://matplotlib.org/stable/', None),
+    'networkx': ('https://networkx.org/documentation/stable/', None),
+    "tensorflow": ("https://www.tensorflow.org/api_docs/python",
+                   "https://github.com/GPflow/tensorflow-intersphinx/raw/master/tf2_py_objects.inv"),
+
 }
 intersphinx_disabled_domains = ['std']
 
