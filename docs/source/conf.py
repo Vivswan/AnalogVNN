@@ -1,7 +1,14 @@
 # -*- coding: utf-8 -*-
 from datetime import date
 
-from analogvnn import __version__
+try:
+    from analogvnn import __version__
+except Exception:
+    with open('../../pyproject.toml', 'r') as f:
+        for i in f.readlines():
+            if 'version' in i:
+                __version__ = i.split('=')[1].strip().strip('"')
+                break
 
 # Configuration file for the Sphinx documentation builder.
 #
@@ -21,17 +28,17 @@ extensions = [
     'myst_parser',
     'sphinx.ext.duration',
     'sphinx.ext.autosectionlabel',
-    # 'sphinx.ext.doctest',
+    'sphinx.ext.doctest',
     'sphinx.ext.autodoc',
     # 'sphinx.ext.autosummary',
-    # 'sphinx.ext.intersphinx',
-    # 'sphinx.ext.extlinks',
-    # 'sphinx.ext.mathjax',
-    # 'sphinx.ext.todo',
-    # 'sphinx.ext.viewcode',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.extlinks',
+    'sphinx.ext.mathjax',
+    'sphinx.ext.todo',
+    'sphinx.ext.viewcode',
     'sphinx_copybutton',
     'autoapi.extension',
-    # 'notfound.extension',
+    'notfound.extension',
 ]
 
 autoapi_dirs = ['../../analogvnn']

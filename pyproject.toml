@@ -96,10 +96,10 @@ doc = [
     "rst-to-myst[sphinx]",
     "myst_parser",
     "furo",
-    # "sphinx-rtd-theme",
+    "sphinx-rtd-theme",
     "sphinx-autoapi",
     "sphinx-copybutton",
-    # "sphinx-notfound-page",
+    "sphinx-notfound-page",
 ]
 all = ["analogvnn[research,dev,doc]"]
 
