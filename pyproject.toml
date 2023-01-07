@@ -16,8 +16,6 @@ description = "A fully modular framework for modeling and optimizing analog/phot
 readme = "README.md"
 requires-python = ">=3.7"
 license = { file = "LICENSE" }
-documentation = "https://analogvnn.readthedocs.io/en/latest/"
-repository = "https://github.com/Vivswan/AnalogVNN"
 keywords = ["deep-learning", "analog", "photonics", "neural-network", "framework", "pytorch"]
 authors = [
     { name = "Vivswan Shah", email = "vivswanshah@pitt.edu" }
