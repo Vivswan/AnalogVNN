@@ -28,13 +28,14 @@ release = __version__
 # General configuration
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 extensions = [
+    'sphinx.ext.napoleon',
+    'sphinx.ext.viewcode',
+    'autoapi.extension',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
-    'sphinx.ext.napoleon',
-    'sphinx.ext.viewcode',
     'sphinx.ext.autosectionlabel',
     'sphinx.ext.duration',
     'sphinx.ext.mathjax',
@@ -42,7 +43,6 @@ extensions = [
     'notfound.extension',
     'sphinx_inline_tabs',
     'sphinxext.opengraph',
-    'autoapi.extension',
     'myst_parser',
 ]
 
