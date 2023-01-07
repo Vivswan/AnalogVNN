@@ -36,3 +36,5 @@ sphinx-rtd-theme
 sphinx-autoapi
 sphinx-copybutton
 sphinx-notfound-page
+sphinx-inline-tabs
+sphinxext-opengraph

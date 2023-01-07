@@ -5,7 +5,7 @@ try:
     from analogvnn import __version__
     print('Version from module: {}'.format(__version__))
 except Exception:
-    with open('../../pyproject.toml', 'r') as f:
+    with open('../pyproject.toml', 'r') as f:
         for i in f.readlines():
             if 'version' in i:
                 __version__ = i.split('=')[1].strip().strip('"')
@@ -28,8 +28,14 @@ release = __version__
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 extensions = [
     'myst_parser',
+    'autoapi.extension',
+    'sphinx_copybutton',
     'sphinx.ext.duration',
     'sphinx.ext.autosectionlabel',
+    'notfound.extension',
+    "sphinx_inline_tabs",
+    "sphinxext.opengraph",
+
     'sphinx.ext.doctest',
     'sphinx.ext.autodoc',
     # 'sphinx.ext.autosummary',
@@ -38,12 +44,9 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.todo',
     'sphinx.ext.viewcode',
-    'sphinx_copybutton',
-    'autoapi.extension',
-    'notfound.extension',
 ]
 
-autoapi_dirs = ['../../analogvnn']
+autoapi_dirs = ['../analogvnn']
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
@@ -59,7 +62,14 @@ intersphinx_disabled_domains = ['std']
 html_theme = 'furo'
 html_static_path = ['_static']
 html_css_files = ['custom.css']
-html_logo = '_static/analogvnn-logo-wide-black.svg'
+html_theme_options = {
+    "light_logo": "analogvnn-logo-wide-white.svg",
+    "dark_logo": "analogvnn-logo-wide-black.svg",
+    "source_repository": "https://github.com/Vivswan/AnalogVNN",
+    "source_branch": "main",
+    "source_directory": "docs/",
+}
+# html_logo = '_static/analogvnn-logo-wide-black.svg'
 html_favicon = '_static/analogvnn-logo-square-black.svg'
 html_title = f'AnalogVNN {release}'
 language = 'en'

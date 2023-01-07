@@ -100,6 +100,8 @@ doc = [
     "sphinx-autoapi",
     "sphinx-copybutton",
     "sphinx-notfound-page",
+    "sphinx-inline-tabs",
+    "sphinxext-opengraph",
 ]
 all = ["analogvnn[research,dev,doc]"]
 
