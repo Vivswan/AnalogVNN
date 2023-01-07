@@ -3,12 +3,14 @@ from datetime import date
 
 try:
     from analogvnn import __version__
+    print('Version from module: {}'.format(__version__))
 except Exception:
     with open('../../pyproject.toml', 'r') as f:
         for i in f.readlines():
             if 'version' in i:
                 __version__ = i.split('=')[1].strip().strip('"')
                 break
+    print('Version from toml: {}'.format(__version__))
 
 # Configuration file for the Sphinx documentation builder.
 #

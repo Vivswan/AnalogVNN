@@ -1,6 +1,9 @@
-import enum
+from __future__ import annotations
 
-__all__ = ['GraphEnum']
+import enum
+from typing import Union, Callable
+
+__all__ = ['GraphEnum', 'GRAPH_NODE_TYPE']
 
 
 class GraphEnum(enum.Enum):
@@ -14,3 +17,6 @@ class GraphEnum(enum.Enum):
     INPUT = "INPUT"
     OUTPUT = "OUTPUT"
     STOP = "STOP"
+
+
+GRAPH_NODE_TYPE = Union[GraphEnum, Callable]

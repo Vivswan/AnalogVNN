@@ -1,18 +1,19 @@
 from __future__ import annotations
 
 import uuid
-from typing import Dict, Any, Union, Sequence, Callable
+from typing import Dict, Union, Callable, List, Tuple
 
 import networkx as nx
 import torch
-from torch import nn, Tensor
+from torch import nn
 
 from analogvnn.backward.BackwardModule import BackwardModule
 from analogvnn.graph.AccumulateGrad import AccumulateGrad
 from analogvnn.graph.AcyclicDirectedGraph import AcyclicDirectedGraph
 from analogvnn.graph.ArgsKwargs import ArgsKwargs, InputOutput, ArgsKwargsOutput
-from analogvnn.graph.GraphEnum import GraphEnum
+from analogvnn.graph.GraphEnum import GraphEnum, GRAPH_NODE_TYPE
 from analogvnn.nn.module.Layer import Layer
+from analogvnn.utils.common_types import TENSORS
 
 __all__ = ['BackwardGraph']
 
@@ -20,11 +21,11 @@ __all__ = ['BackwardGraph']
 class BackwardGraph(AcyclicDirectedGraph):
     """The backward graph."""
 
-    def __call__(self, gradient: Union[Tensor, Sequence[Tensor]] = None) -> ArgsKwargsOutput:
+    def __call__(self, gradient: TENSORS = None) -> ArgsKwargsOutput:
         """Backward pass through the backward graph
 
         Args:
-            gradient (Union[Tensor, Sequence[Tensor]]): gradient of the loss function w.r.t. the output of the forward graph
+            gradient (TENSORS): gradient of the loss function w.r.t. the output of the forward graph
 
         Returns:
             ArgsKwargsOutput: gradient of the inputs function w.r.t. loss
@@ -182,19 +183,19 @@ class BackwardGraph(AcyclicDirectedGraph):
         else:
             return None
 
-    def _pass(self, from_node, *args, **kwargs) -> Dict[Any, InputOutput]:
+    def _pass(self, from_node: GRAPH_NODE_TYPE, *args, **kwargs) -> Dict[GRAPH_NODE_TYPE, InputOutput]:
         """Perform the backward pass through the graph
 
         Args:
-            from_node (Any): The node to start the backward pass from.
+            from_node (GRAPH_NODE_TYPE): The node to start the backward pass from.
             *args: The gradients args of outputs.
             **kwargs: The gradients kwargs of outputs.
 
         Returns:
-            Dict[Any, InputOutput]: The input and output gradients of each node.
+            Dict[GRAPH_NODE_TYPE, InputOutput]: The input and output gradients of each node.
         """
-        static_graph = self._create_sub_graph(from_node)
-        input_output_graph = {
+        static_graph: List[Tuple[GRAPH_NODE_TYPE, List[GRAPH_NODE_TYPE]]] = self._create_static_sub_graph(from_node)
+        input_output_graph: Dict[GRAPH_NODE_TYPE, InputOutput] = {
             from_node: InputOutput(inputs=ArgsKwargs(
                 args=args,
                 kwargs=kwargs
@@ -202,7 +203,7 @@ class BackwardGraph(AcyclicDirectedGraph):
         }
         for module, predecessors in static_graph:
             if module != from_node:
-                inputs = self.get_args_kwargs(input_output_graph, module, predecessors)
+                inputs = self.parse_args_kwargs(input_output_graph, module, predecessors)
                 input_output_graph[module] = InputOutput(inputs=inputs)
 
             if isinstance(module, GraphEnum):
@@ -244,8 +245,8 @@ class BackwardGraph(AcyclicDirectedGraph):
 
         if isinstance(module, AccumulateGrad):
             return module.grad(
-                forward_input_output_graph=self.graph_state.forward_input_output_graph,
                 grad_outputs_args_kwargs=grad_outputs.inputs,
+                forward_input_output_graph=self.graph_state.forward_input_output_graph,
             )
 
         if isinstance(module, Layer) and isinstance(module.backward_function, BackwardModule):

@@ -1,27 +1,53 @@
+from __future__ import annotations
+
 import abc
-from typing import Dict
+import typing
+from typing import Dict, Union, List, Tuple, TypeVar
 
 import networkx as nx
 
-from analogvnn.graph.ArgsKwargs import ArgsKwargs
-from analogvnn.graph.GraphEnum import GraphEnum
+from analogvnn.graph.ArgsKwargs import ArgsKwargs, InputOutput
+from analogvnn.graph.GraphEnum import GraphEnum, GRAPH_NODE_TYPE
 from analogvnn.graph.ModelGraphState import ModelGraphState
 from analogvnn.graph.to_graph_viz_digraph import to_graphviz_digraph
+
+if typing.TYPE_CHECKING:
+    pass
 
 __all__ = ['AcyclicDirectedGraph']
 
 
 class AcyclicDirectedGraph(abc.ABC):
+    """The base class for all acyclic directed graphs.
+
+    Attributes:
+        graph (nx.MultiDiGraph): The graph.
+        graph_state (ModelGraphState): The graph state.
+        _is_static (bool): If True, the graph is not changing during runtime and will be cached.
+        _static_graphs (Dict[GRAPH_NODE_TYPE, List[Tuple[GRAPH_NODE_TYPE, List[GRAPH_NODE_TYPE]]]]): The static graphs.
+        INPUT (GraphEnum): GraphEnum.INPUT
+        OUTPUT (GraphEnum): GraphEnum.OUTPUT
+        STOP (GraphEnum): GraphEnum.STOP
+
+    """
     graph: nx.MultiDiGraph
     graph_state: ModelGraphState
     _is_static: bool
-    _static_graphs: Dict
+    _static_graphs: Dict[GRAPH_NODE_TYPE, List[Tuple[GRAPH_NODE_TYPE, List[GRAPH_NODE_TYPE]]]]
 
     INPUT = GraphEnum.INPUT
     OUTPUT = GraphEnum.OUTPUT
     STOP = GraphEnum.STOP
 
     def __init__(self, graph_state: ModelGraphState = None):
+        """Create a new graph.
+
+        Args:
+            graph_state (ModelGraphState): The graph state.
+
+        Raises:
+            NotImplementedError: If allow_loops is True, since this is not implemented yet.
+        """
         self.graph = nx.MultiDiGraph()
         self.graph_state = graph_state
         self._is_static = False
@@ -32,22 +58,52 @@ class AcyclicDirectedGraph(abc.ABC):
 
     @abc.abstractmethod
     def __call__(self, *args, **kwargs):
+        """Performs pass through the graph
+
+        Args:
+            *args: Arguments
+            **kwargs: Keyword arguments
+
+        Raises:
+            NotImplementedError: since method is abstract
+        """
         raise NotImplementedError
 
-    def add_connection(self, *args):
+    def add_connection(self, *args: GRAPH_NODE_TYPE) -> AcyclicDirectedGraphType:
+        """Add a connection between nodes.
+
+        Args:
+            *args: The nodes.
+
+        Returns:
+            AcyclicDirectedGraphType: self.
+        """
         for i in range(1, len(args)):
             self.add_edge(args[i - 1], args[i])
         return self
 
     def add_edge(
             self,
-            u_of_edge,
-            v_of_edge,
-            in_arg=None,
-            in_kwarg=None,
-            out_arg=None,
-            out_kwarg=None,
-    ):
+            u_of_edge: GRAPH_NODE_TYPE,
+            v_of_edge: GRAPH_NODE_TYPE,
+            in_arg: Union[None, int, bool] = None,
+            in_kwarg: Union[None, str, bool] = None,
+            out_arg: Union[None, int, bool] = None,
+            out_kwarg: Union[None, str, bool] = None
+    ) -> AcyclicDirectedGraphType:
+        """Add an edge to the graph.
+
+        Args:
+            u_of_edge (GRAPH_NODE_TYPE): The source node.
+            v_of_edge (GRAPH_NODE_TYPE): The target node.
+            in_arg (Union[None, int, bool]): The input argument.
+            in_kwarg (Union[None, str, bool]): The input keyword argument.
+            out_arg (Union[None, int, bool]): The output argument.
+            out_kwarg (Union[None, str, bool]): The output keyword argument.
+
+        Returns:
+            AcyclicDirectedGraphType: self.
+        """
         attr = self.check_edge_parameters(in_arg, in_kwarg, out_arg, out_kwarg)
         existing_edges = self.graph.get_edge_data(u_of_edge, v_of_edge)
 
@@ -70,17 +126,36 @@ class AcyclicDirectedGraph(abc.ABC):
         return self
 
     @staticmethod
-    def check_edge_parameters(in_arg, in_kwarg, out_arg, out_kwarg):
+    def check_edge_parameters(
+            in_arg: Union[None, int, bool],
+            in_kwarg: Union[None, str, bool],
+            out_arg: Union[None, int, bool],
+            out_kwarg: Union[None, str, bool]
+    ) -> Dict[str, Union[None, int, str, bool]]:
+        """Check the edge's in and out parameters.
+
+        Args:
+            in_arg (Union[None, int, bool]): The input argument.
+            in_kwarg (Union[None, str, bool]): The input keyword argument.
+            out_arg (Union[None, int, bool]): The output argument.
+            out_kwarg (Union[None, str, bool]): The output keyword argument.
+
+        Returns:
+            Dict[str, Union[None, int, str, bool]]: Dict of valid edge's in and out parameters.
+
+        Raises:
+            ValueError: If in and out parameters are invalid.
+        """
         # @@@ in_arg: None    in_kwarg: None  out_arg: None   out_kwarg: None   0
         # @@  in_arg: True    in_kwarg: None  out_arg: True   out_kwarg: None   1
         #     in_arg: None    in_kwarg: True  out_arg: True   out_kwarg: None   2
         # @   in_arg: None    in_kwarg: True  out_arg: None   out_kwarg: True   3
         # @   in_arg: 0       in_kwarg: None  out_arg: True   out_kwarg: None   4
         #     in_arg: 0       in_kwarg: None  out_arg: 0      out_kwarg: None   5
-        #     in_arg: 0       in_kwarg: None  out_arg: None   out_kwarg: 0      6
-        #     in_arg: None    in_kwarg: 0     out_arg: True   out_kwarg: None   7
-        #     in_arg: None    in_kwarg: 0     out_arg: 0      out_kwarg: None   8
-        # @@  in_arg: None    in_kwarg: 0     out_arg: None   out_kwarg: 0      9
+        #     in_arg: 0       in_kwarg: None  out_arg: None   out_kwarg: a      6
+        #     in_arg: None    in_kwarg: a     out_arg: True   out_kwarg: None   7
+        #     in_arg: None    in_kwarg: a     out_arg: 0      out_kwarg: None   8
+        # @@  in_arg: None    in_kwarg: a     out_arg: None   out_kwarg: a      9
         if out_arg is not None and out_kwarg is not None:
             raise ValueError('both "out_arg" and "out_kwarg" can\'t be present at the same time')
         if in_arg is not None and in_kwarg is not None:
@@ -140,8 +215,26 @@ class AcyclicDirectedGraph(abc.ABC):
 
         return attr
 
+    # noinspection PyUnusedLocal
     @staticmethod
-    def _create_edge_label(in_arg=None, in_kwarg=None, out_arg=None, out_kwarg=None, **kwargs):
+    def _create_edge_label(
+            in_arg: Union[None, int, bool] = None,
+            in_kwarg: Union[None, str, bool] = None,
+            out_arg: Union[None, int, bool] = None,
+            out_kwarg: Union[None, str, bool] = None,
+            **kwargs
+    ) -> str:
+        """Create the edge's label.
+
+        Args:
+            in_arg (Union[None, int, bool]): The input argument.
+            in_kwarg (Union[None, str, bool]): The input keyword argument.
+            out_arg (Union[None, int, bool]): The output argument.
+            out_kwarg (Union[None, str, bool]): The output keyword argument.
+
+        Returns:
+            str: The edge's label.
+        """
         label = ""
         if in_arg == in_kwarg == out_arg == out_kwarg is True:
             return "* -> *"
@@ -167,18 +260,35 @@ class AcyclicDirectedGraph(abc.ABC):
 
         return label
 
-    def compile(self, is_static=True):
+    def compile(self, is_static: bool = True) -> AcyclicDirectedGraphType:
+        """Compile the graph.
+
+        Args:
+            is_static (bool): If True, the graph will be compiled as a static graph.
+
+        Returns:
+            AcyclicDirectedGraphType: The compiled graph.
+        """
         for i in nx.simple_cycles(self.graph):
             raise Exception(f"There is cyclic loop between {i}")
 
-        self.graph = self._remove_missing_args(self.graph)
+        self.graph = self._reindex_out_args(self.graph)
         self._is_static = is_static
         self._static_graphs = {}
         return self
 
     @staticmethod
-    def _remove_missing_args(graph: nx.MultiDiGraph):
-        graph = graph.copy()
+    def _reindex_out_args(graph: nx.MultiDiGraph) -> nx.MultiDiGraph:
+        """Reindex the output arguments.
+
+        Args:
+            graph (nx.MultiDiGraph): The graph.
+
+        Returns:
+            nx.MultiDiGraph: The graph with re-indexed output arguments.
+        """
+        # noinspection PyTypeChecker
+        graph: nx.MultiDiGraph = graph.copy()
 
         for v in graph.nodes():
             args_index = []
@@ -197,7 +307,18 @@ class AcyclicDirectedGraph(abc.ABC):
 
         return graph
 
-    def _create_sub_graph(self, from_node):
+    def _create_static_sub_graph(
+            self,
+            from_node: GRAPH_NODE_TYPE
+    ) -> List[Tuple[GRAPH_NODE_TYPE, List[GRAPH_NODE_TYPE]]]:
+        """Create a static sub graph connected to the given node.
+
+        Args:
+            from_node (GRAPH_NODE_TYPE): The node.
+
+        Returns:
+            List[Tuple[GRAPH_NODE_TYPE, List[GRAPH_NODE_TYPE]]]: The static sub graph.
+        """
         if self._is_static and from_node in self._static_graphs:
             return self._static_graphs[from_node]
 
@@ -216,7 +337,22 @@ class AcyclicDirectedGraph(abc.ABC):
 
         return self._static_graphs[from_node]
 
-    def get_args_kwargs(self, input_output_graph, module, predecessors) -> ArgsKwargs:
+    def parse_args_kwargs(
+            self,
+            input_output_graph: Dict[GRAPH_NODE_TYPE, InputOutput],
+            module: GRAPH_NODE_TYPE,
+            predecessors: List[GRAPH_NODE_TYPE]
+    ) -> ArgsKwargs:
+        """Parse the arguments and keyword arguments.
+
+        Args:
+            input_output_graph (Dict[GRAPH_NODE_TYPE, InputOutput]): The input output graph.
+            module (GRAPH_NODE_TYPE): The module.
+            predecessors (List[GRAPH_NODE_TYPE]): The predecessors.
+
+        Returns:
+            ArgsKwargs: The arguments and keyword arguments.
+        """
         args = {}
         extra_args = []
         kwargs = {}
@@ -295,5 +431,18 @@ class AcyclicDirectedGraph(abc.ABC):
     #     if len(input_output_graph[module].outputs.kwargs.keys()) > 0:
     #         print(f"{module} :o: {input_output_graph[module].outputs.kwargs}")
 
-    def render(self, *args, real_label=False, **kwargs):
+    def render(self, *args, real_label: bool = False, **kwargs) -> str:
+        """Save the source to file and render with the Graphviz engine.
+
+        Args:
+            *args: Arguments to pass to graphviz render function.
+            real_label: If True, the real label will be used instead of the label.
+            **kwargs: Keyword arguments to pass to graphviz render function.
+
+        Returns:
+            str: The (possibly relative) path of the rendered file.
+        """
         return to_graphviz_digraph(self.graph, real_label=real_label).render(*args, **kwargs)
+
+
+AcyclicDirectedGraphType = TypeVar('AcyclicDirectedGraphType', bound=AcyclicDirectedGraph)

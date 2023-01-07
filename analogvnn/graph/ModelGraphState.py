@@ -2,11 +2,10 @@ from __future__ import annotations
 
 from typing import Union, Dict, Optional
 
-import torch
 from torch import Tensor
 
 from analogvnn.graph.ArgsKwargs import InputOutput, ArgsKwargs
-from analogvnn.graph.GraphEnum import GraphEnum
+from analogvnn.graph.GraphEnum import GraphEnum, GRAPH_NODE_TYPE
 
 __all__ = ['ModelGraphState']
 
@@ -16,7 +15,7 @@ class ModelGraphState:
 
     Attributes:
         allow_loops (bool): if True, the graph is allowed to contain loops.
-        forward_input_output_graph (InputOutput): the input and output of the forward pass.
+        forward_input_output_graph (Optional[Dict[GRAPH_NODE_TYPE, InputOutput]]): the input and output of the forward pass.
         use_autograd_graph (bool): if True, the autograd graph is used to calculate the gradients.
         _loss (Tensor): the loss.
         INPUT (GraphEnum): GraphEnum.INPUT
@@ -30,7 +29,7 @@ class ModelGraphState:
     """
     allow_loops: bool
     use_autograd_graph: bool
-    forward_input_output_graph: Optional[Dict[Union[GraphEnum, torch.nn.Module], InputOutput]]
+    forward_input_output_graph: Optional[Dict[GRAPH_NODE_TYPE, InputOutput]]
     _loss: Optional[Tensor]
 
     INPUT = GraphEnum.INPUT

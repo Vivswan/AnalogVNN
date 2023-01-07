@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, Sequence, Union
+from typing import Dict, Sequence
 
 import torch
 from torch import Tensor
@@ -8,6 +8,7 @@ from torch import Tensor
 from analogvnn.graph.AcyclicDirectedGraph import AcyclicDirectedGraph
 from analogvnn.graph.ArgsKwargs import ArgsKwargs, InputOutput, ArgsKwargsOutput
 from analogvnn.graph.GraphEnum import GraphEnum
+from analogvnn.utils.common_types import TENSORS
 
 __all__ = ['ForwardGraph']
 
@@ -15,11 +16,11 @@ __all__ = ['ForwardGraph']
 class ForwardGraph(AcyclicDirectedGraph):
     """The forward graph."""
 
-    def __call__(self, inputs: Union[Tensor, Sequence[Tensor]], is_training: bool) -> ArgsKwargsOutput:
+    def __call__(self, inputs: TENSORS, is_training: bool) -> ArgsKwargsOutput:
         """Forward pass through the forward graph
 
         Args:
-            inputs (Union[Tensor, Sequence[Tensor]]): Input to the graph
+            inputs (TENSORS): Input to the graph
             is_training (bool): Is training or not
 
         Returns:
@@ -48,14 +49,14 @@ class ForwardGraph(AcyclicDirectedGraph):
 
     def calculate(
             self,
-            inputs: Union[Tensor, Sequence[Tensor]],
+            inputs: TENSORS,
             is_training: bool = True,
             **kwargs
     ) -> ArgsKwargsOutput:
         """Calculate the output of the graph
 
         Args:
-            inputs (Union[Tensor, Sequence[Tensor]]): Input to the graph
+            inputs (TENSORS): Input to the graph
             is_training (bool): Is training or not
             **kwargs: Additional arguments
 
@@ -86,13 +87,13 @@ class ForwardGraph(AcyclicDirectedGraph):
         Returns:
             Dict[GraphEnum, InputOutput]: The input and output of each node
         """
-        static_graph = self._create_sub_graph(from_node)
+        static_graph = self._create_static_sub_graph(from_node)
         input_output_graph = {
             from_node: InputOutput(inputs=ArgsKwargs(args=[*inputs]))
         }
         for module, predecessors in static_graph:
             if module != from_node:
-                inputs = self.get_args_kwargs(input_output_graph, module, predecessors)
+                inputs = self.parse_args_kwargs(input_output_graph, module, predecessors)
                 if not self.graph_state.use_autograd_graph:
                     inputs.args = [self._detach_tensor(i) for i in inputs.args]
                     inputs.kwargs = {k: self._detach_tensor(v) for k, v in inputs.kwargs.items()}

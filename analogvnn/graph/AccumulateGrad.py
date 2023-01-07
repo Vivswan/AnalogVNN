@@ -3,53 +3,85 @@ from typing import Dict, Union, Callable
 import torch
 from torch import nn
 
-from analogvnn.graph.ArgsKwargs import ArgsKwargs
+from analogvnn.graph.ArgsKwargs import ArgsKwargs, InputOutput
+from analogvnn.graph.GraphEnum import GRAPH_NODE_TYPE
 
 __all__ = ['AccumulateGrad']
 
 
 class AccumulateGrad:
-    locations: Dict
+    """AccumulateGrad is a module that accumulates the gradients of the outputs of the module
+    it is attached to. It has no parameters of its own.
+
+    Attributes:
+        module (nn.Module): Module to accumulate gradients for.
+        locations (Dict[str, Dict[str, Union[None, bool, int, str, GRAPH_NODE_TYPE]]]): input/output connections.
+    """
+    locations: Dict[str, Dict[str, Union[None, bool, int, str, GRAPH_NODE_TYPE]]]
     module: Union[nn.Module, Callable]
 
-    def __init__(self, module):
+    def __init__(self, module: Union[nn.Module, Callable]):
+        """Initialize the module.
+
+        Args:
+            module (Union[nn.Module, Callable]): Module from which to accumulate gradients.
+        """
         self.locations = {}
         self.module = module
 
     def __repr__(self):
+        """Return a string representation of the module.
+
+        Returns:
+            str: String representation of the module.
+        """
         # return f"AccumulateGrad"
         return f"AccumulateGrad({self.module})"
 
-    def grad(self, grad_outputs_args_kwargs: ArgsKwargs, forward_input_output_graph) -> ArgsKwargs:
+    def grad(
+            self,
+            grad_outputs_args_kwargs: ArgsKwargs,
+            forward_input_output_graph: Dict[GRAPH_NODE_TYPE, InputOutput]
+    ) -> ArgsKwargs:
+        """Calculate and Accumulate the output gradients of the module.
+
+        Args:
+            grad_outputs_args_kwargs (ArgsKwargs): The output gradients from previous modules (predecessors).
+            forward_input_output_graph (Dict[GRAPH_NODE_TYPE, InputOutput]): The input and output from forward pass.
+
+        Returns:
+            ArgsKwargs: The output gradients.
+        """
         grad_inputs_args = {}
         grad_inputs_kwargs = {}
         for key, grad_output in grad_outputs_args_kwargs.kwargs.items():
             location = self.locations[key]
-            forward_out_arg = location['in_arg']
-            forward_out_kwarg = location['in_kwarg']
-            forward_in_arg = location['out_arg']
-            forward_in_kwarg = location['out_kwarg']
+            forward_out_arg: Union[None, int, bool] = location['in_arg']
+            forward_out_kwarg: Union[None, str, bool] = location['in_kwarg']
+            forward_in_arg: Union[None, int, bool] = location['out_arg']
+            forward_in_kwarg: Union[None, str, bool] = location['out_kwarg']
+            predecessor: GRAPH_NODE_TYPE = location['from']
             # print(out_kwarg, out_arg, value)
 
             # 0 - not allowed
 
             # 4
             if forward_out_arg is True and isinstance(forward_in_arg, int) and not isinstance(forward_in_arg, bool):
-                forward_inputs = forward_input_output_graph[location["from"]].inputs.args
+                forward_inputs = forward_input_output_graph[predecessor].inputs.args
                 forward_outputs = forward_input_output_graph[self.module].outputs.args
                 forward_out_arg = forward_inputs.index(forward_outputs[forward_in_arg])
                 grad_output = grad_output[forward_out_arg]
 
             # 7
             if forward_out_arg is True and isinstance(forward_in_kwarg, str):
-                forward_inputs = forward_input_output_graph[location["from"]].inputs.args
+                forward_inputs = forward_input_output_graph[predecessor].inputs.args
                 forward_outputs = forward_input_output_graph[self.module].outputs.kwargs
                 forward_out_arg = forward_inputs.index(forward_outputs[forward_in_kwarg])
                 grad_output = grad_output[forward_out_arg]
 
             # 1
             if forward_out_arg is True and forward_in_arg is True:
-                forward_inputs = forward_input_output_graph[location["from"]].inputs.args
+                forward_inputs = forward_input_output_graph[predecessor].inputs.args
                 forward_outputs = forward_input_output_graph[self.module].outputs.args
                 for i in range(len(forward_inputs)):
                     if forward_inputs[i] not in forward_outputs:
@@ -63,7 +95,7 @@ class AccumulateGrad:
 
             # 2
             if forward_out_arg is True and forward_in_kwarg is True:
-                forward_inputs = forward_input_output_graph[location["from"]].inputs.args
+                forward_inputs = forward_input_output_graph[predecessor].inputs.args
                 forward_outputs = forward_input_output_graph[self.module].outputs.kwargs
                 for i in forward_outputs:
                     value_index = forward_inputs.index(forward_outputs[i])
@@ -103,3 +135,5 @@ class AccumulateGrad:
             args=[grad_inputs_args[i] for i in sorted(list(grad_inputs_args.keys()))],
             kwargs=grad_inputs_kwargs
         )
+
+    __call__ = grad

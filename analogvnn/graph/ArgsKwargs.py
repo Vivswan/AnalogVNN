@@ -23,8 +23,8 @@ class ArgsKwargs:
     """The arguments.
 
     Attributes:
-        args (List[Any]): The arguments.
-        kwargs (Dict[str, Any]): The keyword arguments.
+        args (List): The arguments.
+        kwargs (Dict): The keyword arguments.
     """
     args: List
     kwargs: Dict

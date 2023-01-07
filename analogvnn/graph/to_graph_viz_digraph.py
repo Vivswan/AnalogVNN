@@ -1,11 +1,18 @@
+from __future__ import annotations
+
+import typing
+
 import networkx
 
 from analogvnn.graph.GraphEnum import GraphEnum
 
+if typing.TYPE_CHECKING:
+    import graphviz
+
 __all__ = ['to_graphviz_digraph']
 
 
-def to_graphviz_digraph(from_graph: networkx.DiGraph, real_label: bool = False):
+def to_graphviz_digraph(from_graph: networkx.DiGraph, real_label: bool = False) -> graphviz.Digraph:
     """Returns a pygraphviz graph from a NetworkX graph N.
 
     Examples:
