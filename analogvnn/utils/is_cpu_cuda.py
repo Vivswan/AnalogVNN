@@ -4,7 +4,7 @@ from typing import Tuple
 
 import torch
 
-__all__ = ['is_cpu_cuda']
+__all__ = ['CPUCuda', 'is_cpu_cuda']
 
 
 class CPUCuda:
