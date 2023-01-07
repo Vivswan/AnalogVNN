@@ -94,14 +94,13 @@ research = [
 doc = [
     "sphinx>=4.2.0",
     "rst-to-myst[sphinx]",
-    "myst_parser",
     "furo",
-    "sphinx-rtd-theme",
+    "myst_parser",
     "sphinx-autoapi",
-    "sphinx-copybutton",
-    "sphinx-notfound-page",
-    "sphinx-inline-tabs",
     "sphinxext-opengraph",
+    "sphinx-inline-tabs",
+    "sphinx-notfound-page",
+    "sphinx-copybutton",
 ]
 all = ["analogvnn[research,dev,doc]"]
 
@@ -109,9 +108,9 @@ all = ["analogvnn[research,dev,doc]"]
 "Homepage" = "https://github.com/Vivswan/AnalogVNN"
 "Bug Reports" = "https://github.com/Vivswan/AnalogVNN/issues"
 "Documentation" = "https://analogvnn.readthedocs.io/en/latest/"
-#"Funding" = "https://vivswan.github.io/"
 "Say Thanks!" = "https://github.com/Vivswan"
 "Source" = "https://github.com/Vivswan/AnalogVNN"
+"Author" = "https://vivswan.github.io/"
 
 # The following would provide a command line executable called `sample`
 # which executes the function `main` from this package when invoked.

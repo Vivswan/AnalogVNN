@@ -33,19 +33,17 @@ extensions = [
     'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
-    'sphinx.ext.coverage',
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
     'sphinx.ext.autosectionlabel',
     'sphinx.ext.duration',
+    'sphinx.ext.mathjax',
     'sphinx_copybutton',
     'notfound.extension',
     'sphinx_inline_tabs',
     'sphinxext.opengraph',
-    'sphinx.ext.mathjax',
     'autoapi.extension',
     'myst_parser',
-    # 'sphinx_rtd_theme',
 ]
 
 autosummary_generate = True
@@ -86,7 +84,6 @@ intersphinx_disabled_domains = ['std']
 # Options for HTML output
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 html_theme = 'furo'
-# html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 html_css_files = ['custom.css']
 html_theme_options = {
@@ -103,11 +100,3 @@ language = 'en'
 
 # Options for EPUB output
 epub_show_urls = 'footnote'
-
-
-def skip_util_classes(app, what, name, obj, skip, options):
-    return False
-
-
-def setup(sphinx):
-    sphinx.connect('autoapi-skip-member', skip_util_classes)
