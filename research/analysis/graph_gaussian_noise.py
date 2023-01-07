@@ -300,8 +300,8 @@ def plot_and_integrate(std=0.2, precision=2):
 
     def p_threshold(q, a=-np.inf, b=np.inf):
         return [
-            reduce_precision(q) - reduce_precision.step_width / 2,
-            reduce_precision(q) + reduce_precision.step_width / 2
+            reduce_precision(q) - reduce_precision.precision_width / 2,
+            reduce_precision(q) + reduce_precision.precision_width / 2
         ]
         # return [
         #     np.maximum(float(reduce_precision(q) - reduce_precision.step_width / 2), a),
@@ -337,10 +337,10 @@ def plot_and_integrate(std=0.2, precision=2):
     plt.legend()
     for i in range(k):
         plt.subplot(k + 1, 1, i + 2)
-        plt.plot(num_line, normal_int_fn(num_line, i * reduce_precision.step_width), label=f"normal_int {i}")
-        plt.plot(num_line, poisson_int_fn(num_line, i * reduce_precision.step_width), label=f"poisson_int {i}")
-        plt.plot(num_line, normal_int_fn(num_line, -i * reduce_precision.step_width), label=f"normal_int {-i}")
-        plt.plot(num_line, poisson_int_fn(num_line, -i * reduce_precision.step_width), label=f"poisson_int {-i}")
+        plt.plot(num_line, normal_int_fn(num_line, i * reduce_precision.precision_width), label=f"normal_int {i}")
+        plt.plot(num_line, poisson_int_fn(num_line, i * reduce_precision.precision_width), label=f"poisson_int {i}")
+        plt.plot(num_line, normal_int_fn(num_line, -i * reduce_precision.precision_width), label=f"normal_int {-i}")
+        plt.plot(num_line, poisson_int_fn(num_line, -i * reduce_precision.precision_width), label=f"poisson_int {-i}")
         plt.ylim(-0.01, 1.1)
         plt.legend()
     fig.tight_layout()
@@ -356,8 +356,8 @@ def plot_and_integrate(std=0.2, precision=2):
     print(cdf_domain)
     print(reduce_precision(cdf_domain))
     for i in cdf_domain:
-        min_i = i - reduce_precision.step_width / 2
-        max_i = i + reduce_precision.step_width / 2
+        min_i = i - reduce_precision.precision_width / 2
+        max_i = i + reduce_precision.precision_width / 2
         if np.isclose(i, 1.):
             max_i = 1.
         if np.isclose(i, -1.):

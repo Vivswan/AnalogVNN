@@ -30,6 +30,10 @@ def to_graphviz_digraph(from_graph: networkx.DiGraph, real_label: bool = False) 
 
     Returns:
         graphviz.Digraph: the converted graph.
+
+    Raises:
+        ImportError: if pygraphviz is not available.
+        ImportError: if graphviz is not available.
     """
     try:
         import pygraphviz

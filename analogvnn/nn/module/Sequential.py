@@ -5,6 +5,7 @@ from collections import OrderedDict
 from itertools import islice
 from typing import Iterator, TypeVar, Union, Dict, Optional
 
+import torch
 from torch import nn
 from torch.nn import Module
 
@@ -16,17 +17,37 @@ __all__ = ['Sequential']
 
 
 class Sequential(Model):
+    """A sequential model.
+
+    Attributes:
+        _runtime_module_list (OrderedDict[str, nn.Module]): The ordered dictionary of the modules.
+    """
+
     def __init__(self, *args):
         super(Sequential, self).__init__()
         self._runtime_module_list: Dict[str, Optional[Module]] = OrderedDict()
         self.add_sequence(*args)
 
-    def compile(self, device=None, layer_data=True):
+    def compile(self, device: Optional[torch.device] = None, layer_data: bool = True):
+        """Compile the model and add forward graph.
+
+        Args:
+            device (torch.device): The device to run the model on.
+            layer_data (bool): True if the data of the layers should be compiled.
+
+        Returns:
+            Sequential: self
+        """
         arr = [self.graphs.INPUT, *list(self._runtime_module_list.values()), self.graphs.OUTPUT]
         self.graphs.forward_graph.add_connection(*arr)
         return super().compile(device, layer_data)
 
     def add_sequence(self, *args):
+        """Add a sequence of modules to the forward graph of model.
+
+        Args:
+            *args (nn.Module): The modules to add.
+        """
         if len(args) == 1 and isinstance(args[0], OrderedDict):
             for key, module in args[0].items():
                 self._add_run_module(key, module)
@@ -35,6 +56,12 @@ class Sequential(Model):
                 self._add_run_module(str(idx), module)
 
     def _add_run_module(self, name: str, module: Optional[Module]):
+        """Add a module to the forward graph of model.
+
+        Args:
+            name (str): The name of the module.
+            module (nn.Module): The module to add.
+        """
         self.add_module(name, module)
         self._runtime_module_list[name] = module
         return self

@@ -101,6 +101,7 @@ doc = [
     "sphinx-inline-tabs",
     "sphinx-notfound-page",
     "sphinx-copybutton",
+    "sphinxcontrib-katex", # for math
 ]
 all = ["analogvnn[research,dev,doc]"]
 [project.urls]
