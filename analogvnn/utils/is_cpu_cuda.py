@@ -4,9 +4,12 @@ __all__ = ['is_cpu_cuda']
 
 
 class CPUCuda:
+    device_name: str
+    device: torch.device
+
     def __init__(self):
-        self.device: torch.device = None
-        self.device_name: str = None
+        self.device = None
+        self.device_name = None
         self.reset_device()
 
     def set_device(self, device_name):

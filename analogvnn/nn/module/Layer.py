@@ -29,6 +29,9 @@ nn.Module.__init__ = __nn_Module_init_updated__(nn.Module.__init__)
 
 
 class Layer(nn.Module):
+    r"""Base class for analog neural network modules.
+    """
+
     _inputs: Union[None, ArgsKwargs]
     _outputs: Union[None, Tensor, Sequence[Tensor]]
     _backward_module: Optional[BackwardModule]

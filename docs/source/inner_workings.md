@@ -1,11 +1,8 @@
-**************
-Inner Workings
-**************
+# Inner Workings
 
 There are three major new classes in AnalogVNN, which are as follows
 
-PseudoParameters
-================
+## PseudoParameters
 
 "PseudoParameters" is a subclass of "Parameter" class of PyTorch.
 
@@ -16,31 +13,27 @@ PseudoParameters requires a ParameterizingModel to parameterize the parameters (
 layer to get parameterized data
 
 PyTorch's ParameterizedParameters vs AnalogVNN's PseudoParameters:
-    - Similarity (Forward or Parameterizing the data):
-        Data -> ParameterizingModel -> Parameterized Data
-
-    - Difference (Backward or Gradient Calculations):
-        - ParameterizedParameters: Parameterized Data -> ParameterizingModel -> Data
-
-        - PseudoParameters: Parameterized Data -> Data
+: - Similarity (Forward or Parameterizing the data):
+: Data -> ParameterizingModel -> Parameterized Data
+- Difference (Backward or Gradient Calculations):
+: - ParameterizedParameters: Parameterized Data -> ParameterizingModel -> Data
+- PseudoParameters: Parameterized Data -> Data
 
 So, by using PseudoParameters class the gradients of the parameter are calculated in such a way that
 the ParameterizingModel was never present.
 
 To convert parameters of a layer or model to use PseudoParameters, then use:
 
-    .. code-block:: python
+  ```python
+    PseudoParameters.parameterize(Model, "parameter_name", transformation=ParameterizingModel)
+  ```
 
-        PseudoParameters.parameterize(Model, "parameter_name", transformation=ParameterizingModel)
+OR
 
-    OR
+  ```python
+    PseudoParameters.parametrize_module(Model, transformation=ParameterizingModel)
+  ```
 
-    .. code-block:: python
+## Forward and Backward Graphs
 
-        PseudoParameters.parametrize_module(Model, transformation=ParameterizingModel)
-
-
-Forward and Backward Graphs
-===========================
 Documentation Coming Soon...
-

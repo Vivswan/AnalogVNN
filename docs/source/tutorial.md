@@ -1,13 +1,11 @@
-********
-Tutorial
-********
+# Tutorial
 
 To convert a digital model to its analog counterpart the following steps needs to be followed:
 
-#. Adding the analog layers to the digital model. For example, to create the Photonic Linear Layer with Reduce Precision, Normalization and Noise:
-    #. Create the model similar to how you would create a digital model but using FullSequential as superclass
-        .. code-block:: python
-
+1. Adding the analog layers to the digital model. For example, to create the Photonic Linear Layer with Reduce
+   Precision, Normalization and Noise:
+    1. Create the model similar to how you would create a digital model but using FullSequential as superclass
+        ```python
             class LinearModel(FullSequential):
                 def __init__(self, activation_class, norm_class, precision_class, precision, noise_class, leakage):
                     super(LinearModel, self).__init__()
@@ -26,26 +24,27 @@ To convert a digital model to its analog counterpart the following steps needs t
                     self.add_layer(Linear(in_features=128, out_features=10))
 
                     self.add_sequence(*self.all_layers)
+        ```
 
-       Note: "add_sequence" is used to create and set forward and backward graphs in AnalogVNN, more information in :doc:`inner_workings`
+       Note: "add_sequence" is used to create and set forward and backward graphs in AnalogVNN, more information in
+       {doc}`inner_workings`
 
-    #. To add the Reduce Precision, Normalization, and Noise before and after the main Linear layer, we can modify the "add_layer" function
-        .. code-block:: python
-
-            def add_layer(self, layer):
-                self.all_layers.append(self.norm_class())
-                self.all_layers.append(self.precision_class(precision=self.precision))
-                self.all_layers.append(self.noise_class(leakage=self.leakage, precision=self.precision))
-                self.all_layers.append(layer)
-                self.all_layers.append(self.noise_class(leakage=self.leakage, precision=self.precision))
-                self.all_layers.append(self.norm_class())
-                self.all_layers.append(self.precision_class(precision=self.precision))
-                self.all_layers.append(self.activation_class())
-                self.activation_class.initialise_(layer.weight)
-
-#. Creating an Analog Parameters Model for analog parameters (analog weights and biases)
-    .. code-block:: python
-
+    1. To add the Reduce Precision, Normalization, and Noise before and after the main Linear layer, we can modify the "
+       add_layer" function
+        ```python
+        def add_layer(self, layer):
+            self.all_layers.append(self.norm_class())
+            self.all_layers.append(self.precision_class(precision=self.precision))
+            self.all_layers.append(self.noise_class(leakage=self.leakage, precision=self.precision))
+            self.all_layers.append(layer)
+            self.all_layers.append(self.noise_class(leakage=self.leakage, precision=self.precision))
+            self.all_layers.append(self.norm_class())
+            self.all_layers.append(self.precision_class(precision=self.precision))
+            self.all_layers.append(self.activation_class())
+            self.activation_class.initialise_(layer.weight)
+        ```
+    1. Creating an Analog Parameters Model for analog parameters (analog weights and biases)
+        ```python
         class WeightModel(FullSequential):
             def __init__(self, norm_class, precision_class, precision, noise_class, leakage):
                 super(WeightModel, self).__init__()
@@ -57,12 +56,14 @@ To convert a digital model to its analog counterpart the following steps needs t
 
                 self.eval()
                 self.add_sequence(*self.all_layers)
+       ```
 
-    Note: Since the "WeightModel" will only be used for converting the data to analog data to be used in the main "LinearModel", we can use "eval()" to make sure the "WeightModel" is never been trained
+       Note: Since the "WeightModel" will only be used for converting the data to analog data to be used in the main "
+       LinearModel", we can use "eval()" to make sure the "WeightModel" is never been trained
 
-#. Simply getting data and setting up the model as we will normally do in PyTorch with some minor changes for automatic evaluations
-    .. code-block:: python
-
+1. Simply getting data and setting up the model as we will normally do in PyTorch with some minor changes for automatic
+   evaluations
+    ```python
         torch.backends.cudnn.benchmark = True
         device, is_cuda = is_cpu_cuda.is_using_cuda()
         print(f"Device: {device}")
@@ -100,21 +101,17 @@ To convert a digital model to its analog counterpart the following steps needs t
         nn_model.accuracy_function = cross_entropy_accuracy
         nn_model.compile(device=device)
         weight_model.compile(device=device)
-
-
-#. Using Analog Parameters Model to convert digital parameters to analog parameters
-    .. code-block:: python
-
+    ```
+4. Using Analog Parameters Model to convert digital parameters to analog parameters
+    ```python
         PseudoParameter.parametrize_module(nn_model, transformation=weight_model)
-
-#. Adding optimizer
-    .. code-block:: python
-
+    ```
+5. Adding optimizer
+    ```python
         nn_model.optimizer = optim.Adam(params=nn_model.parameters())
-
-#. Then you are good to go to train and test the model
-    .. code-block:: python
-
+    ```
+6. Then you are good to go to train and test the model
+    ```python
         # Training
         print(f"Starting Training...")
         for epoch in range(10):
@@ -129,5 +126,6 @@ To convert a digital model to its analog counterpart the following steps needs t
                         f' Testing Accuracy: {100. * test_accuracy:.0f}%\n'
             print(print_str)
         print("Run Completed Successfully...")
+    ```
 
-Full Sample code for this process can be found at :doc:`sample_code`
+Full Sample code for this process can be found at {doc}`sample_code`

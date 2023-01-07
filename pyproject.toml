@@ -3,13 +3,16 @@
 [build-system]
 # These are the assumed default build requirements from pip:
 # https://pip.pypa.io/en/stable/reference/pip/#pep-517-and-518-support
-requires = ["setuptools>=61.0.0", "wheel", "flit_core >=3.2,<4"]
-build-backend = "setuptools.build_meta"
-#build-backend = "flit_core.buildapi"
+requires = ["wheel", "setuptools>=61.0.0", "flit_core >=3.2,<4"]
+#build-backend = "setuptools.build_meta"
+build-backend = "flit_core.buildapi"
+
+[tool.flit.module]
+name = "analogvnn"
 
 [project]
 # $ pip install analogvnn
-name = "AnalogVNN"  # Required
+name = "analogvnn"  # Required
 version = "0.0.1"  # Required
 description = "A fully modular framework for modeling and optimizing analog/photonic neural networks"  # Optional
 readme = "README.md"
@@ -71,12 +74,38 @@ dependencies = [# Optional
 # Similar to `dependencies` above, these must be valid existing
 # projects.
 [project.optional-dependencies]
-dev = ["setuptools>=61.0.0"]
-#test = ["coverage"]
+dev = [
+    "setuptools>=61.0.0",
+    "build",
+    "twine",
+    "johnnydep"
+]
+research = [
+    "tensorflow",
+    "tensorboard",
+    "torchviz",
+    "matplotlib",
+    "tabulate",
+    "pillow",
+    "graphviz",
+    #    "python-graphviz",
+    "seaborn",
+    "natsort",
+]
+doc = [
+    "sphinx>=4.2.0",
+    "rst-to-myst[sphinx]",
+    "myst_parser",
+    "furo",
+    "sphinx-rtd-theme",
+    "sphinx-autoapi",
+]
+all = ["analogvnn[research,dev,doc]"]
 
 [project.urls]
 "Homepage" = "https://github.com/Vivswan/AnalogVNN"
 "Bug Reports" = "https://github.com/Vivswan/AnalogVNN/issues"
+"Documentation" = "https://analogvnn.readthedocs.io/en/latest/"
 #"Funding" = "https://vivswan.github.io/"
 "Say Thanks!" = "https://github.com/Vivswan"
 "Source" = "https://github.com/Vivswan/AnalogVNN"
@@ -92,3 +121,5 @@ dev = ["setuptools>=61.0.0"]
 # If there are data files included in your packages that need to be
 # installed, specify them here.
 #package-data = {"sample" = ["*.dat"]}
+[tool.setuptools]
+py-modules = ['analogvnn']

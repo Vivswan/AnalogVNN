@@ -44,7 +44,7 @@ class Sequential(Model):
         size = len(self)
         idx = operator.index(idx)
         if not -size <= idx < size:
-            raise IndexError('index.rst {} is out of range'.format(idx))
+            raise IndexError('index {} is out of range'.format(idx))
         idx %= size
         return next(islice(iterator, idx, None))
 
