@@ -28,12 +28,12 @@ release = __version__
 # General configuration
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 extensions = [
-    # 'sphinx.ext.autodoc',
-    # 'sphinx.ext.autosummary',
-    # 'sphinx.ext.doctest',
-    # 'sphinx.ext.intersphinx',
-    # 'sphinx.ext.todo',
-    # 'sphinx.ext.napoleon',
+    'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.doctest',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.todo',
+    'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
     # 'sphinx.ext.autosectionlabel',
     # 'sphinx.ext.duration',
@@ -61,7 +61,7 @@ templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 intersphinx_mapping = {
-    'python': ('https://docs.python.org/3.7', None),
+    "python": ("https://docs.python.org/3/", None),
     'sphinx': ('https://www.sphinx-doc.org/en/master', None),
     'markdown_it': ('https://markdown-it-py.readthedocs.io/en/latest', None),
     'numpy': ('https://numpy.org/doc/stable/', None),
@@ -76,7 +76,7 @@ intersphinx_mapping = {
         'https://www.tensorflow.org/probability/api_docs/python',
         'https://github.com/GPflow/tensorflow-intersphinx/raw/master/tfp_py_objects.inv'
     ),
-    'torch': ('https://pytorch.org/docs/1.13/', None),
+    "torch": ("https://pytorch.org/docs/stable/", None),
 
 }
 intersphinx_disabled_domains = ['std']
