@@ -21,14 +21,17 @@ extensions = [
     'myst_parser',
     'sphinx.ext.duration',
     'sphinx.ext.autosectionlabel',
-    'sphinx.ext.doctest',
+    # 'sphinx.ext.doctest',
     'sphinx.ext.autodoc',
-    'sphinx.ext.mathjax',
-    'sphinx.ext.todo',
-    'sphinx.ext.viewcode',
+    # 'sphinx.ext.autosummary',
+    # 'sphinx.ext.intersphinx',
+    # 'sphinx.ext.extlinks',
+    # 'sphinx.ext.mathjax',
+    # 'sphinx.ext.todo',
+    # 'sphinx.ext.viewcode',
     'sphinx_copybutton',
-    'notfound.extension',
     'autoapi.extension',
+    # 'notfound.extension',
 ]
 
 autoapi_dirs = ['../../analogvnn']
