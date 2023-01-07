@@ -4,6 +4,8 @@ There are three major new classes in AnalogVNN, which are as follows
 
 ## PseudoParameters
 
+class:{py:func}`analogvnn.parameter.PseudoParameter.PseudoParameter`
+
 "PseudoParameters" is a subclass of "Parameter" class of PyTorch.
 
 "PseudoParameters" class lets you convent a digital parameter to analog parameter by converting
@@ -37,5 +39,11 @@ OR
   ```
 
 ## Forward and Backward Graphs
+
+Graph class:{py:func}`analogvnn.graph.ModelGraph.ModelGraph`
+
+Forward Graph class:{py:func}`analogvnn.graph.ForwardGraph.ForwardGraph`
+
+Backward Graph class:{py:func}`analogvnn.graph.BackwardGraph.BackwardGraph`
 
 Documentation Coming Soon...
