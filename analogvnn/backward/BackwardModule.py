@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import abc
-from typing import Callable, Any, Optional, Sequence
+from typing import Callable, Any, Optional, Sequence, Tuple
 
 import torch
 from torch import nn, Tensor, autograd
@@ -51,7 +51,7 @@ class BackwardModule(abc.ABC):
             return ctx.backward_module._call_impl_forward(*args, **kwargs)
 
         @staticmethod
-        def backward(ctx: Any, *grad_outputs: Tensor) -> TENSORS:
+        def backward(ctx: Any, *grad_outputs: Tensor) -> Tuple[None, None, TENSORS]:
             """Backward pass of the autograd function.
 
             Args:
