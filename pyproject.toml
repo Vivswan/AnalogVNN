@@ -1,10 +1,7 @@
 # pyproject-build
 
 [build-system]
-# These are the assumed default build requirements from pip:
-# https://pip.pypa.io/en/stable/reference/pip/#pep-517-and-518-support
 requires = ["wheel", "setuptools>=61.0.0", "flit_core >=3.2,<4"]
-#build-backend = "setuptools.build_meta"
 build-backend = "flit_core.buildapi"
 
 [tool.flit.module]
@@ -12,8 +9,8 @@ name = "analogvnn"
 
 [project]
 # $ pip install analogvnn
-name = "analogvnn"  # Required
-version = "0.0.1"  # Required
+name = "analogvnn"
+version = "0.0.1"
 description = "A fully modular framework for modeling and optimizing analog/photonic neural networks"  # Optional
 readme = "README.md"
 requires-python = ">=3.7"
@@ -31,7 +28,7 @@ classifiers = [# Optional
     #   3 - Alpha
     #   4 - Beta
     #   5 - Production/Stable
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     # Indicate who your project is intended for
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
@@ -58,11 +55,12 @@ classifiers = [# Optional
 #
 # For an analysis of this field vs pip's requirements files see:
 # https://packaging.python.org/discussions/install-requires-vs-requirements/
-dependencies = [# Optional
+dependencies = [
     "dataclasses",
     "scipy",
     "numpy>=1.16.5",
-    "networkx"
+    "networkx",
+    "importlib_metadata",
 ]
 
 # List additional groups of dependencies here (e.g. development
@@ -88,7 +86,7 @@ research = [
     "tabulate",
     "pillow",
     "graphviz",
-    #    "python-graphviz",
+    #"python-graphviz",
     "seaborn",
     "natsort",
 ]
@@ -99,6 +97,8 @@ doc = [
     "furo",
     "sphinx-rtd-theme",
     "sphinx-autoapi",
+    "sphinx-copybutton",
+    "sphinx-notfound-page",
 ]
 all = ["analogvnn[research,dev,doc]"]
 
@@ -117,9 +117,5 @@ all = ["analogvnn[research,dev,doc]"]
 
 # This is configuration specific to the `setuptools` build backend.
 # If you are using a different build backend, you will need to change this.
-#[tool.setuptools]
-# If there are data files included in your packages that need to be
-# installed, specify them here.
-#package-data = {"sample" = ["*.dat"]}
 [tool.setuptools]
 py-modules = ['analogvnn']

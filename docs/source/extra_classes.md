@@ -15,14 +15,9 @@ RP(x) = sign(x * p) * max(\left\lfloor \left| x * p \right| \right\rfloor, \left
 ```
 
 where:
-
-x is the original number in full precision
-
-p is the analog precision of the input signal, output signal, or weights (p ∈ Natural Numbers, number of bits= log2(
-p+1))
-
-d is the divide parameter (0 ≤ d ≤ 1, default value = 0.5) which determines whether x is rounded to a discrete level
-higher or lower than the original value
+- x is the original number in full precision
+- p is the analog precision of the input signal, output signal, or weights (p ∈ Natural Numbers, number of bits=log2(p+1))
+- d is the divide parameter (0 ≤ d ≤ 1, default value = 0.5) which determines whether x is rounded to a discrete level higher or lower than the original value
 
 ### StochasticReducePrecision
 
@@ -38,12 +33,9 @@ f(x)  = \left\{ \begin{array}{cl}
 ```
 
 where:
-
-r is a uniformly distributed random number between 0 and 1
-
-p is the analog precision (p ∈ Natural Numbers, number of bits= log2(p+1))
-
-f(x) is the stochastic rounding function
+- r is a uniformly distributed random number between 0 and 1
+- p is the analog precision (p ∈ Natural Numbers, number of bits= log2(p+1))
+- f(x) is the stochastic rounding function
 
 ## Normalization
 
@@ -56,12 +48,9 @@ L^pNormM(x) = \frac{L^pNorm(x)}{max(\left| L^pNorm(x) \right|))}
 ```
 
 where:
-
-: x is the input weight matrix,
-
-i, j ... k are indexes of the matrix,
-
-p is a positive integer.
+- x is the input weight matrix,
+- i, j ... k are indexes of the matrix,
+- p is a positive integer.
 
 ### LPNormW
 
@@ -72,10 +61,8 @@ L^pNormWM(x) = \frac{L^pNormW(x)}{max(\left| L^pNormW(x) \right|))}
 ```
 
 where:
-
-: x is the input weight matrix,
-
-p is a positive integer.
+- x is the input weight matrix,
+- p is a positive integer.
 
 ### Clamp
 
@@ -88,8 +75,7 @@ p & : \ p \gt x
 ```
 
 where:
-
-p, q ∈ ℜ (p ≤ q, Default value for photonics p = −1 and q = 1)
+- p, q ∈ ℜ (p ≤ q, Default value for photonics p = −1 and q = 1)
 
 ## Noise
 
@@ -130,24 +116,15 @@ EP = 2 * CDF_{N_{0}} \left( - \frac{1}{2 * p} \right)
 ```
 
 where:
-
-EP is in the range \[0, 1\]
-
-δ is the Dirac Delta function
-
-RP is the Reduce Precision function (for the above equation, d=0.5)
-
-s is the step width of reduce precision function
-
-{math}`R_{RP}(a, b)` is {x ∈ \[a, b\] | RP (x) = x}
-
-PDF_x is the probability density function for the noise distribution, x
-
-CDF_x is the cumulative density function for the noise distribution, x
-
-N_x is the noise function around point x. (for Gaussian Noise, x = mean and for Poisson Noise, x = rate)
-
-a, b are the limits of the analog signal domain (for photonics a = −1 and b = 1)
+- EP is in the range \[0, 1\]
+- {math}`\delta` is the Dirac Delta function
+- RP is the Reduce Precision function (for the above equation, d=0.5)
+- s is the step width of reduce precision function
+- {math}`R_{RP}(a, b)` is {math}`\{x ∈ [a, b] | RP(x) = x\}`
+- {math}`PDF_x` is the probability density function for the noise distribution, x
+- {math}`CDF_x` is the cumulative density function for the noise distribution, x
+- {math}`N_x` is the noise function around point x. (for Gaussian Noise, x = mean and for Poisson Noise, x = rate)
+- a, b are the limits of the analog signal domain (for photonics a = −1 and b = 1)
 
 ### GaussianNoise
 
@@ -158,11 +135,7 @@ EP = 1 - erf \left( \frac{1}{2\sqrt{2} * \sigma * p} \right)
 ```
 
 where:
-
-sigma is the standard deviation of Gaussian Noise
-
-EP is the error probability (0 > EP > 1)
-
-erf is the Gauss Error Function
-
-p is precision
+- {math}`\sigma` is the standard deviation of Gaussian Noise
+- EP is the error probability (0 > EP > 1)
+- erf is the Gauss Error Function
+- p is precision

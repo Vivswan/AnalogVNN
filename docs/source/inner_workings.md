@@ -13,11 +13,13 @@ PseudoParameters requires a ParameterizingModel to parameterize the parameters (
 layer to get parameterized data
 
 PyTorch's ParameterizedParameters vs AnalogVNN's PseudoParameters:
-: - Similarity (Forward or Parameterizing the data):
-: Data -> ParameterizingModel -> Parameterized Data
+- Similarity (Forward or Parameterizing the data):
+    > Data -> ParameterizingModel -> Parameterized Data
 - Difference (Backward or Gradient Calculations):
-: - ParameterizedParameters: Parameterized Data -> ParameterizingModel -> Data
-- PseudoParameters: Parameterized Data -> Data
+  - ParameterizedParameters
+    > Parameterized Data -> ParameterizingModel -> Data
+  - PseudoParameters 
+    > Parameterized Data -> Data
 
 So, by using PseudoParameters class the gradients of the parameter are calculated in such a way that
 the ParameterizingModel was never present.

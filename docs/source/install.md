@@ -1,39 +1,21 @@
 # Installing AnalogVNN
 
-## Download and install Git
+This page describes how to install AnalogVNN.
 
-All development of gdshelper is done it Git. Even if you do not plan on contributing by your own, you will eventually
-need it. Download it from [git-scm.com](http://git-scm.com/downloads). Keep the default settings.
+### Installation
 
-## Download and install Python
-
-### CPython as Python distribution
-
-While you can basically use any Python 3 interpreter (at least Python 3.7, preferably the newest version), in this guide
-we use CPython by python.org. Head there now and
-[download](https://www.python.org/downloads/) the Windows installer. Make sure that the installer **adds CPython to PATH
-** and installs the Python package managment **pip**.
-
-### PyCharm as IDE
-
-One of the best Python IDEs is PyCharm which now also has a free community edition. Go and
-[get it](http://www.jetbrains.com/pycharm/).
-It's recommendable to install it via te [Jetbrains toolbox](https://www.jetbrains.com/toolbox/), as it simplifies
-upgrading Pycharm.
-
-You can directly start it after it is installed. On the first start it will ask you about your default theme and keymap.
-Change it to your own preference.
-
-#### Setting up Python in PyCharm
-
-Before doing any real work you will have to tell PyCharm which Python it should use. On the welcome screen, select
-`Configure`, then `Settings`. Add the Python interpreter in `Project Interpreters` and click
-on the gear in the upper right and then `Add`. There you can add the Python Interpreter by
-selecting `System Interpreter`.
-The right path should be already in the form.
+Install AnalogVNN (one fo the following ways):
+- Pip installation instructions:
+  - Install [PyTorch](https://pytorch.org/)
+  - Install AnalogVNN using [pip](https://pypi.org/project/analogvnn/)
+    ```bash
+      pip install analogvnn
+    ```
+- AnalogVNN can be downloaded at ([GitHub](https://github.com/Photonics-Pitt-Org/AnalogVNN)) or creating a
+fork of it.
 
 Install the required dependencies:
-: - PyTorch
+- PyTorch
 - dataclasses
 - scipy
 - numpy
@@ -42,12 +24,7 @@ Install the required dependencies:
 - graphviz (optional)
 - python-graphviz (optional)
 
-Install AnalogVNN (one fo the following ways):
-: - Finally AnalogVNN can be downloaded at ([GitHub](https://github.com/Photonics-Pitt-Org/AnalogVNN)) or creating a
-fork of it.
-- Pip installation instructions \[coming soon...\]
+### Finish
 
-##### Finish
-
-That's it, you are all set to simulate analog neural networks. Head over to the {doc}`tutorial` and look over the
-{doc}`sample_code`.
+That's it, you are all set to simulate analog neural networks. 
+Head over to the {doc}`tutorial` and look over the {doc}`sample_code`.

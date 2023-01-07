@@ -5,6 +5,7 @@ torchaudio
 numpy>=1.16.5
 scipy
 networkx
+importlib_metadata
 
 # Development
 setuptools==65.6.3
@@ -33,3 +34,5 @@ myst_parser
 furo
 sphinx-rtd-theme
 sphinx-autoapi
+sphinx-copybutton
+sphinx-notfound-page
