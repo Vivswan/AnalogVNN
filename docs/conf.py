@@ -28,7 +28,6 @@ release = __version__
 # General configuration
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 extensions = [
-    'autoapi.extension',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.doctest',
@@ -43,6 +42,7 @@ extensions = [
     'notfound.extension',
     'sphinx_inline_tabs',
     'sphinxext.opengraph',
+    'autoapi.extension',
     'myst_parser',
 ]
 
