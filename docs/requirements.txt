@@ -1,8 +1,0 @@
-# Docs
-sphinx>=4.2.0
-sphinx-autobuild
-rst-to-myst[sphinx]
-myst_parser
-furo
-sphinx-rtd-theme
-sphinx-autoapi
