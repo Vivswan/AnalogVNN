@@ -28,8 +28,8 @@ release = __version__
 # General configuration
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 extensions = [
-    'sphinx.ext.viewcode',
     'autoapi.extension',
+    'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
