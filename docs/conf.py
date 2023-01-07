@@ -28,26 +28,34 @@ release = __version__
 # General configuration
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 extensions = [
-    'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
     'sphinx.ext.napoleon',
-    # 'sphinx.ext.viewcode',
+    'sphinx.ext.viewcode',
     # 'sphinxcontrib.katex',
     'sphinx.ext.autosectionlabel',
     'sphinx.ext.duration',
+
     'sphinx_copybutton',
     'notfound.extension',
     'sphinx_inline_tabs',
     'sphinxext.opengraph',
+
+    'sphinx.ext.autodoc',
+    'sphinx.ext.inheritance_diagram',
     'autoapi.extension',
+
     'myst_parser',
 ]
 
 autosummary_generate = True
 autoapi_dirs = ['../analogvnn']
+autoapi_modules = {'analogvnn': {
+    'override': False,
+    'output': 'auto'
+}}
 autoapi_type = 'python'
 autoapi_add_toctree_entry = True
 autoapi_member_order = 'groupwise'
