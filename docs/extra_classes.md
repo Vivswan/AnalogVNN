@@ -8,6 +8,8 @@ Reduce Precision classes are used to reduce precision of an input to some given 
 
 ### ReducePrecision
 
+class: {py:class}`analogvnn.nn.precision.ReducePrecision.ReducePrecision`
+
 Reduce Precision uses the following function to reduce precision of the input value
 
 ```{math}
@@ -15,11 +17,16 @@ RP(x) = sign(x * p) * max(\left\lfloor \left| x * p \right| \right\rfloor, \left
 ```
 
 where:
+
 - x is the original number in full precision
-- p is the analog precision of the input signal, output signal, or weights (p ∈ Natural Numbers, number of bits=log2(p+1))
-- d is the divide parameter (0 ≤ d ≤ 1, default value = 0.5) which determines whether x is rounded to a discrete level higher or lower than the original value
+- p is the analog precision of the input signal, output signal, or weights (p ∈ Natural Numbers, number of bits=log2(
+  p+1))
+- d is the divide parameter (0 ≤ d ≤ 1, default value = 0.5) which determines whether x is rounded to a discrete level
+  higher or lower than the original value
 
 ### StochasticReducePrecision
+
+class: {py:class}`analogvnn.nn.precision.StochasticReducePrecision.StochasticReducePrecision`
 
 Reduce Precision uses the following probabilistic function to reduce precision of the input value
 
@@ -33,6 +40,7 @@ f(x)  = \left\{ \begin{array}{cl}
 ```
 
 where:
+
 - r is a uniformly distributed random number between 0 and 1
 - p is the analog precision (p ∈ Natural Numbers, number of bits= log2(p+1))
 - f(x) is the stochastic rounding function
@@ -41,6 +49,8 @@ where:
 
 ### LPNorm
 
+class: {py:class}`analogvnn.nn.normalize.LPNorm.LPNorm`
+
 ```{math}
 L^pNorm(x) = \left[ {x}_{ij..k} \to \frac{{x}_{ij..k}}{\sqrt[p]{\sum_{j..k}^{} \left| {x}_{ij..k} \right|^p}} \right]
 
@@ -48,11 +58,14 @@ L^pNormM(x) = \frac{L^pNorm(x)}{max(\left| L^pNorm(x) \right|))}
 ```
 
 where:
+
 - x is the input weight matrix,
 - i, j ... k are indexes of the matrix,
 - p is a positive integer.
 
 ### LPNormW
+
+class: {py:class}`analogvnn.nn.normalize.LPNorm.LPNormW`
 
 ```{math}
 L^pNormW(x) = \frac{x}{\left\| x \right\|_p} = \frac{x}{\sqrt[p]{\sum_{}^{} \left| x \right|^p}}
@@ -61,10 +74,13 @@ L^pNormWM(x) = \frac{L^pNormW(x)}{max(\left| L^pNormW(x) \right|))}
 ```
 
 where:
+
 - x is the input weight matrix,
 - p is a positive integer.
 
 ### Clamp
+
+class: {py:class}`analogvnn.nn.normalize.Clamp.Clamp`
 
 ```{math}
 Clamp_{pq}(x) = \left\{ \begin{array}{cl}
@@ -128,6 +144,8 @@ where:
 
 ### GaussianNoise
 
+class: {py:class}`analogvnn.nn.noise.GaussianNoise.GaussianNoise`
+
 ```{math}
 EP = 1 - erf \left( \frac{1}{2\sqrt{2} * \sigma * p} \right)
 
@@ -135,6 +153,7 @@ EP = 1 - erf \left( \frac{1}{2\sqrt{2} * \sigma * p} \right)
 ```
 
 where:
+
 - {math}`\sigma` is the standard deviation of Gaussian Noise
 - EP is the error probability (0 > EP > 1)
 - erf is the Gauss Error Function

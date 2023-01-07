@@ -26,7 +26,7 @@ tutorial
 extra_classes
 inner_workings
 changelog
-autoapi/analogvnn/index
+autoapi/index
 
 ```
 
