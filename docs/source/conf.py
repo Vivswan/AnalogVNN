@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from datetime import date
+
 from analogvnn import __version__
 
 # Configuration file for the Sphinx documentation builder.
@@ -22,9 +23,6 @@ extensions = [
     'sphinx.ext.autosectionlabel',
     'sphinx.ext.doctest',
     'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.extlinks',
     'sphinx.ext.mathjax',
     'sphinx.ext.todo',
     'sphinx.ext.viewcode',
