@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import abc
 import typing
-from typing import Dict, Union, List, Tuple, TypeVar
+from typing import Dict, Union, List, Tuple
 
 import networkx as nx
 
@@ -69,14 +69,14 @@ class AcyclicDirectedGraph(abc.ABC):
         """
         raise NotImplementedError
 
-    def add_connection(self, *args: GRAPH_NODE_TYPE) -> AcyclicDirectedGraphType:
+    def add_connection(self, *args: GRAPH_NODE_TYPE):
         """Add a connection between nodes.
 
         Args:
             *args: The nodes.
 
         Returns:
-            AcyclicDirectedGraphType: self.
+            AcyclicDirectedGraph: self.
         """
         for i in range(1, len(args)):
             self.add_edge(args[i - 1], args[i])
@@ -90,7 +90,7 @@ class AcyclicDirectedGraph(abc.ABC):
             in_kwarg: Union[None, str, bool] = None,
             out_arg: Union[None, int, bool] = None,
             out_kwarg: Union[None, str, bool] = None
-    ) -> AcyclicDirectedGraphType:
+    ):
         """Add an edge to the graph.
 
         Args:
@@ -102,7 +102,7 @@ class AcyclicDirectedGraph(abc.ABC):
             out_kwarg (Union[None, str, bool]): The output keyword argument.
 
         Returns:
-            AcyclicDirectedGraphType: self.
+            AcyclicDirectedGraph: self.
         """
         attr = self.check_edge_parameters(in_arg, in_kwarg, out_arg, out_kwarg)
         existing_edges = self.graph.get_edge_data(u_of_edge, v_of_edge)
@@ -260,14 +260,14 @@ class AcyclicDirectedGraph(abc.ABC):
 
         return label
 
-    def compile(self, is_static: bool = True) -> AcyclicDirectedGraphType:
+    def compile(self, is_static: bool = True):
         """Compile the graph.
 
         Args:
             is_static (bool): If True, the graph will be compiled as a static graph.
 
         Returns:
-            AcyclicDirectedGraphType: The compiled graph.
+            AcyclicDirectedGraph: The compiled graph.
         """
         for i in nx.simple_cycles(self.graph):
             raise Exception(f"There is cyclic loop between {i}")
@@ -443,6 +443,3 @@ class AcyclicDirectedGraph(abc.ABC):
             str: The (possibly relative) path of the rendered file.
         """
         return to_graphviz_digraph(self.graph, real_label=real_label).render(*args, **kwargs)
-
-
-AcyclicDirectedGraphType = TypeVar('AcyclicDirectedGraphType', bound=AcyclicDirectedGraph)

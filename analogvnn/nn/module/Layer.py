@@ -7,7 +7,7 @@ from torch import nn, Tensor
 
 from analogvnn.backward.BackwardFunction import BackwardFunction
 from analogvnn.backward.BackwardModule import BackwardModule
-from analogvnn.graph.ArgsKwargs import ArgsKwargs
+from analogvnn.graph.ArgsKwargs import ArgsKwargs, ArgsKwargsOutput
 from analogvnn.utils.common_types import TENSORS
 
 if TYPE_CHECKING:
@@ -102,11 +102,11 @@ class Layer(nn.Module):
             self.graphs.use_autograd_graph = use_autograd_graph
 
     @property
-    def inputs(self) -> Union[None, ArgsKwargs]:
+    def inputs(self) -> ArgsKwargsOutput:
         """Inputs of the layer.
 
         Returns:
-            Union[None, ArgsKwargs]: inputs.
+            ArgsKwargsOutput: inputs.
         """
         return ArgsKwargs.from_args_kwargs_object(self._inputs)
 

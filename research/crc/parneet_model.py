@@ -252,7 +252,7 @@ def run_parneet_model(parameters: RunParametersParneet):
 
     if parameters.device is not None:
         is_cpu_cuda.set_device(parameters.device)
-    device, is_cuda = is_cpu_cuda.is_using_cuda()
+    device, is_cuda = is_cpu_cuda.is_using_cuda
     parameters.device = device
 
     if parameters.data_folder is None:

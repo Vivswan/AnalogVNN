@@ -51,7 +51,7 @@ class Model(Layer):
     accuracy_function: Optional[Callable]
     device: torch.device
 
-    def __init__(self, tensorboard_log_dir=None, device=is_cpu_cuda.get_device()):
+    def __init__(self, tensorboard_log_dir=None, device=is_cpu_cuda.device):
         """Create a new model.
 
         Args:

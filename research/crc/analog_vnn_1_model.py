@@ -303,8 +303,8 @@ def run_analog_vnn1_model(parameters: RunParametersAnalogVNN1):
     torch.backends.cudnn.benchmark = True
 
     if parameters.device is not None:
-        is_cpu_cuda.set_device(parameters.device)
-    device, is_cuda = is_cpu_cuda.is_using_cuda()
+        is_cpu_cuda.set_device(str(parameters.device))
+    device, is_cuda = is_cpu_cuda.is_using_cuda
     parameters.device = device
 
     if parameters.data_folder is None:

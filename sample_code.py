@@ -154,7 +154,7 @@ def run_linear3_model():
     """
     torch.backends.cudnn.benchmark = True
     torch.manual_seed(0)
-    device, is_cuda = is_cpu_cuda.is_using_cuda()
+    device, is_cuda = is_cpu_cuda.is_using_cuda
     print(f"Device: {device}")
     print()
 
