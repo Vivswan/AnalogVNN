@@ -165,7 +165,7 @@ def run_linear3_model():
     if not data_path.exists():
         data_path.mkdir()
 
-    device, is_cuda = is_cpu_cuda.is_using_cuda()
+    device, is_cuda = is_cpu_cuda.is_using_cuda
     print(f"Device: {device}")
     print()
 

@@ -15,9 +15,10 @@ class AccumulateGrad:
 
     Attributes:
         module (nn.Module): Module to accumulate gradients for.
-        locations (Dict[str, Dict[str, Union[None, bool, int, str, GRAPH_NODE_TYPE]]]): input/output connections.
+        input_output_connections (Dict[str, Dict[str, Union[None, bool, int, str, GRAPH_NODE_TYPE]]]): input/output
+        connections.
     """
-    locations: Dict[str, Dict[str, Union[None, bool, int, str, GRAPH_NODE_TYPE]]]
+    input_output_connections: Dict[str, Dict[str, Union[None, bool, int, str, GRAPH_NODE_TYPE]]]
     module: Union[nn.Module, Callable]
 
     def __init__(self, module: Union[nn.Module, Callable]):
@@ -26,7 +27,7 @@ class AccumulateGrad:
         Args:
             module (Union[nn.Module, Callable]): Module from which to accumulate gradients.
         """
-        self.locations = {}
+        self.input_output_connections = {}
         self.module = module
 
     def __repr__(self):
@@ -38,7 +39,7 @@ class AccumulateGrad:
         # return f"AccumulateGrad"
         return f"AccumulateGrad({self.module})"
 
-    def grad(
+    def __call__(
             self,
             grad_outputs_args_kwargs: ArgsKwargs,
             forward_input_output_graph: Dict[GRAPH_NODE_TYPE, InputOutput]
@@ -55,7 +56,7 @@ class AccumulateGrad:
         grad_inputs_args = {}
         grad_inputs_kwargs = {}
         for key, grad_output in grad_outputs_args_kwargs.kwargs.items():
-            location = self.locations[key]
+            location = self.input_output_connections[key]
             forward_out_arg: Union[None, int, bool] = location['in_arg']
             forward_out_kwarg: Union[None, str, bool] = location['in_kwarg']
             forward_in_arg: Union[None, int, bool] = location['out_arg']
@@ -136,4 +137,5 @@ class AccumulateGrad:
             kwargs=grad_inputs_kwargs
         )
 
-    __call__ = grad
+    grad = __call__
+    """Alias for __call__."""

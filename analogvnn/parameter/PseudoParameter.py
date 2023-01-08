@@ -33,7 +33,7 @@ class PseudoParameterModule(nn.Module):
         self.original = original
         self._transformed = transformed
 
-    def _call_impl(self, *args, **kwargs) -> nn.Parameter:
+    def __call__(self, *args, **kwargs) -> nn.Parameter:
         """Transforms the parameter by calling the __call__ method of the PseudoParameter.
 
         Args:
@@ -45,10 +45,13 @@ class PseudoParameterModule(nn.Module):
         """
         return self.original()
 
-    __call__ = _call_impl
-    forward = _call_impl
+    forward = __call__
+    """Alias for __call__"""
 
-    def right_inverse(self, data: Tensor) -> PseudoParameterModule:
+    _call_impl = __call__
+    """Alias for __call__"""
+
+    def set_original_data(self, data: Tensor) -> PseudoParameterModule:
         """set data to the original parameter.
 
         Args:
@@ -59,6 +62,9 @@ class PseudoParameterModule(nn.Module):
         """
         self.original.data = data
         return self
+
+    right_inverse = set_original_data
+    """Alias for set_original_data."""
 
 
 class PseudoParameter(Parameter):

@@ -67,7 +67,7 @@ To convert a digital model to its analog counterpart the following steps needs t
    evaluations
     ```python
     torch.backends.cudnn.benchmark = True
-    device, is_cuda = is_cpu_cuda.is_using_cuda()
+    device, is_cuda = is_cpu_cuda.is_using_cuda
     print(f"Device: {device}")
     print()
 
