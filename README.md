@@ -4,6 +4,16 @@ AnalogVNN Paper: [https://arxiv.org/abs/2210.10048](https://arxiv.org/abs/2210.1
 
 Documentation: [https://analogvnn.readthedocs.io/](https://analogvnn.readthedocs.io/)
 
+Cite: Vivswan Shah, and Nathan Youngblood. "AnalogVNN: A fully modular framework for modeling and optimizing photonic neural
+networks." *arXiv preprint arXiv:2210.10048 (2022)*.
+
+Installation:
+- Install [PyTorch](https://pytorch.org/)
+- Install AnanlogVNN using [pip](https://pypi.org/project/analogvnn/)
+```bash
+pip install analogvnn
+```
+
 AnalogVNN is a simulation framework built on PyTorch which can simulate the effects of
 optoelectronic noise, limited precision, and signal normalization present in photonic
 neural network accelerators. We use this framework to train and optimize linear and

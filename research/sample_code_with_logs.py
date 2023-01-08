@@ -1,3 +1,8 @@
+import json
+import time
+from pathlib import Path
+
+import numpy as np
 import torch.backends.cudnn
 import torchvision
 from torch import optim, nn
@@ -12,6 +17,8 @@ from analogvnn.nn.normalize.Clamp import Clamp
 from analogvnn.nn.precision.ReducePrecision import ReducePrecision
 from analogvnn.parameter.PseudoParameter import PseudoParameter
 from analogvnn.utils.is_cpu_cuda import is_cpu_cuda
+from analogvnn.utils.summary import summary
+from research.utils.save_graph import save_graph
 
 
 def load_vision_dataset(dataset, path, batch_size, is_cuda=False, grayscale=True):
@@ -154,6 +161,10 @@ def run_linear3_model():
     """
     torch.backends.cudnn.benchmark = True
     torch.manual_seed(0)
+    data_path = Path("C:/X/_data").joinpath(str(int(time.time())))
+    if not data_path.exists():
+        data_path.mkdir()
+
     device, is_cuda = is_cpu_cuda.is_using_cuda()
     print(f"Device: {device}")
     print()
@@ -162,7 +173,7 @@ def run_linear3_model():
     print(f"Loading Data...")
     train_loader, test_loader, input_shape, classes = load_vision_dataset(
         dataset=torchvision.datasets.MNIST,
-        path="_data/",
+        path="C:/X/_data/",
         batch_size=128,
         is_cuda=is_cuda
     )
@@ -188,17 +199,49 @@ def run_linear3_model():
     # Setting Model Parameters
     nn_model.loss_function = nn.CrossEntropyLoss()
     nn_model.accuracy_function = cross_entropy_accuracy
+    # nn_model.use_autograd_graph = True
+    # weight_model.use_autograd_graph = True
     nn_model.compile(device=device)
     weight_model.compile(device=device)
+    nn_model.create_tensorboard(str(data_path.joinpath("tensorboard")))
+    nn_model.to(device=device)
+    weight_model.to(device=device)
 
     PseudoParameter.parametrize_module(nn_model, transformation=weight_model)
     nn_model.optimizer = optim.Adam(params=nn_model.parameters())
+
+    print(f"Creating Log File...")
+    with open(data_path.joinpath("logfile.log"), "a+") as file:
+        file.write(str(nn_model.optimizer) + "\n\n")
+
+        file.write(str(nn_model) + "\n\n")
+        file.write(str(weight_model) + "\n\n")
+        file.write(summary(nn_model, input_size=tuple(input_shape[1:])) + "\n\n")
+        file.write(summary(weight_model, input_size=(1, 1)) + "\n\n")
+
+    data = next(iter(train_loader))[0]
+
+    print(f"Saving Graphs...")
+    save_graph(data_path.joinpath(f"nn_model"), nn_model, data)
+    save_graph(data_path.joinpath(f"weight_model"), weight_model, torch.ones((1, 1)))
+    nn_model.tensorboard.add_graph(train_loader)
+    loss_accuracy = {
+        "train_loss": [],
+        "train_accuracy": [],
+        "test_loss": [],
+        "test_accuracy": [],
+    }
 
     # Training
     print(f"Starting Training...")
     for epoch in range(10):
         train_loss, train_accuracy = nn_model.train_on(train_loader, epoch=epoch)
         test_loss, test_accuracy = nn_model.test_on(test_loader, epoch=epoch)
+
+        loss_accuracy["train_loss"].append(train_loss)
+        loss_accuracy["train_accuracy"].append(train_accuracy)
+        loss_accuracy["test_loss"].append(test_loss)
+        loss_accuracy["test_accuracy"].append(test_accuracy)
 
         str_epoch = str(epoch + 1).zfill(1)
         print_str = f'({str_epoch})' \
@@ -207,7 +250,29 @@ def run_linear3_model():
                     f' Testing Loss: {test_loss:.4f},' \
                     f' Testing Accuracy: {100. * test_accuracy:.0f}%\n'
         print(print_str)
+
+        with open(data_path.joinpath("logfile.log"), "a+") as file:
+            file.write(print_str)
     print("Run Completed Successfully...")
+
+    metric_dict = {
+        "train_loss": loss_accuracy["train_loss"][-1],
+        "train_accuracy": loss_accuracy["train_accuracy"][-1],
+        "test_loss": loss_accuracy["test_loss"][-1],
+        "test_accuracy": loss_accuracy["test_accuracy"][-1],
+        "min_train_loss": np.min(loss_accuracy["train_loss"]),
+        "max_train_accuracy": np.max(loss_accuracy["train_accuracy"]),
+        "min_test_loss": np.min(loss_accuracy["test_loss"]),
+        "max_test_accuracy": np.max(loss_accuracy["test_accuracy"]),
+    }
+    nn_model.tensorboard.tensorboard.add_hparams(
+        metric_dict=metric_dict
+    )
+
+    with open(data_path.joinpath("logfile.log"), "a+") as file:
+        file.write(json.dumps(metric_dict, sort_keys=True) + "\n\n")
+        file.write("Run Completed Successfully...")
+    print()
 
 
 if __name__ == '__main__':
