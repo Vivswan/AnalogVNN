@@ -1,3 +1,3 @@
-```{include} ../changelog.md
+```{include} ../CHANGELOG.md
 :relative-images:
 ```
