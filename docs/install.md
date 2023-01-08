@@ -12,7 +12,7 @@ Install AnalogVNN (one fo the following ways):
     ```bash
       pip install analogvnn
     ```
-- AnalogVNN can be downloaded at ([GitHub](https://github.com/Photonics-Pitt-Org/AnalogVNN)) or creating a
+- AnalogVNN can be downloaded at ([GitHub](https://github.com/Vivswan/AnalogVNN)) or creating a
   fork of it.
 
 ## Dependencies

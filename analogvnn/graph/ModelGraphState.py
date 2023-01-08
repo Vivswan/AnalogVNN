@@ -74,13 +74,13 @@ class ModelGraphState:
             RuntimeError: if the state is not ready for backward pass and exception is True.
         """
         if exception:
-            if self.output is None:
+            if self.outputs is None:
                 raise RuntimeError("output is not set.")
 
             if self._loss is None:
                 raise RuntimeError("loss is not set.")
         else:
-            return not (self.output is None or self._loss is None)
+            return not (self.outputs is None or self._loss is None)
 
     @property
     def inputs(self) -> Optional[ArgsKwargs]:
@@ -94,7 +94,7 @@ class ModelGraphState:
         return self.forward_input_output_graph[self.INPUT].inputs
 
     @property
-    def output(self) -> Optional[ArgsKwargs]:
+    def outputs(self) -> Optional[ArgsKwargs]:
         """Get the output.
 
         Returns:

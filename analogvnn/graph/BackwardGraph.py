@@ -42,7 +42,7 @@ class BackwardGraph(AcyclicDirectedGraph):
         else:
             grad_outputs = torch.autograd.grad(
                 outputs=self.graph_state.loss,
-                inputs=self.graph_state.output.args,
+                inputs=self.graph_state.outputs.args,
                 grad_outputs=gradient,
                 retain_graph=True
             )
@@ -109,7 +109,7 @@ class BackwardGraph(AcyclicDirectedGraph):
                             "real_label": " ".join(attr["label"].split(" ")[:-1] + ["{" + uuid_str + "}"]),
                             "label": attr["label"]
                         })
-                        akc.locations[uuid_str] = {
+                        akc.input_output_connections[uuid_str] = {
                             **attr,
                             "from": u,
                         }
@@ -123,7 +123,7 @@ class BackwardGraph(AcyclicDirectedGraph):
                             "real_label": "[] -> {" + uuid_str + "}",
                             "label": "[] -> []",
                         })
-                        akc.locations[uuid_str] = {
+                        akc.input_output_connections[uuid_str] = {
                             **attr,
                             "in_kwarg": None,
                             "out_kwarg": None,
@@ -138,7 +138,7 @@ class BackwardGraph(AcyclicDirectedGraph):
                             "real_label": "{} -> {" + uuid_str + "}",
                             "label": "{} -> {}",
                         })
-                        akc.locations[uuid_str] = {
+                        akc.input_output_connections[uuid_str] = {
                             **attr,
                             "in_arg": None,
                             "out_arg": None,
@@ -212,7 +212,7 @@ class BackwardGraph(AcyclicDirectedGraph):
                 # self.print_inputs_outputs(input_output_graph, module)
                 continue
 
-            outputs = self._gradient_wrapper(
+            outputs = self._calculate_gradients(
                 module,
                 input_output_graph[module]
             )
@@ -221,7 +221,7 @@ class BackwardGraph(AcyclicDirectedGraph):
 
         return input_output_graph
 
-    def _gradient_wrapper(
+    def _calculate_gradients(
             self,
             module: Union[AccumulateGrad, Layer, BackwardModule, Callable],
             grad_outputs: InputOutput
