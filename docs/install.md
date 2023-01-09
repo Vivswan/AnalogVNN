@@ -23,21 +23,34 @@ OR
 - AnalogVNN can be downloaded at ([GitHub](https://github.com/Vivswan/AnalogVNN)) or creating a
   fork of it.
 
+<br>
+
 ## Dependencies
 
 Install the required dependencies:
 
 - PyTorch
+  - Manual installation required: [https://pytorch.org/](https://pytorch.org/)
 - dataclasses
 - scipy
 - numpy
 - networkx
 - (optional) tensorboard
+  - For using tensorboard to visualize the network, with class
+    {py:class}`analogvnn.utils.TensorboardModelLog.TensorboardModelLog`
 - (optional) torchinfo
+  - For adding summary to tensorboard by useing
+    {py:func}`analogvnn.utils.TensorboardModelLog.TensorboardModelLog.add_summary`
 - (optional) graphviz
+  - For saving and rendering forward and backward graphs using
+    {py:func}`analogvnn.graph.AcyclicDirectedGraph.AcyclicDirectedGraph.render`
 - (optional) python-graphviz
+  - For saving and rendering forward and backward graphs
+    {py:func}`analogvnn.graph.AcyclicDirectedGraph.AcyclicDirectedGraph.render`
 
-## Finish
+<br>
+<br>
 
 That's it, you are all set to simulate analog neural networks.
+
 Head over to the {doc}`tutorial` and look over the {doc}`sample_code`.

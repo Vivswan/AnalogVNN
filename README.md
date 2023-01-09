@@ -17,6 +17,8 @@ pip install analogvnn
 
 Documentation: [https://analogvnn.readthedocs.io/](https://analogvnn.readthedocs.io/)
 
+![3 Layered Linear Photonic Analog Neural Network](docs/_static/analogvnn_model.png)
+
 ## Abstract
 
 **AnalogVNN** is a simulation framework built on PyTorch which can simulate the effects of

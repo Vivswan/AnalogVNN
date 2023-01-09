@@ -15,7 +15,7 @@ DOI: [10.48550/arXiv.2210.10048](https://doi.org/10.48550/arXiv.2210.10048)
 }
 ```
 
-### In textual form:
+### In textual form
 
 ```text
 Vivswan Shah, and Nathan Youngblood. "AnalogVNN: A fully modular framework for modeling 
