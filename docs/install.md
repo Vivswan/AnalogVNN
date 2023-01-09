@@ -33,6 +33,7 @@ Install the required dependencies:
 - numpy
 - networkx
 - (optional) tensorboard
+- (optional) torchinfo
 - (optional) graphviz
 - (optional) python-graphviz
 

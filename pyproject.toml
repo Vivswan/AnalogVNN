@@ -83,6 +83,7 @@ research = [
     "tensorflow",
     "tensorboard",
     "torchviz",
+    "torchinfo",
     "matplotlib",
     "tabulate",
     "pillow",
