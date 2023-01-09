@@ -166,7 +166,7 @@ class Layer(nn.Module):
         elif callable(backward_class):
             self._backward_module = BackwardFunction(backward_class, self)
         else:
-            raise Exception(f"Backward Module is not set for '{self}'")
+            raise TypeError(f"Backward Module is not set for '{self}'")
 
         return self
 

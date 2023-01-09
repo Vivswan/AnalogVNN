@@ -53,6 +53,9 @@ class TensorboardModelLog:
 
         Returns:
             TensorboardModelLog: self.
+
+        Raises:
+            ValueError: if the log directory is invalid.
         """
 
         # https://github.com/tensorflow/tensorboard/pull/6135
@@ -64,7 +67,7 @@ class TensorboardModelLog:
         if os.path.isdir(log_dir):
             self.tensorboard = SummaryWriter(log_dir=log_dir)
         else:
-            raise Exception(f'"{log_dir}" is not a directory.')
+            raise ValueError(f"Log directory {log_dir} does not exist.")
         return self
 
     def _add_layer_data(self, epoch: int = None):
@@ -112,9 +115,6 @@ class TensorboardModelLog:
 
         Returns:
             TensorboardModelLog: self.
-
-        Raises:
-            ImportError: if torchinfo is not installed.
         """
         if model is None:
             model = self.model
@@ -155,7 +155,7 @@ class TensorboardModelLog:
             TensorboardModelLog: self.
 
         Raises:
-            ImportError: if torchinfo is not installed.
+            ImportError: if torchinfo (https://github.com/tyleryep/torchinfo) is not installed.
         """
 
         try:

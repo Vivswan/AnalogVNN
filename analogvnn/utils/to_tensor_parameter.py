@@ -9,7 +9,7 @@ __all__ = ['to_float_tensor', 'to_nongrad_parameter']
 def to_float_tensor(*args) -> Tuple[Union[torch.Tensor, None], ...]:
     """Converts the given arguments to `torch.Tensor` of type `torch.float32`.
 
-    The tensors are not trainable.
+    The returned tensors are not trainable.
 
     Args:
         *args: the arguments to convert.
@@ -23,7 +23,7 @@ def to_float_tensor(*args) -> Tuple[Union[torch.Tensor, None], ...]:
 def to_nongrad_parameter(*args) -> Tuple[Union[nn.Parameter, None], ...]:
     """Converts the given arguments to `nn.Parameter` of type `torch.float32`.
 
-    The parameters are not trainable.
+    The returned parameters are not trainable.
 
     Args:
         *args: the arguments to convert.

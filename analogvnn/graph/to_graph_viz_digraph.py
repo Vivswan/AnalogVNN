@@ -15,15 +15,6 @@ __all__ = ['to_graphviz_digraph']
 def to_graphviz_digraph(from_graph: networkx.DiGraph, real_label: bool = False) -> graphviz.Digraph:
     """Returns a pygraphviz graph from a NetworkX graph N.
 
-    Examples:
-        >>> K5 = networkx.complete_graph(5)
-        >>> A = networkx.nx_agraph.to_agraph(K5)
-
-    Notes:
-        If N has an dict N.graph_attr an attempt will be made first
-        to copy properties attached to the graph (see from_agraph)
-        and then updated with the calling arguments if any.
-
     Args:
         from_graph (networkx.DiGraph): the graph to convert.
         real_label (bool): True to use the real label.
@@ -32,8 +23,8 @@ def to_graphviz_digraph(from_graph: networkx.DiGraph, real_label: bool = False) 
         graphviz.Digraph: the converted graph.
 
     Raises:
-        ImportError: if pygraphviz is not available.
-        ImportError: if graphviz is not available.
+        ImportError: if pygraphviz (https://pygraphviz.github.io/) is not available.
+        ImportError: if graphviz (https://pygraphviz.github.io/) is not available.
     """
     try:
         import pygraphviz
