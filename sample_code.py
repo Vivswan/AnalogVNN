@@ -19,7 +19,7 @@ def load_vision_dataset(dataset, path, batch_size, is_cuda=False, grayscale=True
     Loads a vision dataset with optional grayscale conversion and CUDA support.
 
     Args:
-        dataset (Type[torchvision.datasetsVisionDataset]): the dataset class to use (e.g. torchvision.datasets.MNIST)
+        dataset (Type[torchvision.datasets.VisionDataset]): the dataset class to use (e.g. torchvision.datasets.MNIST)
         path (str): the path to the dataset files
         batch_size (int): the batch size to use for the data loader
         is_cuda (bool): a flag indicating whether to use CUDA support (defaults to False)
@@ -77,7 +77,7 @@ def cross_entropy_accuracy(output, target) -> float:
 
 class LinearModel(FullSequential):
     def __init__(self, activation_class, norm_class, precision_class, precision, noise_class, leakage):
-        """ Linear Model with 3 dense nn
+        """Initialise LinearModel with 3 Dense layers
 
         Args:
             activation_class: Activation Class
@@ -126,7 +126,7 @@ class LinearModel(FullSequential):
 
 class WeightModel(FullSequential):
     def __init__(self, norm_class, precision_class, precision, noise_class, leakage):
-        """
+        """Initialize the WeightModel
 
         Args:
             norm_class: Normalization Class

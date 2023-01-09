@@ -19,5 +19,5 @@ DOI: [10.48550/arXiv.2210.10048](https://doi.org/10.48550/arXiv.2210.10048)
 
 ```text
 Vivswan Shah, and Nathan Youngblood. "AnalogVNN: A fully modular framework for modeling 
-and optimizing photonic neural networks." *arXiv preprint arXiv:2210.10048 (2022)*.
+and optimizing photonic neural networks." arXiv preprint arXiv:2210.10048 (2022).
 ```

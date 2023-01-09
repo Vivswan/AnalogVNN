@@ -127,14 +127,16 @@ class TensorboardModelLog:
             data_shape = next(iter(train_loader))[0].shape
             input_size = [1] + list(data_shape)[1:]
 
+        use_autograd_graph = False
         if isinstance(model, Layer):
+            use_autograd_graph = model.use_autograd_graph
             model.use_autograd_graph = True
 
         self.tensorboard.add_graph(model, torch.zeros(input_size).to(model.device))
         setattr(self.tensorboard, log_id, True)
 
         if isinstance(model, Layer):
-            model.use_autograd_graph = False
+            model.use_autograd_graph = use_autograd_graph
 
         return self
 
@@ -174,7 +176,9 @@ class TensorboardModelLog:
             data_shape = next(iter(train_loader))[0].shape
             input_size = tuple(list(data_shape)[1:])
 
+        use_autograd_graph = False
         if isinstance(model, Layer):
+            use_autograd_graph = model.use_autograd_graph
             model.use_autograd_graph = True
 
         model_str = re.sub("\n", "\n    ", "    " + str(model))
@@ -193,7 +197,7 @@ class TensorboardModelLog:
         setattr(self.tensorboard, log_id, True)
 
         if isinstance(model, Layer):
-            model.use_autograd_graph = False
+            model.use_autograd_graph = use_autograd_graph
         return self
 
     def register_training(self, epoch: int, train_loss: float, train_accuracy: float) -> TensorboardModelLog:
