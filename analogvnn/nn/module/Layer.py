@@ -43,7 +43,7 @@ def __nn_Module_init_updated__(function: Callable) -> Callable:
 
         if next_mro_class is not object:
             next_mro_class.__init__ = super_init
-            super(nn.Module, self).__init__(*args, **kwargs)
+            super(nn.Module, self).__init__()
 
     return new_function
 
