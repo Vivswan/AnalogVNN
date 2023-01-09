@@ -28,7 +28,7 @@ natsort
 torchinfo
 
 # Docs
-sphinx==5.3.0
+sphinx>=4.2.0
 sphinx-autobuild
 rst-to-myst[sphinx]
 myst_parser

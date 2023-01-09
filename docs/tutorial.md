@@ -1,8 +1,12 @@
 # Tutorial
 
-#### Run in Google Colab:
+<a href="https://colab.research.google.com/github/Vivswan/AnalogVNN/blob/v1.0.0/docs/_static/AnalogVNN_Demo.ipynb" style="font-size:24px;">
+Run in Google Colab:
+<img alt="Google Colab" src="https://www.tensorflow.org/images/colab_logo_32px.png" style="vertical-align: bottom;">
+</a>
 
-[![Google Colab](https://www.tensorflow.org/images/colab_logo_32px.png)](https://colab.research.google.com/github/Vivswan/AnalogVNN/blob/v1.0.0/docs/_static/AnalogVNN_Demo.ipynb)
+<br>
+<br>
 
 To convert a digital model to its analog counterpart the following steps needs to be followed:
 
