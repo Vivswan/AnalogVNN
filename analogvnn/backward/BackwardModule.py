@@ -82,8 +82,6 @@ class BackwardModule(abc.ABC):
         if not isinstance(self, nn.Module):
             self.set_layer(layer)
 
-        print(f"BackwardModule: {self.__class__.__name__} is initialized {id(self)}")
-
     def forward(self, *inputs: Tensor, **inputs_kwarg: Tensor) -> TENSORS:
         """Forward pass of the layer.
 
