@@ -39,13 +39,13 @@ Install the required dependencies:
   - For using tensorboard to visualize the network, with class
     {py:class}`analogvnn.utils.TensorboardModelLog.TensorboardModelLog`
 - (optional) torchinfo
-  - For adding summary to tensorboard by useing
+  - For adding summary to tensorboard by using
     {py:func}`analogvnn.utils.TensorboardModelLog.TensorboardModelLog.add_summary`
 - (optional) graphviz
   - For saving and rendering forward and backward graphs using
     {py:func}`analogvnn.graph.AcyclicDirectedGraph.AcyclicDirectedGraph.render`
 - (optional) python-graphviz
-  - For saving and rendering forward and backward graphs
+  - For saving and rendering forward and backward graphs using
     {py:func}`analogvnn.graph.AcyclicDirectedGraph.AcyclicDirectedGraph.render`
 
 <br>
