@@ -5,13 +5,12 @@ Run in Google Colab:
 <img alt="Google Colab" src="https://www.tensorflow.org/images/colab_logo_32px.png" style="vertical-align: bottom;">
 </a>
 
-<br>
-<br>
+![3 Layered Linear Photonic Analog Neural Network](_static/analogvnn_model.png)
 
 To convert a digital model to its analog counterpart the following steps needs to be followed:
 
-1. Adding the analog layers to the digital model. For example, to create the Photonic Linear Layer with Reduce
-   Precision, Normalization and Noise:
+1. Adding the analog layers to the digital model. For example, to create the Photonic Linear Layer with
+   {ref}`extra_classes:Reduce Precision`, {ref}`extra_classes:Normalization` and {ref}`extra_classes:noise`:
     1. Create the model similar to how you would create a digital model but using
        {py:class}`analogvnn.nn.module.FullSequential.FullSequential` as superclass
         ```python
@@ -36,8 +35,7 @@ To convert a digital model to its analog counterpart the following steps needs t
         ```
 
        Note: {py:func}`analogvnn.nn.module.Sequential.Sequential.add_sequence` is used to create and set forward and
-       backward graphs in AnalogVNN, more information in
-       {doc}`inner_workings`
+       backward graphs in AnalogVNN, more information in {doc}`inner_workings`
 
     2. To add the Reduce Precision, Normalization, and Noise before and after the main Linear layer, `add_layer`
        function is used.
@@ -68,8 +66,8 @@ To convert a digital model to its analog counterpart the following steps needs t
             self.add_sequence(*self.all_layers)
    ```
 
-   Note: Since the "WeightModel" will only be used for converting the data to analog data to be used in the main "
-   LinearModel", we can use "eval()" to make sure the "WeightModel" is never been trained
+   Note: Since the `WeightModel` will only be used for converting the data to analog data to be used in the main
+   `LinearModel`, we can use `eval()` to make sure the `WeightModel` is never been trained
 
 3. Simply getting data and setting up the model as we will normally do in PyTorch with some minor changes for automatic
    evaluations
