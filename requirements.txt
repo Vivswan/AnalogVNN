@@ -10,7 +10,7 @@ importlib_metadata
 # Development
 setuptools==65.6.3
 build # building the package {pyproject-build}
-twine # to publish on pypi {twine upload --repository-url=https://test.pypi.org/legacy/ dist/*}
+twine # to publish on pypi {twine upload --repository-url=https://test.pypi.org/legacy/ dist/*} {twine upload dist/*}
 johnnydep # to see dependencies {johnnydep <package>}
 
 # Research
