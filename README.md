@@ -6,6 +6,8 @@
 [![Python](https://img.shields.io/badge/python-3.7--3.11-blue)](https://badge.fury.io/py/analogvnn)
 [![License: MPL 2.0](https://img.shields.io/badge/License-MPL_2.0-blue.svg)](https://opensource.org/licenses/MPL-2.0)
 
+Documentation: [https://analogvnn.readthedocs.io/](https://analogvnn.readthedocs.io/)
+
 ## Installation:
 
 - Install [PyTorch](https://pytorch.org/)
@@ -14,8 +16,6 @@
 ```bash
 pip install analogvnn
 ```
-
-Documentation: [https://analogvnn.readthedocs.io/](https://analogvnn.readthedocs.io/)
 
 ![3 Layered Linear Photonic Analog Neural Network](docs/_static/analogvnn_model.png)
 
