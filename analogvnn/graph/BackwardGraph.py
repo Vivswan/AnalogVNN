@@ -52,7 +52,7 @@ class BackwardGraph(AcyclicDirectedGraph):
 
         return result
 
-    def compile(self, is_static=True) -> BackwardGraph:
+    def compile(self, is_static=True):
         """Compile the graph
 
         Args:
@@ -60,9 +60,12 @@ class BackwardGraph(AcyclicDirectedGraph):
 
         Returns:
             BackwardGraph: self.
+
+        Raises:
+            ValueError: If no forward pass has been performed yet.
         """
         if not self.graph.has_node(self.OUTPUT):
-            raise Exception("OUTPUT doesn't exist in the forward graph")
+            raise ValueError("OUTPUT doesn't exist in the forward graph. Please preform a forward pass first.")
 
         return super().compile(is_static=is_static)
 
@@ -170,10 +173,13 @@ class BackwardGraph(AcyclicDirectedGraph):
 
         Returns:
             ArgsKwargsOutput: The gradient of the inputs function w.r.t. loss.
+
+        Raises:
+            ValueError: If no forward pass has been performed yet.
         """
 
         if self.graph_state.forward_input_output_graph is None:
-            raise Exception("No forward pass has been performed yet")
+            raise ValueError("No forward pass has been performed yet. Please preform a forward pass first.")
 
         input_output_graph = self._pass(self.OUTPUT, *args, **kwargs)
         self.graph_state.forward_input_output_graph = None

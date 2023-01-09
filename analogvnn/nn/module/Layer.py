@@ -26,11 +26,24 @@ def __nn_Module_init_updated__(function: Callable) -> Callable:
         Callable: Wrapped function
     """
 
+    def _temp(*args, **kwargs) -> ...:
+        pass
+
     @functools.wraps(function)
     def new_function(self, *args, **kwargs):
+        super_init = None
+        next_mro_index = self.__class__.__mro__.index(nn.Module) + 1
+        next_mro_class = self.__class__.__mro__[next_mro_index]
+
+        if next_mro_class is not object:
+            super_init = next_mro_class.__init__
+            next_mro_class.__init__ = _temp
+
         function(self, *args, **kwargs)
-        # noinspection PyArgumentList
-        super(nn.Module, self).__init__(*args, **kwargs)
+
+        if next_mro_class is not object:
+            next_mro_class.__init__ = super_init
+            super(nn.Module, self).__init__()
 
     return new_function
 
@@ -166,7 +179,7 @@ class Layer(nn.Module):
         elif callable(backward_class):
             self._backward_module = BackwardFunction(backward_class, self)
         else:
-            raise Exception(f"Backward Module is not set for '{self}'")
+            raise TypeError(f"Backward Module is not set for '{self}'")
 
         return self
 

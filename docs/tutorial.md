@@ -1,5 +1,13 @@
 # Tutorial
 
+<a href="https://colab.research.google.com/github/Vivswan/AnalogVNN/blob/v1.0.0/docs/_static/AnalogVNN_Demo.ipynb" style="font-size:24px;">
+Run in Google Colab:
+<img alt="Google Colab" src="https://www.tensorflow.org/images/colab_logo_32px.png" style="vertical-align: bottom;">
+</a>
+
+<br>
+<br>
+
 To convert a digital model to its analog counterpart the following steps needs to be followed:
 
 1. Adding the analog layers to the digital model. For example, to create the Photonic Linear Layer with Reduce
@@ -31,8 +39,8 @@ To convert a digital model to its analog counterpart the following steps needs t
        backward graphs in AnalogVNN, more information in
        {doc}`inner_workings`
 
-    2. To add the Reduce Precision, Normalization, and Noise before and after the main Linear layer, we can modify the "
-       add_layer" function
+    2. To add the Reduce Precision, Normalization, and Noise before and after the main Linear layer, `add_layer`
+       function is used.
         ```python
         def add_layer(self, layer):
             self.all_layers.append(self.norm_class())

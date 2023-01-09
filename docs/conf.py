@@ -21,7 +21,7 @@ except Exception:
 # Project information
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 project = 'AnalogVNN'
-copyright = f'{date.today().year}, Vivswan Shah (vivswanshah@pitt.edu)'
+copyright = f'2021-{date.today().year}, Vivswan Shah (vivswanshah@pitt.edu)'
 author = 'Vivswan Shah'
 release = __version__
 

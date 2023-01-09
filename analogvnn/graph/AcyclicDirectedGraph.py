@@ -268,9 +268,12 @@ class AcyclicDirectedGraph(abc.ABC):
 
         Returns:
             AcyclicDirectedGraph: The compiled graph.
+
+        Raises:
+            ValueError: If the graph is not acyclic.
         """
         for i in nx.simple_cycles(self.graph):
-            raise Exception(f"There is cyclic loop between {i}")
+            raise ValueError(f'Cycle detected: {i}')
 
         self.graph = self._reindex_out_args(self.graph)
         self._is_static = is_static

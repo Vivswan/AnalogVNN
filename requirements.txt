@@ -2,7 +2,7 @@
 torch
 torchvision~=0.14.0
 torchaudio
-numpy>=1.16.5
+numpy
 scipy
 networkx
 importlib_metadata
@@ -14,7 +14,7 @@ twine # to publish on pypi {twine upload --repository-url=https://test.pypi.org/
 johnnydep # to see dependencies {johnnydep <package>}
 
 # Research
-tensorflow>=2.0.0
+tensorflow
 tensorboard
 torchviz
 matplotlib
@@ -25,6 +25,7 @@ graphviz
 # python-graphviz
 seaborn
 natsort
+torchinfo
 
 # Docs
 sphinx>=4.2.0
