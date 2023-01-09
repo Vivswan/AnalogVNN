@@ -11,7 +11,7 @@ Documentation: [https://analogvnn.readthedocs.io/](https://analogvnn.readthedocs
 ## Installation:
 
 - Install [PyTorch](https://pytorch.org/)
-- Install AnanlogVNN using [pip](https://pypi.org/project/analogvnn/)
+- Install AnalogVNN using [pip](https://pypi.org/project/analogvnn/)
 
 ```bash
 pip install analogvnn
