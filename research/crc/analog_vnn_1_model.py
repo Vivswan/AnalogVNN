@@ -7,6 +7,7 @@ from typing import Type, List, Union, Optional
 
 import numpy as np
 import torch.backends.cudnn
+import torchinfo
 import torchvision
 from torch import optim, nn, Tensor
 from torch.nn import Flatten
@@ -26,7 +27,6 @@ from analogvnn.nn.precision.ReducePrecision import ReducePrecision
 from analogvnn.nn.precision.StochasticReducePrecision import StochasticReducePrecision
 from analogvnn.parameter.PseudoParameter import PseudoParameter
 from analogvnn.utils.is_cpu_cuda import is_cpu_cuda
-from analogvnn.utils.summary import summary
 from research.crc._common import pick_instanceof_module
 from research.dataloaders.load_vision_dataset import load_vision_dataset
 from research.utils.data_dirs import data_dirs
@@ -372,8 +372,8 @@ def run_analog_vnn1_model(parameters: RunParametersAnalogVNN1):
 
         file.write(str(nn_model) + "\n\n")
         file.write(str(weight_model) + "\n\n")
-        file.write(summary(nn_model, input_size=tuple(input_shape[1:])) + "\n\n")
-        file.write(summary(weight_model, input_size=(1, 1)) + "\n\n")
+        file.write(torchinfo.summary(nn_model, input_size=tuple(input_shape[1:])).__repr__() + "\n\n")
+        file.write(torchinfo.summary(weight_model, input_size=(1, 1)).__repr__() + "\n\n")
 
     if parameters.tensorboard:
         nn_model.tensorboard.tensorboard.add_text("parameter", json.dumps(parameters.json, sort_keys=True, indent=2))

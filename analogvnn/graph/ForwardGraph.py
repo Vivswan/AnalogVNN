@@ -30,7 +30,7 @@ class ForwardGraph(AcyclicDirectedGraph):
         outputs = self.calculate(inputs, is_training)
         return outputs
 
-    def compile(self, is_static: bool = True) -> ForwardGraph:
+    def compile(self, is_static: bool = True):
         """Compile the graph
 
         Args:
@@ -38,12 +38,15 @@ class ForwardGraph(AcyclicDirectedGraph):
 
         Returns:
             ForwardGraph: self.
+
+        Raises:
+            ValueError: If no forward pass has been performed yet.
         """
         if not self.graph.has_node(self.INPUT):
-            raise Exception("INPUT doesn't exist in the forward graph")
+            raise ValueError("INPUT doesn't exist in the forward graph. Please preform a forward pass first.")
 
         if not self.graph.has_node(self.OUTPUT):
-            raise Exception("OUTPUT doesn't exist in the forward graph")
+            raise ValueError("OUTPUT doesn't exist in the forward graph. Please preform a forward pass first.")
 
         return super().compile(is_static=is_static)
 

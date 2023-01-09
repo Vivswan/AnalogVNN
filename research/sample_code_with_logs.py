@@ -4,6 +4,7 @@ from pathlib import Path
 
 import numpy as np
 import torch.backends.cudnn
+import torchinfo
 import torchvision
 from torch import optim, nn
 from torch.utils.data import DataLoader
@@ -17,7 +18,6 @@ from analogvnn.nn.normalize.Clamp import Clamp
 from analogvnn.nn.precision.ReducePrecision import ReducePrecision
 from analogvnn.parameter.PseudoParameter import PseudoParameter
 from analogvnn.utils.is_cpu_cuda import is_cpu_cuda
-from analogvnn.utils.summary import summary
 from research.utils.save_graph import save_graph
 
 
@@ -162,6 +162,7 @@ def run_linear3_model():
     torch.backends.cudnn.benchmark = True
     torch.manual_seed(0)
     data_path = Path("C:/X/_data").joinpath(str(int(time.time())))
+    data_path = Path("C:/X/_data").joinpath("hi")
     if not data_path.exists():
         data_path.mkdir()
 
@@ -203,21 +204,35 @@ def run_linear3_model():
     # weight_model.use_autograd_graph = True
     nn_model.compile(device=device)
     weight_model.compile(device=device)
-    nn_model.create_tensorboard(str(data_path.joinpath("tensorboard")))
-    nn_model.to(device=device)
-    weight_model.to(device=device)
 
     PseudoParameter.parametrize_module(nn_model, transformation=weight_model)
     nn_model.optimizer = optim.Adam(params=nn_model.parameters())
 
+    nn_model.create_tensorboard(str(data_path.joinpath("tensorboard")))
+    summary_params = {
+        "verbose": 0,
+        "col_names": [
+            "input_size",
+            "output_size",
+            "num_params",
+            "kernel_size",
+            "mult_adds",
+            "trainable",
+        ],
+        "depth": 5,
+    }
+    nn_model_summary = torchinfo.summary(nn_model, input_size=tuple(input_shape[1:]), **summary_params)
+    nn_model_summary.formatting.verbose = 2
+    weight_model_summary = torchinfo.summary(weight_model, input_size=(1, 1), **summary_params)
+    weight_model_summary.formatting.verbose = 2
     print(f"Creating Log File...")
-    with open(data_path.joinpath("logfile.log"), "a+") as file:
+    with open(data_path.joinpath("logfile.log"), "a+", encoding="utf-8") as file:
         file.write(str(nn_model.optimizer) + "\n\n")
 
         file.write(str(nn_model) + "\n\n")
         file.write(str(weight_model) + "\n\n")
-        file.write(summary(nn_model, input_size=tuple(input_shape[1:])) + "\n\n")
-        file.write(summary(weight_model, input_size=(1, 1)) + "\n\n")
+        file.write(f"{nn_model_summary}\n\n")
+        file.write(f"{weight_model_summary}\n\n")
 
     data = next(iter(train_loader))[0]
 
@@ -225,6 +240,9 @@ def run_linear3_model():
     save_graph(data_path.joinpath(f"nn_model"), nn_model, data)
     save_graph(data_path.joinpath(f"weight_model"), weight_model, torch.ones((1, 1)))
     nn_model.tensorboard.add_graph(train_loader)
+    nn_model.tensorboard.add_graph(train_loader, model=weight_model)
+    nn_model.tensorboard.add_summary(train_loader)
+    nn_model.tensorboard.add_summary(train_loader, model=weight_model)
     loss_accuracy = {
         "train_loss": [],
         "train_accuracy": [],
@@ -266,7 +284,8 @@ def run_linear3_model():
         "max_test_accuracy": np.max(loss_accuracy["test_accuracy"]),
     }
     nn_model.tensorboard.tensorboard.add_hparams(
-        metric_dict=metric_dict
+        metric_dict=metric_dict,
+        hparam_dict={}
     )
 
     with open(data_path.joinpath("logfile.log"), "a+") as file:

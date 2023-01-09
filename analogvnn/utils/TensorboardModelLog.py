@@ -2,14 +2,15 @@ from __future__ import annotations
 
 import os
 import re
-from typing import Optional
+from typing import Optional, Sequence
 
 import torch
 from torch import nn
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
-from analogvnn.utils.summary import summary
+from analogvnn.nn.module.Layer import Layer
+from analogvnn.nn.module.Model import Model
 
 __all__ = ['TensorboardModelLog']
 
@@ -26,7 +27,7 @@ class TensorboardModelLog:
     tensorboard: Optional[SummaryWriter]
     layer_data: bool
 
-    def __init__(self, model: nn.Module, log_dir: str):
+    def __init__(self, model: Model, log_dir: str):
         """Log the model to Tensorboard.
 
         Args:
@@ -52,11 +53,21 @@ class TensorboardModelLog:
 
         Returns:
             TensorboardModelLog: self.
+
+        Raises:
+            ValueError: if the log directory is invalid.
         """
+
+        # https://github.com/tensorflow/tensorboard/pull/6135
+        from tensorboard.compat import tf
+        if getattr(tf, "io", None) is None:
+            import tensorboard.compat.tensorflow_stub as new_tf
+            tf.__dict__.update(new_tf.__dict__)
+
         if os.path.isdir(log_dir):
             self.tensorboard = SummaryWriter(log_dir=log_dir)
         else:
-            raise Exception(f'"{log_dir}" is not a directory.')
+            raise ValueError(f"Log directory {log_dir} does not exist.")
         return self
 
     def _add_layer_data(self, epoch: int = None):
@@ -89,12 +100,18 @@ class TensorboardModelLog:
             self._add_layer_data(epoch=-1)
         return self
 
-    def add_graph(self, train_loader: DataLoader, model: Optional[nn.Module] = None) -> TensorboardModelLog:
+    def add_graph(
+            self,
+            train_loader: DataLoader,
+            model: Optional[nn.Module] = None,
+            input_size: Optional[Sequence[int]] = None,
+    ) -> TensorboardModelLog:
         """Add the model graph to the tensorboard.
 
         Args:
             train_loader (DataLoader): the train loader.
-            model (nn.Module): the model to log.
+            model (Optional[nn.Module]): the model to log.
+            input_size (Optional[Sequence[int]]): the input size.
 
         Returns:
             TensorboardModelLog: self.
@@ -102,23 +119,85 @@ class TensorboardModelLog:
         if model is None:
             model = self.model
 
-        if not getattr(self.tensorboard, f"_added_graph_{id(model)}", False):
-            # print(f"_added_graph_{id(model)}", model.__class__.__name__)
-            for batch_idx, (data, target) in enumerate(train_loader):
-                input_size = tuple(list(data.shape)[1:])
-                batch_size = data.shape[1]
-                self.tensorboard.add_text(
-                    f"str ({model.__class__.__name__})",
-                    re.sub("\n", "\n    ", "    " + str(model))
-                )
-                self.tensorboard.add_text(
-                    f"summary ({model.__class__.__name__})",
-                    re.sub("\n", "\n    ", "    " + summary(model, input_size=input_size))
-                )
-                self.tensorboard.add_graph(model, torch.zeros(tuple([batch_size] + list(input_size))).to(model.device))
-                break
+        log_id = f"{TensorboardModelLog.add_graph.__name__}_{id(model)}"
+        if getattr(self.tensorboard, log_id, False):
+            return self
 
-            setattr(self.tensorboard, f"_added_graph_{id(model)}", True)
+        if input_size is None:
+            data_shape = next(iter(train_loader))[0].shape
+            input_size = [1] + list(data_shape)[1:]
+
+        use_autograd_graph = False
+        if isinstance(model, Layer):
+            use_autograd_graph = model.use_autograd_graph
+            model.use_autograd_graph = True
+
+        self.tensorboard.add_graph(model, torch.zeros(input_size).to(model.device))
+        setattr(self.tensorboard, log_id, True)
+
+        if isinstance(model, Layer):
+            model.use_autograd_graph = use_autograd_graph
+
+        return self
+
+    def add_summary(
+            self,
+            train_loader: DataLoader,
+            model: Optional[nn.Module] = None,
+            input_size: Optional[Sequence[int]] = None,
+    ) -> TensorboardModelLog:
+        """Add the model summary to the tensorboard.
+
+        Args:
+            train_loader (DataLoader): the train loader.
+            model (nn.Module): the model to log.
+            input_size (Optional[Sequence[int]]): the input size.
+
+        Returns:
+            TensorboardModelLog: self.
+
+        Raises:
+            ImportError: if torchinfo (https://github.com/tyleryep/torchinfo) is not installed.
+        """
+
+        try:
+            import torchinfo
+        except ImportError as e:
+            raise ImportError("requires torchinfo: https://github.com/tyleryep/torchinfo") from e
+
+        if model is None:
+            model = self.model
+
+        log_id = f"{TensorboardModelLog.add_summary.__name__}_{id(model)}"
+        if getattr(self.tensorboard, log_id, False):
+            return self
+
+        if input_size is None:
+            data_shape = next(iter(train_loader))[0].shape
+            input_size = tuple(list(data_shape)[1:])
+
+        use_autograd_graph = False
+        if isinstance(model, Layer):
+            use_autograd_graph = model.use_autograd_graph
+            model.use_autograd_graph = True
+
+        model_str = re.sub("\n", "\n    ", "    " + str(model))
+        nn_model_summary = torchinfo.summary(
+            model,
+            input_size=input_size,
+            verbose=torchinfo.Verbosity.QUIET,
+            col_names=[e.value for e in torchinfo.ColumnSettings],
+            depth=10,
+        )
+        nn_model_summary.formatting.verbose = torchinfo.Verbosity.VERBOSE
+        nn_model_summary = re.sub("\n", "\n    ", f"    {nn_model_summary}")
+
+        self.tensorboard.add_text(f"str ({model.__class__.__name__})", model_str)
+        self.tensorboard.add_text(f"summary ({model.__class__.__name__})", nn_model_summary)
+        setattr(self.tensorboard, log_id, True)
+
+        if isinstance(model, Layer):
+            model.use_autograd_graph = use_autograd_graph
         return self
 
     def register_training(self, epoch: int, train_loss: float, train_accuracy: float) -> TensorboardModelLog:
@@ -153,15 +232,15 @@ class TensorboardModelLog:
         self.tensorboard.add_scalar("Accuracy/test", test_accuracy, epoch)
         return self
 
-    def close(self) -> TensorboardModelLog:
+    # noinspection PyUnusedLocal
+    def close(self, *args, **kwargs):
         """Close the tensorboard.
-
-        Returns:
-            TensorboardModelLog: self.
         """
         if self.tensorboard is not None:
             self.tensorboard.close()
-        return self
+            self.tensorboard = None
 
-    def __exit__(self, exc_type, exc_value, traceback):
-        self.close()
+    __exit__ = close
+    """Close the tensorboard."""
+    __del__ = close
+    """Close the tensorboard."""

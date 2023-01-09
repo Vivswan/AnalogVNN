@@ -11,7 +11,7 @@ name = "analogvnn"
 [project]
 # $ pip install analogvnn
 name = "analogvnn"
-version = "1.0.0rc1"
+version = "1.0.0rc2"
 description = "A fully modular framework for modeling and optimizing analog/photonic neural networks"  # Optional
 readme = "README.md"
 requires-python = ">=3.7"
@@ -83,6 +83,7 @@ research = [
     "tensorflow",
     "tensorboard",
     "torchviz",
+    "torchinfo",
     "matplotlib",
     "tabulate",
     "pillow",

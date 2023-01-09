@@ -151,10 +151,10 @@ class Model(Layer):
             Tuple[Tensor, Tensor]: The loss and the accuracy of the model.
 
         Raises:
-            Exception: if loss_function is None.
+            ValueError: if loss_function is None.
         """
         if self.loss_function is None:
-            raise Exception("loss_function is not set")
+            raise ValueError('loss_function is None')
 
         loss_result = self.loss_function(output, target)
         if self.training:
@@ -179,10 +179,10 @@ class Model(Layer):
             Tuple[float, float]: The loss and the accuracy of the model.
 
         Raises:
-            Exception: if model is not compiled.
+            RuntimeError: if model is not compiled.
         """
         if self._compiled is False:
-            raise Exception("model is not complied yet")
+            raise RuntimeError('Model is not compiled')
 
         train_loss, train_accuracy = train(self, train_loader, epoch, *args, **kwargs)
 
@@ -205,10 +205,10 @@ class Model(Layer):
             Tuple[float, float]: The loss and the accuracy of the model.
 
         Raises:
-            Exception: if model is not compiled.
+            RuntimeError: if model is not compiled.
         """
         if self._compiled is False:
-            raise Exception("model is not complied yet")
+            raise RuntimeError('Model is not compiled')
 
         test_loss, test_accuracy = test(self, test_loader, *args, **kwargs)
 
@@ -234,9 +234,6 @@ class Model(Layer):
         Returns:
             Tuple[float, float, float, float]: The train loss, the train accuracy, the test loss
             and the test accuracy of the model.
-
-        Raises:
-            Exception: if model is not compiled.
         """
         train_loss, train_accuracy = self.train_on(train_loader=train_loader, epoch=epoch)
         test_loss, test_accuracy = self.test_on(test_loader=test_loader, epoch=epoch)
@@ -249,7 +246,7 @@ class Model(Layer):
             log_dir (str): The log directory of the tensorboard.
 
         Raises:
-            ImportError: if tensorboard is not installed.
+            ImportError: if tensorboard (https://www.tensorflow.org/) is not installed.
         """
         try:
             from analogvnn.utils.TensorboardModelLog import TensorboardModelLog

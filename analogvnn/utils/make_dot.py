@@ -80,7 +80,7 @@ def make_dot(var, params=None, show_attrs=True, show_saved=True, max_attr_chars=
         graphviz.Digraph: the graphviz object.
 
     Raises:
-        ImportError: if graphviz is not available.
+        ImportError: if graphviz (https://pygraphviz.github.io/) is not available.
     """
 
     try:

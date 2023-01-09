@@ -137,11 +137,14 @@ class PseudoParameter(Parameter):
 
         Returns:
             nn.Parameter: the transformed parameter.
+
+        Raises:
+            RuntimeError: if the transformation callable fails.
         """
         try:
             self._transformed.data = self._transformation(self)
         except Exception as e:
-            raise Exception(f"here: {e.args}") from e
+            raise RuntimeError(f"here: {e.args}") from e
         return self._transformed
 
     def __repr__(self):
