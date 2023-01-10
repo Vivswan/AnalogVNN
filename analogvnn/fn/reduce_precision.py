@@ -16,7 +16,8 @@ def reduce_precision(x: TENSOR_OPERABLE, precision: TENSOR_OPERABLE, divide: TEN
       divide (TENSOR_OPERABLE): the number of bits to be reduced
     
     Returns:
-      TENSOR_OPERABLE: TENSOR_OPERABLE with the same shape as x, but with values rounded to the nearest multiple of precision.
+      TENSOR_OPERABLE: TENSOR_OPERABLE with the same shape as x, but with values rounded to the nearest
+      multiple of precision.
     """
     x = x if isinstance(x, Tensor) else torch.tensor(x, requires_grad=False)
     g: Tensor = x * precision
@@ -36,7 +37,8 @@ def stochastic_reduce_precision(x: TENSOR_OPERABLE, precision: TENSOR_OPERABLE) 
         precision (TENSOR_OPERABLE): the precision of the quantization.
 
     Returns:
-        TENSOR_OPERABLE: TENSOR_OPERABLE with the same shape as x, but with values rounded to the nearest multiple of precision.
+        TENSOR_OPERABLE: TENSOR_OPERABLE with the same shape as x, but with values rounded to the
+        nearest multiple of precision.
     """
     g: Tensor = x * precision
     rand_x = torch.rand_like(g, requires_grad=False)

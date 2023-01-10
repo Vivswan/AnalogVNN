@@ -36,7 +36,6 @@ class AccumulateGrad:
         Returns:
             str: String representation of the module.
         """
-        # return f"AccumulateGrad"
         return f"AccumulateGrad({self.module})"
 
     def __call__(
@@ -62,7 +61,6 @@ class AccumulateGrad:
             forward_in_arg: Union[None, int, bool] = location['out_arg']
             forward_in_kwarg: Union[None, str, bool] = location['out_kwarg']
             predecessor: GRAPH_NODE_TYPE = location['from']
-            # print(out_kwarg, out_arg, value)
 
             # 0 - not allowed
 

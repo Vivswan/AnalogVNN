@@ -104,7 +104,6 @@ class ForwardGraph(AcyclicDirectedGraph):
 
             if isinstance(module, GraphEnum):
                 input_output_graph[module].outputs = input_output_graph[module].inputs
-                # self.print_inputs_outputs(input_output_graph, module)
                 continue
 
             outputs = module(
@@ -112,7 +111,6 @@ class ForwardGraph(AcyclicDirectedGraph):
                 **input_output_graph[module].inputs.kwargs
             )
             input_output_graph[module].outputs = ArgsKwargs.to_args_kwargs_object(outputs)
-            # self.print_inputs_outputs(input_output_graph, module)
 
         return input_output_graph
 

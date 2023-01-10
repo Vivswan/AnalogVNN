@@ -83,6 +83,7 @@ class CPUCuda:
             torch.device: the device of the module.
         """
 
+        # noinspection PyBroadException
         try:
             device: torch.device = getattr(module, "device", None)
             if device is None:

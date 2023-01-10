@@ -26,6 +26,7 @@ def __nn_Module_init_updated__(function: Callable) -> Callable:
         Callable: Wrapped function
     """
 
+    # noinspection PyUnusedLocal
     def _temp(*args, **kwargs) -> ...:
         pass
 
@@ -192,6 +193,7 @@ class Layer(nn.Module):
         Returns:
             Callable: Wrapped function.
         """
+        # noinspection PyUnresolvedReferences
         if hasattr(function, "__wrapper__") and function.__wrapper__ == Layer._forward_wrapper:
             return function
 

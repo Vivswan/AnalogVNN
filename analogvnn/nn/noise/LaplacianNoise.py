@@ -94,7 +94,6 @@ class LaplacianNoise(Layer, BackwardIdentity):
         Returns:
             float: the leakage of the Laplacian noise.
         """
-        # return math.exp((-1 / (2 * precision)) * (1 / scale))
         return 2 * LaplacianNoise.static_cdf(x=-1 / (2 * precision), scale=scale)
 
     @property

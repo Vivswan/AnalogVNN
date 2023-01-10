@@ -153,14 +153,12 @@ class BackwardGraph(AcyclicDirectedGraph):
                 "in_kwarg": True,
                 "out_arg": True,
                 "out_kwarg": True,
-                # "label": f"* -> *",
                 "len": 0,
             })
 
         for v in graph.nodes():
             new_graph.nodes[v]["fillcolor"] = "lightblue"
         self.graph = new_graph
-        # self.graph = graph
         return self
 
     @torch.no_grad()
@@ -214,8 +212,6 @@ class BackwardGraph(AcyclicDirectedGraph):
 
             if isinstance(module, GraphEnum):
                 input_output_graph[module].outputs = input_output_graph[module].inputs
-                # print()
-                # self.print_inputs_outputs(input_output_graph, module)
                 continue
 
             outputs = self._calculate_gradients(
@@ -223,7 +219,6 @@ class BackwardGraph(AcyclicDirectedGraph):
                 input_output_graph[module]
             )
             input_output_graph[module].outputs = ArgsKwargs.to_args_kwargs_object(outputs)
-            # self.print_inputs_outputs(input_output_graph, module)
 
         return input_output_graph
 
@@ -293,10 +288,6 @@ class BackwardGraph(AcyclicDirectedGraph):
             retain_graph=True,
             allow_unused=True
         )
-        # print()
-        # print(f"inputs: {inputs}")
-        # print(f"outputs: {outputs}")
-        # print(f"grad_outputs: {outputs_grads}")
         for i, v in enumerate(out_grads):
             grad_dict[inputs[i]] = v
 
