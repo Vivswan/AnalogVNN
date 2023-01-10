@@ -133,7 +133,7 @@ class LinearModel(FullSequential):
 
 class WeightModel(FullSequential):
     def __init__(self, norm_class, precision_class, precision, noise_class, leakage):
-        """
+        """ Weight Model
 
         Args:
             norm_class: Normalization Class

@@ -78,6 +78,8 @@ def get_fn_name(fn: Callable, show_attrs: bool, max_attr_chars: int) -> str:
     """
 
     name = str(type(fn).__name__)
+    if name.endswith('Backward'):
+        name = name[:-8]
     if not show_attrs:
         return name
     attrs = dict()
@@ -313,10 +315,13 @@ class AutoGradDot:
         if not name:
             if id(tensor) in self.param_map:
                 name = self.param_map[id(tensor)]
-            elif hasattr(tensor, "name") and tensor.name is not None:
+            elif hasattr(tensor, "name") and not not tensor.name:
                 name = tensor.name
-            elif hasattr(tensor, "names") and tensor.names is not None and len(tensor.names) > 0:
-                name = str(tensor.names)
+            elif hasattr(tensor, "names") and not not tensor.names:
+                if len(tensor.names) == 1:
+                    name = tensor.names[0]
+                else:
+                    name = str(tensor.names)
             else:
                 name = ''
         return '%s\n %s' % (name, size_to_str(tensor.size()))
@@ -426,18 +431,23 @@ def add_grad_fn(grad_fn, autograd_dot: AutoGradDot):
         for attr in dir(grad_fn):
             if not attr.startswith(SAVED_PREFIX):
                 continue
+
             val = getattr(grad_fn, attr)
             autograd_dot.add_seen(val)
             attr = attr[len(SAVED_PREFIX):]
+
             if torch.is_tensor(val):
                 autograd_dot.add_edge(grad_fn, val, dir="none")
                 autograd_dot.add_tensor(val, name=attr, fillcolor='orange')
+                continue
+
             if isinstance(val, tuple):
                 for i, t in enumerate(val):
-                    if torch.is_tensor(t):
-                        name = attr + '[%s]' % str(i)
-                        autograd_dot.add_edge(grad_fn, t, dir="none")
-                        autograd_dot.add_tensor(t, name=name, fillcolor='orange')
+                    if not torch.is_tensor(t):
+                        continue
+                    name = attr + '[%s]' % str(i)
+                    autograd_dot.add_edge(grad_fn, t, dir="none")
+                    autograd_dot.add_tensor(t, name=name, fillcolor='orange')
 
     if hasattr(grad_fn, 'variable'):
         # if grad_accumulator, add the node for `.variable`
@@ -448,9 +458,18 @@ def add_grad_fn(grad_fn, autograd_dot: AutoGradDot):
     # recurse
     if hasattr(grad_fn, 'next_functions'):
         for u in grad_fn.next_functions:
-            if u[0] is not None:
-                autograd_dot.add_edge(u[0], grad_fn)
-                add_grad_fn(u[0], autograd_dot=autograd_dot)
+            if u[0] is None:
+                continue
+
+            if (
+                    u[0].__class__.__name__ == 'AccumulateGrad' and
+                    hasattr(u[0], 'variable') and
+                    autograd_dot.get_tensor_name(u[0].variable) == "_empty_holder_tensor\n (1)"
+            ):
+                continue
+
+            autograd_dot.add_edge(u[0], grad_fn)
+            add_grad_fn(u[0], autograd_dot=autograd_dot)
 
     # note: this used to show .saved_tensors in pytorch0.2, but stopped
     # working* as it was moved to ATen and Variable-Tensor merged
@@ -492,7 +511,7 @@ def make_autograd_obj(
         max_attr_chars: int = 50,
         **kwargs: Tensor
 ) -> AutoGradDot:
-    """Produces Graphviz representation of PyTorch autograd graph.
+    """Produces Graphviz representation of PyTorch autograd graph from forward pass.
 
     If a node represents a backward function, it is gray. Otherwise, the node
     represents a tensor and is either blue, orange, or green:
@@ -644,7 +663,7 @@ def get_autograd_dot_from_trace(trace) -> Digraph:
 
 
 def get_autograd_obj(module: nn.Module, *args, **kwargs) -> AutoGradDot:
-    """Produces Graphviz representation of PyTorch autograd graph.
+    """Produces Graphviz representation of PyTorch autograd graph from forward pass.
 
     Args:
         module: PyTorch model
@@ -689,7 +708,7 @@ def get_autograd_obj(module: nn.Module, *args, **kwargs) -> AutoGradDot:
 
 
 def get_autograd_dot(module: nn.Module, *args, **kwargs) -> Digraph:
-    """Produces Graphviz representation of PyTorch autograd graph.
+    """Produces Graphviz representation of PyTorch autograd graph from forward pass.
 
     Args:
         module: PyTorch model
@@ -703,7 +722,7 @@ def get_autograd_dot(module: nn.Module, *args, **kwargs) -> Digraph:
 
 
 def save_autograd_graph(filename, module: nn.Module, *args, **kwargs) -> None:
-    """Save Graphviz representation of PyTorch autograd graph.
+    """Save Graphviz representation of PyTorch autograd graph from forward pass.
 
     Args:
         filename: filename to save the graph to
