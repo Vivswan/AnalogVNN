@@ -4,6 +4,7 @@ from typing import Callable, Any
 
 import torch
 import torch.nn as nn
+from torch import Tensor
 from torch.nn import ModuleDict
 from torch.nn.utils import parametrize
 
