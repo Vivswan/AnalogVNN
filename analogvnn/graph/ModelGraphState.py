@@ -15,7 +15,8 @@ class ModelGraphState:
 
     Attributes:
         allow_loops (bool): if True, the graph is allowed to contain loops.
-        forward_input_output_graph (Optional[Dict[GRAPH_NODE_TYPE, InputOutput]]): the input and output of the forward pass.
+        forward_input_output_graph (Optional[Dict[GRAPH_NODE_TYPE, InputOutput]]): the input and output of the
+        forward pass.
         use_autograd_graph (bool): if True, the autograd graph is used to calculate the gradients.
         _loss (Tensor): the loss.
         INPUT (GraphEnum): GraphEnum.INPUT
@@ -49,6 +50,7 @@ class ModelGraphState:
         self.forward_input_output_graph = None
         self._loss = None
 
+    # noinspection PyUnusedLocal
     @staticmethod
     def ready_for_forward(exception: bool = False) -> bool:
         """Check if the state is ready for forward pass.
