@@ -5,7 +5,7 @@ from torch.optim import Adam
 
 from analogvnn.backward.BackwardIdentity import BackwardIdentity
 from analogvnn.nn.module.Model import Model
-from analogvnn.utils.make_dot import make_dot
+from analogvnn.utils.render_autograd_graph import make_autograd_do
 
 # def __getattribute__(self, item):
 #     print(f"__getattribute__:: {item!r}")
@@ -94,7 +94,7 @@ if __name__ == '__main__':
     print(f"inputs                                  = {pstr(inputs)}")
     print(f"output                                  = {pstr(output)}")
 
-    make_dot(output, params={
+    make_autograd_do(output, params={
         "inputs": inputs,
         "output": output,
         "model.weight": model.weight,

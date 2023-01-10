@@ -18,7 +18,7 @@ from analogvnn.nn.normalize.Clamp import Clamp
 from analogvnn.nn.precision.ReducePrecision import ReducePrecision
 from analogvnn.parameter.PseudoParameter import PseudoParameter
 from analogvnn.utils.is_cpu_cuda import is_cpu_cuda
-from research.utils.save_graph import save_graph
+from analogvnn.utils.render_autograd_graph import save_autograd_graph
 
 
 def load_vision_dataset(dataset, path, batch_size, is_cuda=False, grayscale=True):
@@ -200,8 +200,6 @@ def run_linear3_model():
     # Setting Model Parameters
     nn_model.loss_function = nn.CrossEntropyLoss()
     nn_model.accuracy_function = cross_entropy_accuracy
-    # nn_model.use_autograd_graph = True
-    # weight_model.use_autograd_graph = True
     nn_model.compile(device=device)
     weight_model.compile(device=device)
 
@@ -234,11 +232,9 @@ def run_linear3_model():
         file.write(f"{nn_model_summary}\n\n")
         file.write(f"{weight_model_summary}\n\n")
 
-    data = next(iter(train_loader))[0]
-
     print(f"Saving Graphs...")
-    save_graph(data_path.joinpath(f"nn_model"), nn_model, data)
-    save_graph(data_path.joinpath(f"weight_model"), weight_model, torch.ones((1, 1)))
+    save_autograd_graph(data_path.joinpath(f"nn_model"), nn_model, next(iter(train_loader))[0])
+    save_autograd_graph(data_path.joinpath(f"weight_model"), weight_model, torch.ones((1, 1)))
     nn_model.tensorboard.add_graph(train_loader)
     nn_model.tensorboard.add_graph(train_loader, model=weight_model)
     nn_model.tensorboard.add_summary(train_loader)

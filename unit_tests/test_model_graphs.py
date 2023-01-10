@@ -4,7 +4,7 @@ import torch
 from torch import nn
 
 from analogvnn.graph.ModelGraph import ModelGraph
-from analogvnn.utils.make_dot import make_dot
+from analogvnn.utils.render_autograd_graph import make_autograd_do
 
 if __name__ == '__main__':
     mg = ModelGraph()
@@ -69,7 +69,7 @@ if __name__ == '__main__':
     mg.use_autograd_graph = True
     inputs = torch.ones((1, 1), dtype=torch.float, requires_grad=True)
     output = mg.forward_graph.calculate(inputs)
-    make_dot(output, params={
+    make_autograd_do(output, params={
         "input": inputs,
         "output": output,
         "l1.weight": l1.weight,
