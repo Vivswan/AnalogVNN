@@ -130,7 +130,7 @@ class TensorboardModelLog:
         use_autograd_graph = False
         if isinstance(model, Layer):
             use_autograd_graph = model.use_autograd_graph
-            model.use_autograd_graph = True
+            model.use_autograd_graph = False
 
         self.tensorboard.add_graph(model, torch.zeros(input_size).to(model.device))
         setattr(self.tensorboard, log_id, True)
