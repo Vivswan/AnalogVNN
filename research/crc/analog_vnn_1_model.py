@@ -27,7 +27,7 @@ from analogvnn.nn.precision.ReducePrecision import ReducePrecision
 from analogvnn.nn.precision.StochasticReducePrecision import StochasticReducePrecision
 from analogvnn.parameter.PseudoParameter import PseudoParameter
 from analogvnn.utils.is_cpu_cuda import is_cpu_cuda
-from analogvnn.utils.render_autograd_graph import save_autograd_graph
+from analogvnn.utils.render_autograd_graph import save_autograd_graph_from_module
 from research.crc._common import pick_instanceof_module
 from research.dataloaders.load_vision_dataset import load_vision_dataset
 from research.utils.data_dirs import data_dirs
@@ -379,8 +379,10 @@ def run_analog_vnn1_model(parameters: RunParametersAnalogVNN1):
         nn_model.tensorboard.tensorboard.add_text("parameter", json.dumps(parameters.json, sort_keys=True, indent=2))
 
     print(f"Saving Graphs...")
-    save_autograd_graph(path_join(paths.logs, f"{paths.name}_nn_model"), nn_model, next(iter(train_loader))[0])
-    save_autograd_graph(path_join(paths.logs, f"{paths.name}_weight_model"), weight_model, torch.ones((1, 1)))
+    save_autograd_graph_from_module(path_join(paths.logs, f"{paths.name}_nn_model"), nn_model,
+                                    next(iter(train_loader))[0])
+    save_autograd_graph_from_module(path_join(paths.logs, f"{paths.name}_weight_model"), weight_model,
+                                    torch.ones((1, 1)))
 
     if parameters.tensorboard:
         nn_model.tensorboard.add_graph(train_loader)

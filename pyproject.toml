@@ -11,7 +11,7 @@ name = "analogvnn"
 [project]
 # $ pip install analogvnn
 name = "analogvnn"
-version = "1.0.0rc3"
+version = "1.0.0rc4"
 description = "A fully modular framework for modeling and optimizing analog/photonic neural networks"  # Optional
 readme = "README.md"
 requires-python = ">=3.7"
@@ -46,7 +46,6 @@ classifiers = [# Optional
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3 :: Only",
 ]
 
@@ -75,9 +74,9 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "setuptools>=61.0.0",
-    "build",
-    "twine",
-    "johnnydep"
+    "build", # building the package {pyproject-build}
+    "twine", # to publish on pypi {twine upload --repository-url=https://test.pypi.org/legacy/ dist/*} {twine upload dist/*}
+    "johnnydep" # to see dependencies {johnnydep <package>}
 ]
 research = [
     "tensorflow",
@@ -94,14 +93,16 @@ research = [
 ]
 doc = [
     "sphinx>=4.2.0",
+    "sphinx-autobuild",
     "rst-to-myst[sphinx]",
     "furo",
     "myst_parser",
+    "sphinx-rtd-theme",
     "sphinx-autoapi",
-    "sphinxext-opengraph",
-    "sphinx-inline-tabs",
-    "sphinx-notfound-page",
     "sphinx-copybutton",
+    "sphinx-notfound-page",
+    "sphinx-inline-tabs",
+    "sphinxext-opengraph",
     "sphinxcontrib-katex", # for math
 ]
 all = ["analogvnn[research,dev,doc]"]
