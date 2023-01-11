@@ -4,7 +4,6 @@ from pathlib import Path
 
 import numpy as np
 import torch.backends.cudnn
-import torchinfo
 import torchvision
 from torch import optim, nn
 from torch.utils.data import DataLoader
@@ -207,22 +206,27 @@ def run_linear3_model():
     nn_model.optimizer = optim.Adam(params=nn_model.parameters())
 
     nn_model.create_tensorboard(str(data_path.joinpath("tensorboard")))
-    summary_params = {
-        "verbose": 0,
-        "col_names": [
-            "input_size",
-            "output_size",
-            "num_params",
-            "kernel_size",
-            "mult_adds",
-            "trainable",
-        ],
-        "depth": 5,
-    }
-    nn_model_summary = torchinfo.summary(nn_model, input_size=tuple(input_shape[1:]), **summary_params)
-    nn_model_summary.formatting.verbose = 2
-    weight_model_summary = torchinfo.summary(weight_model, input_size=(1, 1), **summary_params)
-    weight_model_summary.formatting.verbose = 2
+
+    print(f"Saving Summary and Graphs...")
+    _, nn_model_summary = nn_model.tensorboard.add_summary(train_loader)
+    _, weight_model_summary = nn_model.tensorboard.add_summary(train_loader, model=weight_model)
+    save_autograd_graph_from_module(data_path.joinpath(f"nn_model"), nn_model, next(iter(train_loader))[0])
+    save_autograd_graph_from_module(data_path.joinpath(f"weight_model"), weight_model, torch.ones((1, 1)))
+    save_autograd_graph_from_module(
+        data_path.joinpath(f"nn_model_autograd"),
+        nn_model,
+        next(iter(train_loader))[0],
+        from_forward=True
+    )
+    save_autograd_graph_from_module(
+        data_path.joinpath(f"weight_model_autograd"),
+        weight_model,
+        torch.ones((1, 1)),
+        from_forward=True
+    )
+    nn_model.tensorboard.add_graph(train_loader)
+    nn_model.tensorboard.add_graph(train_loader, model=weight_model)
+
     print(f"Creating Log File...")
     with open(data_path.joinpath("logfile.log"), "a+", encoding="utf-8") as file:
         file.write(str(nn_model.optimizer) + "\n\n")
@@ -231,18 +235,6 @@ def run_linear3_model():
         file.write(str(weight_model) + "\n\n")
         file.write(f"{nn_model_summary}\n\n")
         file.write(f"{weight_model_summary}\n\n")
-
-    print(f"Saving Graphs...")
-    save_autograd_graph_from_module(data_path.joinpath(f"nn_model"), nn_model, next(iter(train_loader))[0])
-    save_autograd_graph_from_module(data_path.joinpath(f"weight_model"), weight_model, torch.ones((1, 1)))
-    save_autograd_graph_from_module(data_path.joinpath(f"nn_model_autograd"), nn_model, next(iter(train_loader))[0],
-                                    from_forward=True)
-    save_autograd_graph_from_module(data_path.joinpath(f"weight_model_autograd"), weight_model, torch.ones((1, 1)),
-                                    from_forward=True)
-    nn_model.tensorboard.add_graph(train_loader)
-    nn_model.tensorboard.add_graph(train_loader, model=weight_model)
-    nn_model.tensorboard.add_summary(train_loader)
-    nn_model.tensorboard.add_summary(train_loader, model=weight_model)
     loss_accuracy = {
         "train_loss": [],
         "train_accuracy": [],
@@ -285,12 +277,25 @@ def run_linear3_model():
     }
     nn_model.tensorboard.tensorboard.add_hparams(
         metric_dict=metric_dict,
-        hparam_dict={}
+        hparam_dict={
+            "precision": 2 ** 4,
+            "leakage": 0.2,
+            "noise": "GaussianNoise",
+            "activation": "GeLU",
+            "precision_class": "ReducePrecision",
+            "norm_class": "Clamp",
+            "optimizer": "Adam",
+            "loss_function": "CrossEntropyLoss",
+            "accuracy_function": "cross_entropy_accuracy",
+            "batch_size": 128,
+            "epochs": 1,
+        }
     )
 
     with open(data_path.joinpath("logfile.log"), "a+") as file:
         file.write(json.dumps(metric_dict, sort_keys=True) + "\n\n")
         file.write("Run Completed Successfully...")
+    nn_model.tensorboard.close()
     print()
 
 

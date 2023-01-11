@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import os
 import re
-from typing import Optional, Sequence
+from pathlib import Path
+from typing import Optional, Sequence, Tuple, Dict
 
 import torch
 from torch import nn
@@ -22,10 +23,12 @@ class TensorboardModelLog:
         model (nn.Module): the model to log.
         tensorboard (SummaryWriter): the tensorboard.
         layer_data (bool): whether to log the layer data.
+        _log_record (Dict[str, bool]): the log record.
     """
     model: nn.Module
     tensorboard: Optional[SummaryWriter]
     layer_data: bool
+    _log_record: Dict[str, bool]
 
     def __init__(self, model: Model, log_dir: str):
         """Log the model to Tensorboard.
@@ -37,6 +40,7 @@ class TensorboardModelLog:
         self.model = model
         self.tensorboard = None
         self.layer_data = True
+        self._log_record = {}
 
         if not os.path.exists(log_dir):
             os.mkdir(log_dir)
@@ -119,8 +123,8 @@ class TensorboardModelLog:
         if model is None:
             model = self.model
 
-        log_id = f"{TensorboardModelLog.add_graph.__name__}_{id(model)}"
-        if getattr(self.tensorboard, log_id, False):
+        log_id = f"{self.tensorboard.log_dir}_{TensorboardModelLog.add_graph.__name__}_{id(model)}"
+        if log_id in self._log_record:
             return self
 
         if input_size is None:
@@ -132,9 +136,11 @@ class TensorboardModelLog:
             use_autograd_graph = model.use_autograd_graph
             model.use_autograd_graph = False
 
-        self.tensorboard.add_graph(model, torch.zeros(input_size).to(model.device))
-        setattr(self.tensorboard, log_id, True)
+        graph_path = Path(self.tensorboard.log_dir).joinpath(f"graph_{model.__class__.__name__}_{id(model)}")
+        with SummaryWriter(log_dir=str(graph_path)) as graph_writer:
+            graph_writer.add_graph(model, torch.zeros(input_size).to(model.device))
 
+        self._log_record[log_id] = True
         if isinstance(model, Layer):
             model.use_autograd_graph = use_autograd_graph
 
@@ -145,7 +151,7 @@ class TensorboardModelLog:
             train_loader: DataLoader,
             model: Optional[nn.Module] = None,
             input_size: Optional[Sequence[int]] = None,
-    ) -> TensorboardModelLog:
+    ) -> Tuple[str, str]:
         """Add the model summary to the tensorboard.
 
         Args:
@@ -154,7 +160,7 @@ class TensorboardModelLog:
             input_size (Optional[Sequence[int]]): the input size.
 
         Returns:
-            TensorboardModelLog: self.
+            Tuple[str, str]: the model __repr__ and the model summary.
 
         Raises:
             ImportError: if torchinfo (https://github.com/tyleryep/torchinfo) is not installed.
@@ -168,9 +174,7 @@ class TensorboardModelLog:
         if model is None:
             model = self.model
 
-        log_id = f"{TensorboardModelLog.add_summary.__name__}_{id(model)}"
-        if getattr(self.tensorboard, log_id, False):
-            return self
+        log_id = f"{self.tensorboard.log_dir}_{TensorboardModelLog.add_summary.__name__}_{id(model)}"
 
         if input_size is None:
             data_shape = next(iter(train_loader))[0].shape
@@ -181,7 +185,6 @@ class TensorboardModelLog:
             use_autograd_graph = model.use_autograd_graph
             model.use_autograd_graph = True
 
-        model_str = re.sub("\n", "\n    ", "    " + str(model))
         nn_model_summary = torchinfo.summary(
             model,
             input_size=input_size,
@@ -189,16 +192,27 @@ class TensorboardModelLog:
             col_names=[e.value for e in torchinfo.ColumnSettings],
             depth=10,
         )
-        nn_model_summary.formatting.verbose = torchinfo.Verbosity.VERBOSE
-        nn_model_summary = re.sub("\n", "\n    ", f"    {nn_model_summary}")
-
-        self.tensorboard.add_text(f"str ({model.__class__.__name__})", model_str)
-        self.tensorboard.add_text(f"summary ({model.__class__.__name__})", nn_model_summary)
-        setattr(self.tensorboard, log_id, True)
 
         if isinstance(model, Layer):
             model.use_autograd_graph = use_autograd_graph
-        return self
+
+        nn_model_summary.formatting.verbose = torchinfo.Verbosity.VERBOSE
+        model_str = str(model)
+        nn_model_summary = f"{nn_model_summary}"
+
+        if log_id in self._log_record:
+            return model_str, nn_model_summary
+
+        self.tensorboard.add_text(
+            f"str ({model.__class__.__name__})",
+            re.sub("\n", "\n    ", f"    {model_str}")
+        )
+        self.tensorboard.add_text(
+            f"summary ({model.__class__.__name__})",
+            re.sub("\n", "\n    ", f"    {nn_model_summary}")
+        )
+        self._log_record[log_id] = True
+        return model_str, nn_model_summary
 
     def register_training(self, epoch: int, train_loss: float, train_accuracy: float) -> TensorboardModelLog:
         """Register the training data.
@@ -240,7 +254,13 @@ class TensorboardModelLog:
             self.tensorboard.close()
             self.tensorboard = None
 
+    def __enter__(self):
+        """Enter the TensorboardModelLog context.
+
+        Returns:
+            TensorboardModelLog: self.
+        """
+        return self
+
     __exit__ = close
-    """Close the tensorboard."""
-    __del__ = close
     """Close the tensorboard."""
