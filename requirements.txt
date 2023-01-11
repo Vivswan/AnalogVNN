@@ -13,19 +13,13 @@ build # building the package {pyproject-build}
 twine # to publish on pypi {twine upload --repository-url=https://test.pypi.org/legacy/ dist/*} {twine upload dist/*}
 johnnydep # to see dependencies {johnnydep <package>}
 
-# Research
+# Full
 tensorflow
 tensorboard
-torchviz
 torchinfo
-matplotlib
-tabulate
 pillow
 # conda install python-graphviz graphviz
 graphviz
-# python-graphviz
-seaborn
-natsort
 
 # Docs
 sphinx>=4.2.0

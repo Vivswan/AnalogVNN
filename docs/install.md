@@ -17,6 +17,9 @@ Install [PyTorch](https://pytorch.org/) then:
   ```bash
   # Current stable release for CPU and GPU
   pip install analogvnn
+  
+  # For additional optional features
+  pip install analogvnn[full]
   ```
 
 OR

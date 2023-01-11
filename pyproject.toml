@@ -72,24 +72,18 @@ dependencies = [
 # Similar to `dependencies` above, these must be valid existing
 # projects.
 [project.optional-dependencies]
+full = [
+    "tensorflow",
+    "tensorboard",
+    "torchinfo",
+    "graphviz",
+    #"python-graphviz",
+]
 dev = [
     "setuptools>=61.0.0",
     "build", # building the package {pyproject-build}
     "twine", # to publish on pypi {twine upload --repository-url=https://test.pypi.org/legacy/ dist/*} {twine upload dist/*}
     "johnnydep" # to see dependencies {johnnydep <package>}
-]
-research = [
-    "tensorflow",
-    "tensorboard",
-    "torchviz",
-    "torchinfo",
-    "matplotlib",
-    "tabulate",
-    "pillow",
-    "graphviz",
-    #"python-graphviz",
-    "seaborn",
-    "natsort",
 ]
 doc = [
     "sphinx>=4.2.0",
@@ -105,7 +99,7 @@ doc = [
     "sphinxext-opengraph",
     "sphinxcontrib-katex", # for math
 ]
-all = ["analogvnn[research,dev,doc]"]
+all = ["analogvnn[full,dev,doc]"]
 [project.urls]
 "Homepage" = "https://github.com/Vivswan/AnalogVNN"
 "Bug Reports" = "https://github.com/Vivswan/AnalogVNN/issues"
