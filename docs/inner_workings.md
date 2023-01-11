@@ -16,12 +16,12 @@ layer to get parameterized data
 
 PyTorch's ParameterizedParameters vs AnalogVNN's PseudoParameters:
 - Similarity (Forward or Parameterizing the data):
-    > Data -> ParameterizingModel -> Parameterized Data
+  > Data &#8594; ParameterizingModel &#8594; Parameterized Data
 - Difference (Backward or Gradient Calculations):
   - ParameterizedParameters
-    > Parameterized Data -> ParameterizingModel -> Data
-  - PseudoParameters 
-    > Parameterized Data -> Data
+    > Parameterized Data &#8594; ParameterizingModel &#8594; Data
+  - PseudoParameters
+    > Parameterized Data &#8594; Data
 
 So, by using `PseudoParameters` class the gradients of the parameter are calculated in such a way that
 the ParameterizingModel was never present.
@@ -29,13 +29,13 @@ the ParameterizingModel was never present.
 To convert parameters of a layer or model to use PseudoParameters, then use:
 
   ```python
-    PseudoParameters.parameterize(Model, "parameter_name", transformation=ParameterizingModel)
+  PseudoParameters.parameterize(Model, "parameter_name", transformation=ParameterizingModel)
   ```
 
 OR
 
   ```python
-    PseudoParameters.parametrize_module(Model, transformation=ParameterizingModel)
+  PseudoParameters.parametrize_module(Model, transformation=ParameterizingModel)
   ```
 
 ## Forward and Backward Graphs

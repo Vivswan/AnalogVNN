@@ -1,5 +1,4 @@
 import json
-import time
 from pathlib import Path
 
 import numpy as np
@@ -160,8 +159,7 @@ def run_linear3_model():
     """
     torch.backends.cudnn.benchmark = True
     torch.manual_seed(0)
-    data_path = Path("C:/X/").joinpath(str(int(time.time())))
-    data_path = Path("C:/X/").joinpath("hi")
+    data_path = Path("_data")
     if not data_path.exists():
         data_path.mkdir()
 
@@ -173,7 +171,7 @@ def run_linear3_model():
     print(f"Loading Data...")
     train_loader, test_loader, input_shape, classes = load_vision_dataset(
         dataset=torchvision.datasets.MNIST,
-        path="C:/X/_data/",
+        path=str(data_path),
         batch_size=128,
         is_cuda=is_cuda
     )
@@ -244,7 +242,7 @@ def run_linear3_model():
 
     # Training
     print(f"Starting Training...")
-    for epoch in range(1):
+    for epoch in range(10):
         train_loss, train_accuracy = nn_model.train_on(train_loader, epoch=epoch)
         test_loss, test_accuracy = nn_model.test_on(test_loader, epoch=epoch)
 

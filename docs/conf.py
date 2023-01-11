@@ -95,7 +95,6 @@ intersphinx_mapping = {
         'https://github.com/GPflow/tensorflow-intersphinx/raw/master/tfp_py_objects.inv'
     ),
     "torch": ("https://pytorch.org/docs/stable/", None),
-
 }
 intersphinx_disabled_domains = ['std']
 

@@ -7,8 +7,11 @@ Run in Google Colab:
 
 ![3 Layered Linear Photonic Analog Neural Network](_static/analogvnn_model.png)
 
-[Sample code](https://github.com/Photonics-Pitt-Org/AnalogVNN/blob/master/sample_code.py) for 3 layered linear photonic
-analog neural network with 4-bit precision, 0.2 {ref}`extra_classes:leakage` and {ref}`extra_classes:clamp`
+[Sample code](https://github.com/Vivswan/AnalogVNN/blob/v1.0.0/sample_code.py)
+and
+[Sample code with logs](https://github.com/Vivswan/AnalogVNN/blob/v1.0.0/sample_code_with_logs.py)
+for 3 layered linear photonic analog neural network with 4-bit precision,
+0.2 {ref}`extra_classes:leakage` and {ref}`extra_classes:clamp`
 normalization:
 
 ```{literalinclude} ../sample_code.py
