@@ -14,13 +14,15 @@ from torch.nn import Flatten
 from torch.optim import Optimizer
 from torchvision.datasets import VisionDataset
 
-from analogvnn.backward.BackwardIdentity import BackwardIdentity
-from analogvnn.backward.BackwardUsingForward import BackwardUsingForward
+from _research.crc._common import pick_instanceof_module
+from _research.crc.analog_vnn_1_model import WeightModel
+from _research.dataloaders.load_vision_dataset import load_vision_dataset
+from _research.utils.data_dirs import data_dirs
+from _research.utils.path_functions import path_join
 from analogvnn.nn.Linear import Linear
 from analogvnn.nn.activation.Activation import Activation
 from analogvnn.nn.module.FullSequential import FullSequential
 from analogvnn.nn.module.Layer import Layer
-from analogvnn.nn.module.Sequential import Sequential
 from analogvnn.nn.noise.GaussianNoise import GaussianNoise
 from analogvnn.nn.normalize.Normalize import Normalize
 from analogvnn.nn.precision.ReducePrecision import ReducePrecision
@@ -28,32 +30,14 @@ from analogvnn.nn.precision.StochasticReducePrecision import StochasticReducePre
 from analogvnn.parameter.PseudoParameter import PseudoParameter
 from analogvnn.utils.is_cpu_cuda import is_cpu_cuda
 from analogvnn.utils.render_autograd_graph import save_autograd_graph_from_module
-from research.crc._common import pick_instanceof_module
-from research.dataloaders.load_vision_dataset import load_vision_dataset
-from research.utils.data_dirs import data_dirs
-from research.utils.path_functions import path_join
-
-LINEAR_LAYER_SIZES = {
-    1: [],
-    2: [64],
-    3: [128, 64],
-    4: [256, 128, 64]
-}
-CONV_LAYER_SIZES = {
-    0: [],
-    3: [(1, 32, (3, 3)), (32, 64, (3, 3)), (64, 64, (3, 3))],
-}
 
 
 @dataclass
-class RunParametersAnalogVNN1:
+class RunParametersParneet:
     name: Optional[str] = None
     data_folder: Optional[str] = None
 
-    num_conv_layer: Optional[int] = 0
-    num_linear_layer: Optional[int] = 1
     activation_class: Optional[Type[Activation]] = None
-    approach: Optional[str] = "default"
     norm_class: Optional[Type[Normalize]] = None
     precision_class: Type[Layer] = None
     precision: Optional[int] = None
@@ -68,9 +52,10 @@ class RunParametersAnalogVNN1:
 
     optimiser_class: Type[Optimizer] = optim.Adam
     optimiser_parameters: dict = None
-    dataset: Type[VisionDataset] = torchvision.datasets.MNIST
+    dataset: Type[VisionDataset] = torchvision.datasets.CIFAR10
+    color: bool = True
     batch_size: int = 128
-    epochs: int = 10
+    epochs: int = 200
 
     device: Optional[torch.device] = None
     test_logs: bool = False
@@ -85,10 +70,7 @@ class RunParametersAnalogVNN1:
     @property
     def nn_model_params(self):
         return {
-            "num_conv_layer": self.num_conv_layer,
-            "num_linear_layer": self.num_linear_layer,
             "activation_class": self.activation_class,
-            "approach": self.approach,
             "norm_class": self.norm_class,
             "precision_class": self.precision_class,
             "precision": self.precision,
@@ -120,85 +102,84 @@ def cross_entropy_loss_accuracy(output, target):
     return correct / len(output)
 
 
-class ConvLinearModel(FullSequential):
+class ParneetModel(FullSequential):
     def __init__(
             self,
-            input_shape,
-            conv_features_sizes, linear_features_sizes,
+            input_shape, num_classes,
             activation_class: Type[Activation],
-            approach: str = "default",
             norm_class: Type[Normalize] = None,
             precision_class: Type[Union[ReducePrecision, StochasticReducePrecision]] = None,
             precision: Union[int, None] = None,
             noise_class: Type[Union[GaussianNoise]] = None,
             leakage: Union[float, None] = None,
     ):
-        super(ConvLinearModel, self).__init__()
+        super(ParneetModel, self).__init__()
 
-        self.approach = approach
         self.input_shape = input_shape
-        self.conv_features_sizes = conv_features_sizes
-        self.linear_features_sizes = linear_features_sizes
+        self.num_classes = num_classes
         self.activation_class = activation_class
         self.norm_class = norm_class
         self.precision_class = precision_class
         self.precision = precision
         self.noise_class = noise_class
         self.leakage = leakage
-        self.num_conv_layer = len(conv_features_sizes)
-        self.num_linear_layer = len(linear_features_sizes) - 1
-
-        temp_x = torch.zeros(input_shape, requires_grad=False)
 
         self.all_layers: List[nn.Module] = []
-        for i in range(len(conv_features_sizes)):
-            conv_layer = nn.Conv2d(
-                in_channels=conv_features_sizes[i][0],
-                out_channels=conv_features_sizes[i][1],
-                kernel_size=conv_features_sizes[i][2]
-            )
 
-            self.add_doa_layers()
-            self.all_layers.append(conv_layer)
-            self.add_aod_layers()
+        self.add_doa_layers()
+        self.all_layers.append(nn.Conv2d(
+            in_channels=self.input_shape[1],
+            out_channels=48,
+            kernel_size=(3, 3),
+            padding=(1, 1)
+        ))
+        self.add_aod_layers()
+        self.add_doa_layers()
+        self.all_layers.append(nn.Conv2d(in_channels=48, out_channels=48, kernel_size=(3, 3)))
+        self.add_aod_layers()
+        self.all_layers.append(nn.MaxPool2d(2, 2))
+        self.all_layers.append(nn.Dropout(0.25))
+        self.add_doa_layers()
+        self.all_layers.append(nn.Conv2d(in_channels=48, out_channels=96, kernel_size=(3, 3), padding=(1, 1)))
+        self.add_aod_layers()
+        self.add_doa_layers()
+        self.all_layers.append(nn.Conv2d(in_channels=96, out_channels=96, kernel_size=(3, 3)))
+        self.add_aod_layers()
+        self.all_layers.append(nn.MaxPool2d(2, 2))
+        self.all_layers.append(nn.Dropout(0.25))
+        self.add_doa_layers()
+        self.all_layers.append(nn.Conv2d(in_channels=96, out_channels=192, kernel_size=(3, 3), padding=(1, 1)))
+        self.add_aod_layers()
+        self.add_doa_layers()
+        self.all_layers.append(nn.Conv2d(in_channels=192, out_channels=192, kernel_size=(3, 3)))
+        self.add_aod_layers()
+        self.all_layers.append(nn.MaxPool2d(2, 2))
+        self.all_layers.append(nn.Dropout(0.25))
 
-            temp_x = conv_layer(temp_x)
+        self.all_layers.append(Flatten(start_dim=1))
 
-            max_pool = nn.MaxPool2d(2, 2)
-            self.all_layers.append(max_pool)
-            temp_x = max_pool(temp_x)
-
-        flatten = Flatten(start_dim=1)
-        self.all_layers.append(flatten)
-        temp_x = flatten(temp_x)
-
-        for i in range(len(linear_features_sizes)):
-            linear_layer = Linear(in_features=temp_x.shape[1], out_features=linear_features_sizes[i])
-            temp_x = linear_layer(temp_x)
-
-            if activation_class is not None:
-                activation_class.initialise_(linear_layer.weight)
-
-            self.add_doa_layers()
-            self.all_layers.append(linear_layer)
-            self.add_aod_layers()
+        self.add_doa_layers()
+        self.all_layers.append(Linear(in_features=self.get_in_shape(input_shape)[1], out_features=512))
+        self.add_aod_layers()
+        self.all_layers.append(nn.Dropout(0.5))
+        self.add_doa_layers()
+        self.all_layers.append(Linear(in_features=512, out_features=256))
+        self.add_aod_layers()
+        self.all_layers.append(nn.Dropout(0.5))
+        self.add_doa_layers()
+        self.all_layers.append(Linear(in_features=256, out_features=num_classes))
+        self.add_aod_layers()
 
         self.conv2d_layers = pick_instanceof_module(self.all_layers, nn.Conv2d)
         self.max_pool2d_layers = pick_instanceof_module(self.all_layers, nn.MaxPool2d)
         self.linear_layers = pick_instanceof_module(self.all_layers, Linear)
-        self.activation_layers = pick_instanceof_module(self.all_layers, activation_class)
+        self.activation_layers = pick_instanceof_module(self.all_layers, self.activation_class)
         self.norm_layers = pick_instanceof_module(self.all_layers, norm_class)
         self.precision_layers = pick_instanceof_module(self.all_layers, precision_class)
         self.noise_layers = pick_instanceof_module(self.all_layers, noise_class)
 
-        if approach == "default":
-            pass
-        if approach == "use_autograd_graph":
-            self.backward.use_autograd_graph = True
-        if approach == "no_norm_grad":
-            [i.set_backward_function(BackwardIdentity) for i in self.norm_layers]
-        if approach == "norm_grad_by_forward":
-            [i.set_backward_function(BackwardUsingForward) for i in self.norm_layers]
+        for i in self.linear_layers:
+            self.activation_class.initialise_(i.weight)
 
         self.add_sequence(*self.all_layers)
 
@@ -221,6 +202,17 @@ class ConvLinearModel(FullSequential):
         if self.activation_class is not None:
             self.all_layers.append(self.activation_class())
 
+    def get_in_shape(self, input_shape):
+        with torch.no_grad():
+            temp_x = torch.zeros(input_shape, requires_grad=False)
+            for i in self.all_layers:
+                # print(temp_x.shape)
+                temp_t = i.training
+                i.train(False)
+                temp_x = i(temp_x)
+                i.train(temp_t)
+        return temp_x.shape
+
     def set_optimizer(self, optimizer_cls, super_optimizer_cls=None, param_sanitizer=None, **optimiser_parameters):
         if super_optimizer_cls is not None:
             self.optimizer = super_optimizer_cls(
@@ -240,11 +232,7 @@ class ConvLinearModel(FullSequential):
             'nn_model_class': self.__class__.__name__,
 
             'input_shape': self.input_shape,
-            'num_conv_layer': self.num_conv_layer,
-            'num_linear_layer': self.num_linear_layer,
-            'conv_features_sizes': self.conv_features_sizes,
-            'linear_features_sizes': self.linear_features_sizes,
-            'approach': self.approach,
+            'num_classes': self.num_classes,
             'activation_class': self.activation_class.__name__ if self.activation_class is not None else str(None),
             'norm_class_y': self.norm_class.__name__ if self.norm_class is not None else str(None),
             'precision_class_y': self.precision_class.__name__ if self.precision_class is not None else str(None),
@@ -258,52 +246,12 @@ class ConvLinearModel(FullSequential):
         }
 
 
-class WeightModel(Sequential):
-    def __init__(
-            self,
-            norm_class: Type[Normalize] = None,
-            precision_class: Type[Union[ReducePrecision, StochasticReducePrecision]] = None,
-            precision: Union[int, None] = None,
-            noise_class: Type[Union[GaussianNoise]] = None,
-            leakage: Union[float, None] = None,
-    ):
-        super(WeightModel, self).__init__()
-        self.norm_class = norm_class
-        self.precision_class = precision_class
-        self.precision = precision
-        self.noise_class = noise_class
-        self.leakage = leakage
-
-        self.all_layers = []
-
-        if norm_class is not None:
-            self.all_layers.append(norm_class())
-        if precision_class is not None:
-            self.all_layers.append(precision_class(precision=precision))
-        if noise_class is not None:
-            self.all_layers.append(noise_class(leakage=leakage, precision=precision))
-
-        self.eval()
-        if len(self.all_layers) > 0:
-            self.add_sequence(*self.all_layers)
-
-    def hyperparameters(self):
-        return {
-            'weight_model_class': self.__class__.__name__,
-
-            'norm_class_w': self.norm_class.__name__ if self.norm_class is not None else str(None),
-            'precision_class_w': self.precision_class.__name__ if self.precision_class is not None else str(None),
-            'precision_w': self.precision,
-            'noise_class_w': self.noise_class.__name__ if self.noise_class is not None else str(None),
-            'leakage_w': self.leakage,
-        }
-
-
-def run_analog_vnn1_model(parameters: RunParametersAnalogVNN1):
+def run_parneet_model(parameters: RunParametersParneet):
+    print(parameters.color)
     torch.backends.cudnn.benchmark = True
 
     if parameters.device is not None:
-        is_cpu_cuda.set_device(str(parameters.device))
+        is_cpu_cuda.set_device(parameters.device)
     device, is_cuda = is_cpu_cuda.is_using_cuda
     parameters.device = device
 
@@ -330,19 +278,17 @@ def run_analog_vnn1_model(parameters: RunParametersAnalogVNN1):
         dataset=parameters.dataset,
         path=paths.dataset,
         batch_size=parameters.batch_size,
-        is_cuda=is_cuda
+        is_cuda=is_cuda,
+        grayscale=not parameters.color
     )
 
     nn_model_params = parameters.nn_model_params
     weight_model_params = parameters.weight_model_params
     nn_model_params["input_shape"] = input_shape
-    nn_model_params["conv_features_sizes"] = CONV_LAYER_SIZES[parameters.num_conv_layer]
-    nn_model_params["linear_features_sizes"] = LINEAR_LAYER_SIZES[parameters.num_linear_layer] + [len(classes)]
-    del nn_model_params["num_conv_layer"]
-    del nn_model_params["num_linear_layer"]
+    nn_model_params["num_classes"] = len(classes)
 
     print(f"Creating Models...")
-    nn_model = ConvLinearModel(**nn_model_params)
+    nn_model = ParneetModel(**nn_model_params)
     weight_model = WeightModel(**weight_model_params)
     if parameters.tensorboard:
         nn_model.create_tensorboard(paths.tensorboard)
@@ -359,6 +305,8 @@ def run_analog_vnn1_model(parameters: RunParametersAnalogVNN1):
         'dataset': parameters.dataset.__name__,
         'batch_size': parameters.batch_size,
         'is_cuda': is_cuda,
+        'color': parameters.color,
+        'epochs': parameters.epochs,
 
         **nn_model.hyperparameters(),
         **weight_model.hyperparameters(),
@@ -432,6 +380,9 @@ def run_analog_vnn1_model(parameters: RunParametersAnalogVNN1):
             torch.save(nn_model.state_dict(), f"{paths.model_data}/{epoch}_state_dict_nn_model")
             torch.save(weight_model.state_dict(), f"{paths.model_data}/{epoch}_state_dict_weight_model")
 
+        if train_accuracy < 0.125 and epoch >= 9:
+            break
+
         if parameters.test_run:
             break
 
@@ -453,8 +404,6 @@ def run_analog_vnn1_model(parameters: RunParametersAnalogVNN1):
 
     if parameters.tensorboard:
         parameter_log["input_shape"] = "_".join([str(x) for x in parameter_log["input_shape"]])
-        parameter_log["conv_features_sizes"] = "_".join([str(x) for x in parameter_log["conv_features_sizes"]])
-        parameter_log["linear_features_sizes"] = "_".join([str(x) for x in parameter_log["linear_features_sizes"]])
         metric_dict = {
             "train_loss": loss_accuracy["train_loss"][-1],
             "train_accuracy": loss_accuracy["train_accuracy"][-1],

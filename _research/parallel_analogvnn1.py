@@ -16,9 +16,9 @@ import torch
 import torchvision
 from natsort import natsorted, ns
 
+from _research.crc.analog_vnn_1 import analogvnn1_parameters_list
 from analogvnn.nn.normalize.Clamp import *
 from analogvnn.nn.normalize.LPNorm import L2Norm
-from research.crc.analog_vnn_1 import analogvnn1_parameters_list
 
 
 def prepare_data_folder(folder_path):

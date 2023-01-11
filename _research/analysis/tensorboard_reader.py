@@ -17,11 +17,11 @@ from torch import nn
 from torch.utils.data import DataLoader
 
 import analogvnn.nn.normalize.Normalize
+from _research.dataloaders.load_vision_dataset import load_vision_dataset
 from analogvnn.nn.noise.GaussianNoise import GaussianNoise
 from analogvnn.nn.normalize.Clamp import Clamp, Clamp01
 from analogvnn.nn.precision.ReducePrecision import ReducePrecision
 from analogvnn.utils.is_cpu_cuda import is_cpu_cuda
-from research.dataloaders.load_vision_dataset import load_vision_dataset
 
 
 def collect_parameters_to_json(path, destination=None):
