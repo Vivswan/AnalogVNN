@@ -51,6 +51,10 @@ def size_to_str(size):
     return '(' + ', '.join(['%d' % s for s in size]) + ')'
 
 
+def _format_name_size(name, size):
+    return '%s\n %s' % (name, size)
+
+
 def resize_graph(dot: Digraph, size_per_element: float = 0.15, min_size: float = 12):
     """Resize the graph according to how much content it contains.
 
@@ -147,6 +151,7 @@ class AutoGradDot:
     show_saved: bool = dataclasses.field(default=False, repr=False, hash=False)
     max_attr_chars: int = dataclasses.field(default=50, repr=False, hash=False)
     _called: bool = False
+    _ignore_tensor_names: Dict[str, bool] = dataclasses.field(default_factory=dict, repr=False, hash=False)
 
     def __post_init__(self):
         """Create the graphviz graph.
@@ -170,6 +175,7 @@ class AutoGradDot:
             fontname='monospace'
         )
         self.dot = Digraph(node_attr=node_attr, graph_attr=dict(size="12,12"), format="svg")
+        self.add_ignore_tensor_names("_empty_holder_tensor")
 
     @property
     def inputs(self) -> Sequence[Tensor]:
@@ -247,7 +253,7 @@ class AutoGradDot:
             self.param_map[id(v.data)] = f"OUTPUT_{i}"
 
     @property
-    def module(self):
+    def module(self) -> nn.Module:
         """the module.
 
         Returns:
@@ -286,7 +292,19 @@ class AutoGradDot:
         self.module = self.module
         return self
 
-    def get_tensor_name(self, tensor: Tensor, name: Optional[str] = None):
+    @property
+    def ignore_tensor_names(self) -> Dict[str, bool]:
+        return self._ignore_tensor_names
+
+    def add_ignore_tensor_names(self, name: str):
+        self._ignore_tensor_names[name] = True
+        return self
+
+    def del_ignore_tensor_names(self, name: str):
+        self._ignore_tensor_names.pop(name, None)
+        return self
+
+    def get_tensor_name(self, tensor: Tensor, name: Optional[str] = None) -> Tuple[str, str]:
         """Get the name of the tensor.
 
         Args:
@@ -294,7 +312,7 @@ class AutoGradDot:
             name (Optional[str]): the name of the tensor. Defaults to None.
 
         Returns:
-            str: the name of the tensor.
+            Tuple[str, str]: the name and size of the tensor.
         """
         if not name:
             if id(tensor) in self.param_map:
@@ -308,7 +326,8 @@ class AutoGradDot:
                     name = str(tensor.names)
             else:
                 name = ''
-        return '%s\n %s' % (name, size_to_str(tensor.size()))
+        name, size = name.strip(), size_to_str(tensor.size()).strip()
+        return name, size
 
     def add_tensor(self, tensor: Tensor, name: Optional[str] = None, _attributes=None, **kwargs):
         """Add a tensor to the graph.
@@ -325,7 +344,7 @@ class AutoGradDot:
         self._seen.add(tensor)
         self.dot.node(
             name=str(id(tensor)),
-            label=self.get_tensor_name(tensor, name=name),
+            label=_format_name_size(*self.get_tensor_name(tensor, name=name)),
             _attributes=_attributes,
             **kwargs
         )
@@ -397,7 +416,7 @@ class AutoGradDot:
         return item in self._seen
 
 
-def add_grad_fn(grad_fn, autograd_dot: AutoGradDot):
+def _add_grad_fn(grad_fn, autograd_dot: AutoGradDot):
     """Add a grad_fn to the graph.
 
     Args:
@@ -448,45 +467,47 @@ def add_grad_fn(grad_fn, autograd_dot: AutoGradDot):
             if (
                     u[0].__class__.__name__ == 'AccumulateGrad' and
                     hasattr(u[0], 'variable') and
-                    autograd_dot.get_tensor_name(u[0].variable) == "_empty_holder_tensor\n (1)"
+                    autograd_dot.get_tensor_name(u[0].variable)[0] in autograd_dot.ignore_tensor_names
             ):
                 continue
 
             autograd_dot.add_edge(u[0], grad_fn)
-            add_grad_fn(u[0], autograd_dot=autograd_dot)
+            _add_grad_fn(u[0], autograd_dot=autograd_dot)
 
     # note: this used to show .saved_tensors in pytorch0.2, but stopped
     # working* as it was moved to ATen and Variable-Tensor merged
     # also note that this still works for custom autograd functions
     if hasattr(grad_fn, 'saved_tensors'):
         for t in grad_fn.saved_tensors:
+            if t is None:
+                continue
             autograd_dot.add_edge(t, grad_fn)
             autograd_dot.add_tensor(t, fillcolor='orange')
 
 
-def add_base_tensor(tensor: Tensor, autograd_dot: AutoGradDot, color: str = 'darkolivegreen1'):
+def _add_base_tensor(tensor: Tensor, autograd_dot: AutoGradDot, fillcolor: str = 'darkolivegreen1'):
     """Add a base tensor to the graph.
 
     Args:
         tensor (Tensor): the base tensor.
         autograd_dot (AutoGradDot): the AutoGradDot object.
-        color (str): the color of the base tensor in graph. Defaults to 'darkolivegreen1'.
+        fillcolor (str): the color of the base tensor in graph. Defaults to 'darkolivegreen1'.
     """
     if autograd_dot.is_seen(tensor):
         return
 
-    autograd_dot.add_tensor(tensor, fillcolor=color)
+    autograd_dot.add_tensor(tensor, fillcolor=fillcolor)
 
     if tensor.grad_fn:
-        add_grad_fn(tensor.grad_fn, autograd_dot=autograd_dot)
+        _add_grad_fn(tensor.grad_fn, autograd_dot=autograd_dot)
         autograd_dot.add_edge(tensor.grad_fn, tensor)
 
     if tensor._is_view():
-        add_base_tensor(tensor._base, autograd_dot=autograd_dot, color='darkolivegreen3')
+        _add_base_tensor(tensor._base, autograd_dot=autograd_dot, fillcolor='darkolivegreen3')
         autograd_dot.add_edge(tensor._base, tensor, style="dotted")
 
 
-def compile_autograd_obj(
+def _compile_autograd_obj(
         autograd_dot: AutoGradDot,
         additional_params: Optional[dict] = None,
         show_attrs: bool = True,
@@ -535,11 +556,27 @@ def compile_autograd_obj(
 
     # handle multiple outputs
     for v in autograd_dot.outputs:
-        add_base_tensor(tensor=v, autograd_dot=autograd_dot)
+        _add_base_tensor(tensor=v, autograd_dot=autograd_dot)
 
     resize_graph(autograd_dot.dot)
 
     return autograd_dot
+
+
+def _toggle_autograd_backward(disable, status, self):
+    if not isinstance(self, Layer):
+        return
+
+    self = self.backward_function
+
+    if self is None:
+        return
+
+    if disable:
+        status[id(self)] = self._disable_autograd_backward
+        self._disable_autograd_backward = True
+    else:
+        self._disable_autograd_backward = status[id(self)]
 
 
 def make_autograd_obj_from_output(
@@ -575,7 +612,7 @@ def make_autograd_obj_from_output(
         autograd_dot.param_map[id(v)] = k
         autograd_dot.param_map[id(v.data)] = k
 
-    return compile_autograd_obj(autograd_dot, additional_params, show_attrs, show_saved, max_attr_chars)
+    return _compile_autograd_obj(autograd_dot, additional_params, show_attrs, show_saved, max_attr_chars)
 
 
 def make_autograd_obj_from_module(
@@ -638,41 +675,26 @@ def make_autograd_obj_from_module(
         use_autograd_graph_status = module.use_autograd_graph
         module.use_autograd_graph = True
 
-    def toggle_autograd_backward(disable, status, self):
-        if not isinstance(self, Layer):
-            return
-
-        self = self.backward_function
-
-        if self is None:
-            return
-
-        if disable:
-            status[id(self)] = self._disable_autograd_backward
-            self._disable_autograd_backward = True
-        else:
-            self._disable_autograd_backward = status[id(self)]
-
     disable_autograd_backward_status = {}
     if from_forward:
-        module.apply(partial(toggle_autograd_backward, True, disable_autograd_backward_status))
+        module.apply(partial(_toggle_autograd_backward, True, disable_autograd_backward_status))
 
     module.train()
     autograd_dot.outputs = module(*new_args, **new_kwargs)
     module.train(training_status)
 
     if from_forward:
-        module.apply(partial(toggle_autograd_backward, False, disable_autograd_backward_status))
+        module.apply(partial(_toggle_autograd_backward, False, disable_autograd_backward_status))
 
     if isinstance(module, Layer):
         module.use_autograd_graph = use_autograd_graph_status
 
-    autograd_dot = compile_autograd_obj(autograd_dot, additional_params, show_attrs, show_saved, max_attr_chars)
+    autograd_dot = _compile_autograd_obj(autograd_dot, additional_params, show_attrs, show_saved, max_attr_chars)
 
     return autograd_dot
 
 
-def join_scope_name(name: str, scope: Dict[str, str]) -> str:
+def _join_scope_name(name: str, scope: Dict[str, str]) -> str:
     return '/'.join([scope[name], name])
 
 
@@ -693,11 +715,11 @@ def parse_trace_graph(graph) -> List[Node]:
     for n in graph.nodes():
         attrs = {k: n[k] for k in n.attributeNames()}
         attrs = str(attrs).replace("'", ' ')
-        inputs = [join_scope_name(i.uniqueName(), scope) for i in n.inputs()]
+        inputs = [_join_scope_name(i.uniqueName(), scope) for i in n.inputs()]
         uname = next(n.outputs()).uniqueName()
 
         nodes.append(Node(
-            name=join_scope_name(uname, scope),
+            name=_join_scope_name(uname, scope),
             op=n.kind(),
             inputs=inputs,
             attr=attrs
@@ -709,7 +731,7 @@ def parse_trace_graph(graph) -> List[Node]:
             scope[uname] = 'unused'
 
         nodes.append(Node(
-            name=join_scope_name(uname, scope),
+            name=_join_scope_name(uname, scope),
             op='Parameter',
             inputs=[],
             attr=str(n.type())
