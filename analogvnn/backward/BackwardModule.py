@@ -19,14 +19,16 @@ class BackwardModule(abc.ABC):
     of the function.
 
     Attributes:
-        _layer(Optional[nn.Module]): The layer for which the backward gradient is computed.
-        _empty_holder_tensor(Tensor): A placeholder tensor which always requires gradient for backward gradient
+        _layer (Optional[nn.Module]): The layer for which the backward gradient is computed.
+        _empty_holder_tensor (Tensor): A placeholder tensor which always requires gradient for backward gradient
          computation.
-         _autograd_backward(Type[AutogradBackward]): The autograd backward function.
+        _autograd_backward (Type[AutogradBackward]): The autograd backward function.
+        _disable_autograd_backward (bool): If True the autograd backward function is disabled.
     """
     _layer: Optional[nn.Module]
     _empty_holder_tensor: Tensor
     _autograd_backward: Type[AutogradBackward]
+    _disable_autograd_backward: bool
 
     # noinspection PyAbstractClass
     class AutogradBackward(autograd.Function):
@@ -41,7 +43,7 @@ class BackwardModule(abc.ABC):
 
             Args:
                 ctx: The context of the autograd function.
-                backward_module(BackwardModule): The backward module.
+                backward_module (BackwardModule): The backward module.
                 _ (Tensor): placeholder tensor which always requires grad.
                 *args (Tensor): The arguments of the function.
                 **kwargs (Tensor): The keyword arguments of the function.
@@ -85,6 +87,7 @@ class BackwardModule(abc.ABC):
         # noinspection PyTypeChecker
         self._autograd_backward = None
         self._autograd_backward = self._set_autograd_backward()
+        self._disable_autograd_backward = False
         if not isinstance(self, nn.Module):
             self.set_layer(layer)
 
@@ -159,7 +162,7 @@ class BackwardModule(abc.ABC):
         Returns:
             TENSORS: The output of the layer.
         """
-        if to_apply:
+        if to_apply and not self._disable_autograd_backward:
             return self._autograd_backward.apply(self, self._empty_holder_tensor, *args, **kwargs)
         else:
             return self._call_impl_forward(*args, **kwargs)
