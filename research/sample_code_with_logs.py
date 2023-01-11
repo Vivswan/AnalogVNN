@@ -18,7 +18,7 @@ from analogvnn.nn.normalize.Clamp import Clamp
 from analogvnn.nn.precision.ReducePrecision import ReducePrecision
 from analogvnn.parameter.PseudoParameter import PseudoParameter
 from analogvnn.utils.is_cpu_cuda import is_cpu_cuda
-from analogvnn.utils.render_autograd_graph import save_autograd_graph
+from analogvnn.utils.render_autograd_graph import save_autograd_graph_from_module
 
 
 def load_vision_dataset(dataset, path, batch_size, is_cuda=False, grayscale=True):
@@ -161,8 +161,8 @@ def run_linear3_model():
     """
     torch.backends.cudnn.benchmark = True
     torch.manual_seed(0)
-    data_path = Path("C:/X/_data").joinpath(str(int(time.time())))
-    data_path = Path("C:/X/_data").joinpath("hi")
+    data_path = Path("C:/X/").joinpath(str(int(time.time())))
+    data_path = Path("C:/X/").joinpath("hi")
     if not data_path.exists():
         data_path.mkdir()
 
@@ -233,8 +233,12 @@ def run_linear3_model():
         file.write(f"{weight_model_summary}\n\n")
 
     print(f"Saving Graphs...")
-    save_autograd_graph(data_path.joinpath(f"nn_model"), nn_model, next(iter(train_loader))[0])
-    save_autograd_graph(data_path.joinpath(f"weight_model"), weight_model, torch.ones((1, 1)))
+    save_autograd_graph_from_module(data_path.joinpath(f"nn_model"), nn_model, next(iter(train_loader))[0])
+    save_autograd_graph_from_module(data_path.joinpath(f"weight_model"), weight_model, torch.ones((1, 1)))
+    save_autograd_graph_from_module(data_path.joinpath(f"nn_model_autograd"), nn_model, next(iter(train_loader))[0],
+                                    from_forward=True)
+    save_autograd_graph_from_module(data_path.joinpath(f"weight_model_autograd"), weight_model, torch.ones((1, 1)),
+                                    from_forward=True)
     nn_model.tensorboard.add_graph(train_loader)
     nn_model.tensorboard.add_graph(train_loader, model=weight_model)
     nn_model.tensorboard.add_summary(train_loader)

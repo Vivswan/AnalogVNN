@@ -6,10 +6,13 @@ import warnings
 from collections import namedtuple
 from dataclasses import dataclass
 from distutils.version import LooseVersion
-from typing import Optional, Sequence, List, Dict, Union, Any, Callable
+from functools import partial
+from pathlib import Path
+from typing import Optional, Sequence, List, Dict, Union, Any, Callable, Iterator, Tuple
 
 import torch
 from torch import Tensor, nn
+from torch.nn import Parameter
 
 from analogvnn.nn.module.Layer import Layer
 from analogvnn.utils.is_cpu_cuda import is_cpu_cuda
@@ -18,14 +21,16 @@ if typing.TYPE_CHECKING:
     from graphviz import Digraph
 
 __all__ = [
-    'save_autograd_graph',
-    'save_autograd_graph_from_trace',
-    'get_autograd_dot',
-    'get_autograd_dot_from_trace',
-    'get_autograd_obj',
-    'make_autograd_obj',
     'size_to_str',
     'AutoGradDot',
+    'make_autograd_obj_from_output',
+    'make_autograd_obj_from_module',
+    'get_autograd_dot_from_outputs',
+    'get_autograd_dot_from_module',
+    'get_autograd_dot_from_trace',
+    'save_autograd_graph_from_outputs',
+    'save_autograd_graph_from_module',
+    'save_autograd_graph_from_trace',
 ]
 
 Node = namedtuple('Node', ('name', 'inputs', 'attr', 'op'))
@@ -90,7 +95,7 @@ def get_fn_name(fn: Callable, show_attrs: bool, max_attr_chars: int) -> str:
         attr = attr[len(SAVED_PREFIX):]
         if torch.is_tensor(val):
             attrs[attr] = "[saved tensor]"
-        elif isinstance(val, tuple) and any(torch.is_tensor(t) for t in val):
+        elif isinstance(val, Sequence) and any(torch.is_tensor(t) for t in val):
             attrs[attr] = "[saved tensors]"
         else:
             attrs[attr] = str(val)
@@ -166,24 +171,6 @@ class AutoGradDot:
         )
         self.dot = Digraph(node_attr=node_attr, graph_attr=dict(size="12,12"), format="svg")
 
-    def __call__(self) -> Optional[Sequence[Tensor]]:
-        """Call the module with inputs and returns the outputs.
-
-        Returns:
-            Optional[Sequence[Tensor]]: the outputs of the module.
-        """
-
-        assert self._module is not None
-        outputs = self._module(*self.inputs, **self.inputs_kwargs)
-
-        if outputs is None:
-            return outputs
-
-        if isinstance(outputs, tuple):
-            return outputs
-
-        return (outputs,)
-
     @property
     def inputs(self) -> Sequence[Tensor]:
         """the arg inputs to the module
@@ -206,7 +193,7 @@ class AutoGradDot:
         if not inputs:
             return
 
-        if not isinstance(inputs, tuple):
+        if not isinstance(inputs, Sequence):
             inputs = (inputs,)
 
         for i, v in enumerate(inputs):
@@ -246,21 +233,18 @@ class AutoGradDot:
         Returns:
             Optional[Sequence[Tensor]]: the outputs of the module.
         """
-        if self._called:
-            return self._outputs
+        return self._outputs
 
-        outputs = self.__call__()
+    @outputs.setter
+    def outputs(self, outputs):
         self._called = True
+        if outputs is not None and not isinstance(outputs, Sequence):
+            outputs = (outputs,)
 
-        if not outputs:
-            return
-
+        self._outputs = outputs
         for i, v in enumerate(outputs):
             self.param_map[id(v)] = f"OUTPUT_{i}"
             self.param_map[id(v.data)] = f"OUTPUT_{i}"
-
-        self._outputs = outputs
-        return self._outputs
 
     @property
     def module(self):
@@ -441,7 +425,7 @@ def add_grad_fn(grad_fn, autograd_dot: AutoGradDot):
                 autograd_dot.add_tensor(val, name=attr, fillcolor='orange')
                 continue
 
-            if isinstance(val, tuple):
+            if isinstance(val, Sequence):
                 for i, t in enumerate(val):
                     if not torch.is_tensor(t):
                         continue
@@ -502,16 +486,14 @@ def add_base_tensor(tensor: Tensor, autograd_dot: AutoGradDot, color: str = 'dar
         autograd_dot.add_edge(tensor._base, tensor, style="dotted")
 
 
-def make_autograd_obj(
-        module: nn.Module,
-        *args: Tensor,
+def compile_autograd_obj(
+        autograd_dot: AutoGradDot,
         additional_params: Optional[dict] = None,
         show_attrs: bool = True,
         show_saved: bool = True,
         max_attr_chars: int = 50,
-        **kwargs: Tensor
 ) -> AutoGradDot:
-    """Produces Graphviz representation of PyTorch autograd graph from forward pass.
+    """Make dot graph in AutoGradDot
 
     If a node represents a backward function, it is gray. Otherwise, the node
     represents a tensor and is either blue, orange, or green:
@@ -524,8 +506,7 @@ def make_autograd_obj(
          a dark green node.
 
     Args:
-        module (nn.Module): PyTorch model
-        *args (Tensor): input to the model
+        autograd_dot (AutoGradDot): the AutoGradDot object.
         additional_params (dict): dict of additional params to label nodes with
         show_attrs (bool): whether to display non-tensor attributes of backward nodes
             (Requires PyTorch version >= 1.9)
@@ -534,12 +515,10 @@ def make_autograd_obj(
             present, are always displayed. (Requires PyTorch version >= 1.9)
         max_attr_chars (int): if show_attrs is `True`, sets max number of characters
             to display for any given attribute.
-        **kwargs (Tensor): input to the model
 
     Returns:
         AutoGradDot: graphviz representation of autograd graph
     """
-
     if LooseVersion(torch.__version__) < LooseVersion("1.9") and (show_attrs or show_saved):
         warnings.warn(
             "make_dot: showing grad_fn attributes and saved variables"
@@ -547,11 +526,6 @@ def make_autograd_obj(
             " saved tensors saved by custom autograd functions.)"
         )
 
-    autograd_dot = AutoGradDot()
-    autograd_dot.module = module
-    autograd_dot.inputs = args
-    autograd_dot.inputs_kwargs = kwargs
-    autograd_dot.reset_params()
     autograd_dot.show_attrs = show_attrs
     autograd_dot.show_saved = show_saved
     autograd_dot.max_attr_chars = max_attr_chars
@@ -564,6 +538,137 @@ def make_autograd_obj(
         add_base_tensor(tensor=v, autograd_dot=autograd_dot)
 
     resize_graph(autograd_dot.dot)
+
+    return autograd_dot
+
+
+def make_autograd_obj_from_output(
+        outputs: Union[Tensor, Sequence[Tensor]],
+        named_params: Union[Dict[str, Any], Iterator[Tuple[str, Parameter]]],
+        additional_params: Optional[dict] = None,
+        show_attrs: bool = True,
+        show_saved: bool = True,
+        max_attr_chars: int = 50,
+) -> AutoGradDot:
+    """Compile Graphviz representation of PyTorch autograd graph from output tensors.
+
+    Args:
+        outputs (Union[Tensor, Sequence[Tensor]]): output tensor(s) of forward pass
+        named_params (Union[Dict[str, Any], Iterator[Tuple[str, Parameter]]]): dict of params to label nodes with
+        additional_params (dict): dict of additional params to label nodes with
+        show_attrs (bool): whether to display non-tensor attributes of backward nodes
+            (Requires PyTorch version >= 1.9)
+        show_saved (bool): whether to display saved tensor nodes that are not by custom
+            autograd functions. Saved tensor nodes for custom functions, if
+            present, are always displayed. (Requires PyTorch version >= 1.9)
+        max_attr_chars (int): if show_attrs is `True`, sets max number of characters
+            to display for any given attribute.
+
+    Returns:
+        AutoGradDot: graphviz representation of autograd graph
+    """
+    autograd_dot = AutoGradDot()
+    autograd_dot.outputs = outputs
+    named_params = dict(named_params)
+
+    for k, v in named_params.items():
+        autograd_dot.param_map[id(v)] = k
+        autograd_dot.param_map[id(v.data)] = k
+
+    return compile_autograd_obj(autograd_dot, additional_params, show_attrs, show_saved, max_attr_chars)
+
+
+def make_autograd_obj_from_module(
+        module: nn.Module,
+        *args: Tensor,
+        additional_params: Optional[dict] = None,
+        show_attrs: bool = True,
+        show_saved: bool = True,
+        max_attr_chars: int = 50,
+        from_forward: bool = False,
+        **kwargs: Tensor
+) -> AutoGradDot:
+    """Compile Graphviz representation of PyTorch autograd graph from forward pass.
+
+    Args:
+        module (nn.Module): PyTorch model
+        *args (Tensor): input to the model
+        additional_params (dict): dict of additional params to label nodes with
+        show_attrs (bool): whether to display non-tensor attributes of backward nodes
+            (Requires PyTorch version >= 1.9)
+        show_saved (bool): whether to display saved tensor nodes that are not by custom
+            autograd functions. Saved tensor nodes for custom functions, if
+            present, are always displayed. (Requires PyTorch version >= 1.9)
+        max_attr_chars (int): if show_attrs is `True`, sets max number of characters
+            to display for any given attribute.
+        from_forward (bool): if True then use autograd graph otherwise analogvvn graph
+        **kwargs (Tensor): input to the model
+
+    Returns:
+        AutoGradDot: graphviz representation of autograd graph
+    """
+
+    assert isinstance(module, nn.Module)
+    new_args = []
+    new_kwargs = {}
+    device = is_cpu_cuda.get_module_device(module)
+
+    for i in args:
+        assert isinstance(i, Tensor)
+        i = i.to(device)
+        i = i.detach()
+        i = i.requires_grad_(True)
+        new_args.append(i)
+
+    for k, v in kwargs.items():
+        assert isinstance(v, Tensor)
+        v = v.to(device)
+        v = v.detach()
+        v = v.requires_grad_(True)
+        new_kwargs[k] = v
+
+    autograd_dot = AutoGradDot()
+    autograd_dot.module = module
+    autograd_dot.inputs = new_args
+    autograd_dot.inputs_kwargs = new_kwargs
+
+    training_status = module.training
+    use_autograd_graph_status = False
+    if isinstance(module, Layer):
+        use_autograd_graph_status = module.use_autograd_graph
+        module.use_autograd_graph = True
+
+    def toggle_autograd_backward(disable, status, self):
+        if not isinstance(self, Layer):
+            return
+
+        self = self.backward_function
+
+        if self is None:
+            return
+
+        if disable:
+            status[id(self)] = self._disable_autograd_backward
+            self._disable_autograd_backward = True
+        else:
+            self._disable_autograd_backward = status[id(self)]
+
+    disable_autograd_backward_status = {}
+    if from_forward:
+        module.apply(partial(toggle_autograd_backward, True, disable_autograd_backward_status))
+
+    module.train()
+    autograd_dot.outputs = module(*new_args, **new_kwargs)
+    module.train(training_status)
+
+    if from_forward:
+        module.apply(partial(toggle_autograd_backward, False, disable_autograd_backward_status))
+
+    if isinstance(module, Layer):
+        module.use_autograd_graph = use_autograd_graph_status
+
+    autograd_dot = compile_autograd_obj(autograd_dot, additional_params, show_attrs, show_saved, max_attr_chars)
+
     return autograd_dot
 
 
@@ -662,84 +767,172 @@ def get_autograd_dot_from_trace(trace) -> Digraph:
     return dot
 
 
-def get_autograd_obj(module: nn.Module, *args, **kwargs) -> AutoGradDot:
-    """Produces Graphviz representation of PyTorch autograd graph from forward pass.
+def get_autograd_dot_from_outputs(
+        outputs: Union[Tensor, Sequence[Tensor]],
+        named_params: Union[Dict[str, Any], Iterator[Tuple[str, Parameter]]],
+        additional_params: Optional[dict] = None,
+        show_attrs: bool = True,
+        show_saved: bool = True,
+        max_attr_chars: int = 50,
+) -> Digraph:
+    """Runs and make Graphviz representation of PyTorch autograd graph from output tensors.
 
     Args:
-        module: PyTorch model
-        *args: input to the make_autograd_obj
-        **kwargs: input to the make_autograd_obj
-
-    Returns:
-        AutoGradDot: graphviz representation of autograd graph
-    """
-    assert isinstance(module, nn.Module)
-    new_args = []
-    new_kwargs = {}
-    device = is_cpu_cuda.get_module_device(module)
-
-    for i in args:
-        assert isinstance(i, Tensor)
-        i = i.to(device)
-        i = i.detach()
-        i = i.requires_grad_(True)
-        new_args.append(i)
-
-    for k, v in kwargs.items():
-        assert isinstance(v, Tensor)
-        v = v.to(device)
-        v = v.detach()
-        v = v.requires_grad_(True)
-        new_kwargs[k] = v
-
-    training_status = module.training
-    use_autograd_graph = False
-    if isinstance(module, Layer):
-        use_autograd_graph = module.use_autograd_graph
-        module.use_autograd_graph = True
-    module.eval()
-
-    autograd_dot = make_autograd_obj(module, *new_args, **new_kwargs)
-
-    module.train(training_status)
-    if isinstance(module, Layer):
-        module.use_autograd_graph = use_autograd_graph
-    return autograd_dot
-
-
-def get_autograd_dot(module: nn.Module, *args, **kwargs) -> Digraph:
-    """Produces Graphviz representation of PyTorch autograd graph from forward pass.
-
-    Args:
-        module: PyTorch model
-        *args: input to the make_autograd_obj
-        **kwargs: input to the make_autograd_obj
+        outputs (Union[Tensor, Sequence[Tensor]]): output tensor(s) of forward pass
+        named_params (Union[Dict[str, Any], Iterator[Tuple[str, Parameter]]]): dict of params to label nodes with
+        additional_params (dict): dict of additional params to label nodes with
+        show_attrs (bool): whether to display non-tensor attributes of backward nodes
+            (Requires PyTorch version >= 1.9)
+        show_saved (bool): whether to display saved tensor nodes that are not by custom
+            autograd functions. Saved tensor nodes for custom functions, if
+            present, are always displayed. (Requires PyTorch version >= 1.9)
+        max_attr_chars (int): if show_attrs is `True`, sets max number of characters
+            to display for any given attribute.
 
     Returns:
         Digraph: graphviz representation of autograd graph
     """
-    return get_autograd_obj(module, *args, **kwargs).dot
+    return make_autograd_obj_from_output(
+        outputs=outputs,
+        named_params=named_params,
+        additional_params=additional_params,
+        show_attrs=show_attrs,
+        show_saved=show_saved,
+        max_attr_chars=max_attr_chars,
+    ).dot
 
 
-def save_autograd_graph(filename, module: nn.Module, *args, **kwargs) -> None:
+def get_autograd_dot_from_module(
+        module: nn.Module,
+        *args: Tensor,
+        additional_params: Optional[dict] = None,
+        show_attrs: bool = True,
+        show_saved: bool = True,
+        max_attr_chars: int = 50,
+        from_forward: bool = False,
+        **kwargs: Tensor
+) -> Digraph:
+    """Runs and make Graphviz representation of PyTorch autograd graph from forward pass.
+
+    Args:
+        module (nn.Module): PyTorch model
+        *args (Tensor): input to the model
+        additional_params (dict): dict of additional params to label nodes with
+        show_attrs (bool): whether to display non-tensor attributes of backward nodes
+            (Requires PyTorch version >= 1.9)
+        show_saved (bool): whether to display saved tensor nodes that are not by custom
+            autograd functions. Saved tensor nodes for custom functions, if
+            present, are always displayed. (Requires PyTorch version >= 1.9)
+        max_attr_chars (int): if show_attrs is `True`, sets max number of characters
+            to display for any given attribute.
+        from_forward (bool): if True then use autograd graph otherwise analogvvn graph
+        **kwargs (Tensor): input to the model
+
+    Returns:
+        Digraph: graphviz representation of autograd graph
+    """
+    return make_autograd_obj_from_module(
+        module,
+        *args,
+        additional_params=additional_params,
+        show_attrs=show_attrs,
+        show_saved=show_saved,
+        max_attr_chars=max_attr_chars,
+        from_forward=from_forward,
+        **kwargs
+    ).dot
+
+
+def save_autograd_graph_from_outputs(
+        filename: Union[str, Path],
+        outputs: Union[Tensor, Sequence[Tensor]],
+        named_params: Union[Dict[str, Any], Iterator[Tuple[str, Parameter]]],
+        additional_params: Optional[dict] = None,
+        show_attrs: bool = True,
+        show_saved: bool = True,
+        max_attr_chars: int = 50,
+) -> str:
+    """Save Graphviz representation of PyTorch autograd graph from output tensors.
+
+    Args:
+        filename (Union[str, Path]): filename to save the graph to
+        outputs (Union[Tensor, Sequence[Tensor]]): output tensor(s) of forward pass
+        named_params (Union[Dict[str, Any], Iterator[Tuple[str, Parameter]]]): dict of params to label nodes with
+        additional_params (dict): dict of additional params to label nodes with
+        show_attrs (bool): whether to display non-tensor attributes of backward nodes
+            (Requires PyTorch version >= 1.9)
+        show_saved (bool): whether to display saved tensor nodes that are not by custom
+            autograd functions. Saved tensor nodes for custom functions, if
+            present, are always displayed. (Requires PyTorch version >= 1.9)
+        max_attr_chars (int): if show_attrs is `True`, sets max number of characters
+            to display for any given attribute.
+
+    Returns:
+        str: The (possibly relative) path of the rendered file.
+    """
+    return get_autograd_dot_from_outputs(
+        outputs=outputs,
+        named_params=named_params,
+        additional_params=additional_params,
+        show_attrs=show_attrs,
+        show_saved=show_saved,
+        max_attr_chars=max_attr_chars,
+    ).render(filename, format="svg", cleanup=True)
+
+
+def save_autograd_graph_from_module(
+        filename: Union[str, Path],
+        module: nn.Module,
+        *args: Tensor,
+        additional_params: Optional[dict] = None,
+        show_attrs: bool = True,
+        show_saved: bool = True,
+        max_attr_chars: int = 50,
+        from_forward: bool = False,
+        **kwargs: Tensor
+) -> str:
     """Save Graphviz representation of PyTorch autograd graph from forward pass.
 
     Args:
-        filename: filename to save the graph to
-        module: PyTorch model
-        *args: input to the make_autograd_obj
-        **kwargs: input to the make_autograd_obj
+        filename (Union[str, Path]): filename to save the graph to
+        module (nn.Module): PyTorch model
+        *args (Tensor): input to the model
+        additional_params (dict): dict of additional params to label nodes with
+        show_attrs (bool): whether to display non-tensor attributes of backward nodes
+            (Requires PyTorch version >= 1.9)
+        show_saved (bool): whether to display saved tensor nodes that are not by custom
+            autograd functions. Saved tensor nodes for custom functions, if
+            present, are always displayed. (Requires PyTorch version >= 1.9)
+        max_attr_chars (int): if show_attrs is `True`, sets max number of characters
+            to display for any given attribute.
+        from_forward (bool): if True then use autograd graph otherwise analogvvn graph
+        **kwargs (Tensor): input to the model
+
+    Returns:
+        str: The (possibly relative) path of the rendered file.
     """
 
-    get_autograd_dot(module, *args, **kwargs).render(filename, format="svg", cleanup=True)
+    return get_autograd_dot_from_module(
+        module,
+        *args,
+        additional_params=additional_params,
+        show_attrs=show_attrs,
+        show_saved=show_saved,
+        max_attr_chars=max_attr_chars,
+        from_forward=from_forward,
+        **kwargs
+    ).render(filename, format="svg", cleanup=True)
 
 
-def save_autograd_graph_from_trace(filename, trace) -> None:
+def save_autograd_graph_from_trace(filename: Union[str, Path], trace) -> str:
     """Save Graphviz representation of PyTorch autograd graph from trace.
 
     Args:
-        filename: filename to save the graph to
+        filename (Union[str, Path]): filename to save the graph to
         trace (torch.jit.trace): the trace object to visualize.
+
+    Returns:
+        str: The (possibly relative) path of the rendered file.
     """
 
-    get_autograd_dot_from_trace(trace).render(filename, format="svg", cleanup=True)
+    return get_autograd_dot_from_trace(trace).render(filename, format="svg", cleanup=True)

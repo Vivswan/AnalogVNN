@@ -205,7 +205,11 @@ class Layer(nn.Module):
 
         @functools.wraps(function)
         def new_forward(*args, **kwargs):
-            return self.backward_function.auto_apply(*args, to_apply=self.use_autograd_graph, **kwargs)
+            return self.backward_function.auto_apply(
+                *args,
+                to_apply=self.use_autograd_graph,
+                **kwargs
+            )
 
         new_forward.__wrapped__ = function
         new_forward.__wrapper__ = Layer._forward_wrapper
