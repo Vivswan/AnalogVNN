@@ -6,6 +6,7 @@ AnalogVNN is tested and supported on the following 64-bit systems:
 - Windows 7 and later
 - Ubuntu 16.04 and later, including WSL
 - Red Hat Enterprise Linux 7 and later
+- OpenSUSE 15.2 and later
 - macOS 10.12 and later
 
 ### Installation
