@@ -9,12 +9,11 @@ __all__ = ['Clamp', 'Clamp01']
 
 
 class Clamp(Normalize):
-    """Implements the clamp normalization function with range [-1, 1].
-    """
+    """Implements the clamp normalization function with range [-1, 1]."""
 
     @staticmethod
     def forward(x: Tensor):
-        """forward pass of the clamp normalization function with range [-1, 1].
+        """Forward pass of the clamp normalization function with range [-1, 1].
 
         Args:
             x (Tensor): the input tensor.
@@ -25,7 +24,7 @@ class Clamp(Normalize):
         return torch.clamp(x, min=-1, max=1)
 
     def backward(self, grad_output: Optional[Tensor]) -> Optional[Tensor]:
-        """backward pass of the clamp normalization function with range [-1, 1].
+        """Backward pass of the clamp normalization function with range [-1, 1].
 
         Args:
             grad_output (Optional[Tensor]): the gradient of the output tensor.
@@ -39,12 +38,11 @@ class Clamp(Normalize):
 
 
 class Clamp01(Normalize):
-    """Implements the clamp normalization function with range [0, 1].
-    """
+    """Implements the clamp normalization function with range [0, 1]."""
 
     @staticmethod
     def forward(x: Tensor):
-        """forward pass of the clamp normalization function with range [0, 1].
+        """Forward pass of the clamp normalization function with range [0, 1].
 
         Args:
             x (Tensor): the input tensor.
@@ -55,7 +53,7 @@ class Clamp01(Normalize):
         return torch.clamp(x, min=0, max=1)
 
     def backward(self, grad_output: Optional[Tensor]) -> Optional[Tensor]:
-        """backward pass of the clamp normalization function with range [0, 1].
+        """Backward pass of the clamp normalization function with range [0, 1].
 
         Args:
             grad_output (Optional[Tensor]): the gradient of the output tensor.

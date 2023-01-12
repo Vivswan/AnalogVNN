@@ -24,6 +24,11 @@ class Sequential(Model):
     """
 
     def __init__(self, *args):
+        """Initialize the model.
+
+        Args:
+            *args: The modules to add.
+        """
         super(Sequential, self).__init__()
         self._runtime_module_list: Dict[str, Optional[Module]] = OrderedDict()
         self.add_sequence(*args)
@@ -67,7 +72,15 @@ class Sequential(Model):
         return self
 
     def _get_item_by_idx(self, iterator, idx) -> T:
-        """Get the idx-th item of the iterator"""
+        """Get the idx-th item of the iterator.
+
+        Args:
+            iterator (Iterator): The iterator.
+            idx (int): The index of the item.
+
+        Returns:
+            T: The idx-th item of the iterator.
+        """
         size = len(self)
         idx = operator.index(idx)
         if not -size <= idx < size:
@@ -76,16 +89,35 @@ class Sequential(Model):
         return next(islice(iterator, idx, None))
 
     def __getitem__(self, idx) -> Union[Sequential, T]:
+        """Get the idx-th module of the model.
+
+        Args:
+            idx (int): The index of the module.
+
+        Returns:
+            Union[Sequential, T]: The idx-th module of the model.
+        """
         if isinstance(idx, slice):
             return self.__class__(OrderedDict(list(self._runtime_module_list.items())[idx]))
         else:
             return self._get_item_by_idx(self._runtime_module_list.values(), idx)
 
     def __setitem__(self, idx: int, module: nn.Module) -> None:
+        """Set the idx-th module of the model.
+
+        Args:
+            idx (int): The index of the module.
+            module (nn.Module): The module to set.
+        """
         key: str = self._get_item_by_idx(self._runtime_module_list.keys(), idx)
         return setattr(self, key, module)
 
     def __delitem__(self, idx: Union[slice, int]) -> None:
+        """Remove the idx-th module from the model.
+
+        Args:
+            idx (Union[slice, int]): The index of the module.
+        """
         if isinstance(idx, slice):
             for key in list(self._runtime_module_list.keys())[idx]:
                 delattr(self, key)
@@ -94,12 +126,27 @@ class Sequential(Model):
             delattr(self, key)
 
     def __len__(self) -> int:
+        """Return the number of modules in the model.
+
+        Returns:
+            int: The number of modules in the model.
+        """
         return len(self._runtime_module_list)
 
     def __dir__(self):
+        """Return the list of attributes of the module.
+
+        Returns:
+            list: The list of attributes of the module.
+        """
         keys = super(Sequential, self).__dir__()
         keys = [key for key in keys if not key.isdigit()]
         return keys
 
     def __iter__(self) -> Iterator[nn.Module]:
+        """Return an iterator over the modules of the model.
+
+        Returns:
+            Iterator[nn.Module]: An iterator over the modules of the model.
+        """
         return iter(self._runtime_module_list.values())

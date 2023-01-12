@@ -17,7 +17,7 @@ class ForwardGraph(AcyclicDirectedGraph):
     """The forward graph."""
 
     def __call__(self, inputs: TENSORS, is_training: bool) -> ArgsKwargsOutput:
-        """Forward pass through the forward graph
+        """Forward pass through the forward graph.
 
         Args:
             inputs (TENSORS): Input to the graph
@@ -31,7 +31,7 @@ class ForwardGraph(AcyclicDirectedGraph):
         return outputs
 
     def compile(self, is_static: bool = True):
-        """Compile the graph
+        """Compile the graph.
 
         Args:
             is_static (bool): If True, the graph is not changing during runtime and will be cached.
@@ -56,7 +56,7 @@ class ForwardGraph(AcyclicDirectedGraph):
             is_training: bool = True,
             **kwargs
     ) -> ArgsKwargsOutput:
-        """Calculate the output of the graph
+        """Calculate the output of the graph.
 
         Args:
             inputs (TENSORS): Input to the graph
@@ -81,7 +81,7 @@ class ForwardGraph(AcyclicDirectedGraph):
         return ArgsKwargs.from_args_kwargs_object(outputs)
 
     def _pass(self, from_node: GraphEnum, *inputs: Tensor) -> Dict[GraphEnum, InputOutput]:
-        """Perform the forward pass through the graph
+        """Perform the forward pass through the graph.
 
         Args:
             from_node (GraphEnum): The node to  start the forward pass from
@@ -116,7 +116,7 @@ class ForwardGraph(AcyclicDirectedGraph):
 
     @staticmethod
     def _detach_tensor(tensor: torch.Tensor) -> torch.Tensor:
-        """Detach the tensor from the autograd graph
+        """Detach the tensor from the autograd graph.
 
         Args:
             tensor (torch.Tensor): Tensor to detach

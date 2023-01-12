@@ -28,7 +28,6 @@ def load_vision_dataset(dataset, path, batch_size, is_cuda=False, grayscale=True
     Returns:
         A tuple containing the train and test data loaders, the input shape, and a tuple of class labels.
     """
-
     dataset_kwargs = {
         'batch_size': batch_size,
         'shuffle': True
@@ -61,7 +60,7 @@ def load_vision_dataset(dataset, path, batch_size, is_cuda=False, grayscale=True
 
 
 def cross_entropy_accuracy(output, target) -> float:
-    """ Cross Entropy accuracy function
+    """Cross Entropy accuracy function.
 
     Args:
         output (torch.Tensor): output of the model from passing inputs
@@ -77,7 +76,7 @@ def cross_entropy_accuracy(output, target) -> float:
 
 class LinearModel(FullSequential):
     def __init__(self, activation_class, norm_class, precision_class, precision, noise_class, leakage):
-        """Initialise LinearModel with 3 Dense layers
+        """Initialise LinearModel with 3 Dense layers.
 
         Args:
             activation_class: Activation Class
@@ -108,7 +107,7 @@ class LinearModel(FullSequential):
         self.add_sequence(*self.all_layers)
 
     def add_layer(self, layer):
-        """ To add the analog layer
+        """To add the analog layer.
 
         Args:
             layer (BaseLayer): digital layer module
@@ -126,7 +125,7 @@ class LinearModel(FullSequential):
 
 class WeightModel(FullSequential):
     def __init__(self, norm_class, precision_class, precision, noise_class, leakage):
-        """Initialize the WeightModel
+        """Initialize the WeightModel.
 
         Args:
             norm_class: Normalization Class
@@ -150,25 +149,24 @@ class WeightModel(FullSequential):
 
 
 def run_linear3_model():
-    """ The main function to train photonics image classifier with 3 linear/dense nn for MNIST dataset
-    """
+    """The main function to train photonics image classifier with 3 linear/dense nn for MNIST dataset."""
     torch.backends.cudnn.benchmark = True
     torch.manual_seed(0)
     device, is_cuda = is_cpu_cuda.is_using_cuda
-    print(f"Device: {device}")
+    print(f'Device: {device}')
     print()
 
     # Loading Data
-    print(f"Loading Data...")
+    print('Loading Data...')
     train_loader, test_loader, input_shape, classes = load_vision_dataset(
         dataset=torchvision.datasets.MNIST,
-        path="_data/",
+        path='_data/',
         batch_size=128,
         is_cuda=is_cuda
     )
 
     # Creating Models
-    print(f"Creating Models...")
+    print('Creating Models...')
     nn_model = LinearModel(
         activation_class=GeLU,
         norm_class=Clamp,
@@ -195,7 +193,7 @@ def run_linear3_model():
     nn_model.optimizer = optim.Adam(params=nn_model.parameters())
 
     # Training
-    print(f"Starting Training...")
+    print('Starting Training...')
     for epoch in range(10):
         train_loss, train_accuracy = nn_model.train_on(train_loader, epoch=epoch)
         test_loss, test_accuracy = nn_model.test_on(test_loader, epoch=epoch)
@@ -207,7 +205,7 @@ def run_linear3_model():
                     f' Testing Loss: {test_loss:.4f},' \
                     f' Testing Accuracy: {100. * test_accuracy:.0f}%\n'
         print(print_str)
-    print("Run Completed Successfully...")
+    print('Run Completed Successfully...')
 
 
 if __name__ == '__main__':

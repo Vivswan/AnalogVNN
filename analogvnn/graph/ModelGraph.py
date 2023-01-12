@@ -14,6 +14,7 @@ class ModelGraph(ModelGraphState):
         forward_graph (ForwardGraph): store model's forward graph.
         backward_graph (BackwardGraph): store model's backward graph.
     """
+
     forward_graph: ForwardGraph
     backward_graph: BackwardGraph
 
@@ -45,4 +46,3 @@ class ModelGraph(ModelGraphState):
 
         self.backward_graph.compile(is_static=is_static)
         return self
-

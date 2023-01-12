@@ -79,7 +79,7 @@ templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 intersphinx_mapping = {
-    "python": ("https://docs.python.org/3/", None),
+    'python': ('https://docs.python.org/3/', None),
     'sphinx': ('https://www.sphinx-doc.org/en/master', None),
     'markdown_it': ('https://markdown-it-py.readthedocs.io/en/latest', None),
     'numpy': ('https://numpy.org/doc/stable/', None),
@@ -94,7 +94,7 @@ intersphinx_mapping = {
         'https://www.tensorflow.org/probability/api_docs/python',
         'https://github.com/GPflow/tensorflow-intersphinx/raw/master/tfp_py_objects.inv'
     ),
-    "torch": ("https://pytorch.org/docs/stable/", None),
+    'torch': ('https://pytorch.org/docs/stable/', None),
 }
 intersphinx_disabled_domains = ['std']
 
@@ -125,7 +125,7 @@ master_doc = 'index'
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = "en"
+language = 'en'
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'

@@ -14,6 +14,7 @@ class CPUCuda:
         _device (torch.device): The device.
         device_name (str): The name of the device.
     """
+
     _device: torch.device
     device_name: str
 
@@ -30,7 +31,7 @@ class CPUCuda:
         Returns:
             CPUCuda: self
         """
-        self.set_device(f"cuda:{torch.cuda.current_device()}" if torch.cuda.is_available() else "cpu")
+        self.set_device(f'cuda:{torch.cuda.current_device()}' if torch.cuda.is_available() else 'cpu')
         return self
 
     def set_device(self, device_name: str) -> CPUCuda:
@@ -42,7 +43,6 @@ class CPUCuda:
         Returns:
             CPUCuda: self
         """
-
         self._device = torch.device(device_name)
         self.device_name = self._device.type
         return self
@@ -54,7 +54,7 @@ class CPUCuda:
         Returns:
             bool: True if the device is cuda, False otherwise.
         """
-        return "cuda" in self.device_name
+        return 'cuda' in self.device_name
 
     @property
     def device(self) -> torch.device:
@@ -83,10 +83,9 @@ class CPUCuda:
         Returns:
             torch.device: the device of the module.
         """
-
         # noinspection PyBroadException
         try:
-            device: torch.device = getattr(module, "device", None)
+            device: torch.device = getattr(module, 'device', None)
             if device is None:
                 device = next(module.parameters()).device
             return device

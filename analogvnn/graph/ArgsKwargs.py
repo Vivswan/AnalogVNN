@@ -14,6 +14,7 @@ class InputOutput:
         inputs (Optional[ArgsKwargs]): Inputs of a module.
         outputs (Optional[ArgsKwargs]): Outputs of a module.
     """
+
     inputs: Optional[ArgsKwargs] = None
     outputs: Optional[ArgsKwargs] = None
 
@@ -26,6 +27,7 @@ class ArgsKwargs:
         args (List): The arguments.
         kwargs (Dict): The keyword arguments.
     """
+
     args: List
     kwargs: Dict
 
@@ -57,11 +59,11 @@ class ArgsKwargs:
 
     def __repr__(self):
         """Returns a string representation of the parameter."""
-        return f"ArgsKwargs(args={self.args}, kwargs={self.kwargs})"
+        return f'ArgsKwargs(args={self.args}, kwargs={self.kwargs})'
 
     @classmethod
     def to_args_kwargs_object(cls, outputs: ArgsKwargsInput) -> ArgsKwargs:
-        """ Convert the output of a module to ArgsKwargs object
+        """Convert the output of a module to ArgsKwargs object.
 
         Args:
             outputs: The output of a module
@@ -81,7 +83,7 @@ class ArgsKwargs:
 
     @staticmethod
     def from_args_kwargs_object(outputs: ArgsKwargs) -> ArgsKwargsOutput:
-        """Convert ArgsKwargs to object or tuple or dict
+        """Convert ArgsKwargs to object or tuple or dict.
 
         Args:
             outputs (ArgsKwargs): ArgsKwargs object

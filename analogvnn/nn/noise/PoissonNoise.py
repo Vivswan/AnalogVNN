@@ -3,7 +3,7 @@ from typing import Optional
 import numpy as np
 import scipy.special
 import torch
-from scipy.optimize import *
+from scipy.optimize import toms748
 from torch import Tensor, nn
 
 from analogvnn.backward.BackwardIdentity import BackwardIdentity
@@ -23,6 +23,7 @@ class PoissonNoise(Layer, BackwardIdentity):
         max_leakage (nn.Parameter): the maximum leakage of the Poisson noise.
         precision (nn.Parameter): the precision of the Poisson noise.
     """
+
     __constants__ = ['scale', 'max_leakage', 'precision']
     scale: nn.Parameter
     max_leakage: nn.Parameter
@@ -44,7 +45,7 @@ class PoissonNoise(Layer, BackwardIdentity):
         super(PoissonNoise, self).__init__()
 
         if (scale is None) + (max_leakage is None) + (precision is None) != 1:
-            raise ValueError("only 2 out of 3 arguments are needed (scale, max_leakage, precision)")
+            raise ValueError('only 2 out of 3 arguments are needed (scale, max_leakage, precision)')
 
         scale, max_leakage, precision = to_float_tensor(scale, max_leakage, precision)
 
@@ -60,7 +61,7 @@ class PoissonNoise(Layer, BackwardIdentity):
         self.scale, self.max_leakage, self.precision = to_nongrad_parameter(scale, max_leakage, precision)
 
         if self.rate_factor < 1.:
-            raise ValueError("rate_factor must be >= 1 (scale * precision >= 1)")
+            raise ValueError('rate_factor must be >= 1 (scale * precision >= 1)')
 
     @staticmethod
     def calc_scale(max_leakage: TENSOR_OPERABLE, precision: TENSOR_OPERABLE, max_check=10000) -> TENSOR_OPERABLE:

@@ -119,7 +119,7 @@ class TensorboardModelLog:
         if model is None:
             model = self.model
 
-        log_id = f"{self.tensorboard.log_dir}_{TensorboardModelLog.add_graph.__name__}_{id(model)}"
+        log_id = f'{self.tensorboard.log_dir}_{TensorboardModelLog.add_graph.__name__}_{id(model)}'
         if log_id in self._log_record:
             return self
 
@@ -132,7 +132,7 @@ class TensorboardModelLog:
             use_autograd_graph = model.use_autograd_graph
             model.use_autograd_graph = False
 
-        graph_path = Path(self.tensorboard.log_dir).joinpath(f"graph_{model.__class__.__name__}_{id(model)}")
+        graph_path = Path(self.tensorboard.log_dir).joinpath(f'graph_{model.__class__.__name__}_{id(model)}')
         with SummaryWriter(log_dir=str(graph_path)) as graph_writer:
             graph_writer.add_graph(model, torch.zeros(input_size).to(model.device))
 
@@ -164,12 +164,12 @@ class TensorboardModelLog:
         try:
             import torchinfo
         except ImportError as e:
-            raise ImportError("requires torchinfo: https://github.com/tyleryep/torchinfo") from e
+            raise ImportError('requires torchinfo: https://github.com/tyleryep/torchinfo') from e
 
         if model is None:
             model = self.model
 
-        log_id = f"{self.tensorboard.log_dir}_{TensorboardModelLog.add_summary.__name__}_{id(model)}"
+        log_id = f'{self.tensorboard.log_dir}_{TensorboardModelLog.add_summary.__name__}_{id(model)}'
 
         if input_size is None:
             data_shape = next(iter(train_loader))[0].shape
@@ -193,18 +193,18 @@ class TensorboardModelLog:
 
         nn_model_summary.formatting.verbose = torchinfo.Verbosity.VERBOSE
         model_str = str(model)
-        nn_model_summary = f"{nn_model_summary}"
+        nn_model_summary = f'{nn_model_summary}'
 
         if log_id in self._log_record:
             return model_str, nn_model_summary
 
         self.tensorboard.add_text(
-            f"str ({model.__class__.__name__})",
-            re.sub("\n", "\n    ", f"    {model_str}")
+            f'str ({model.__class__.__name__})',
+            re.sub('\n', '\n    ', f'    {model_str}')
         )
         self.tensorboard.add_text(
-            f"summary ({model.__class__.__name__})",
-            re.sub("\n", "\n    ", f"    {nn_model_summary}")
+            f'summary ({model.__class__.__name__})',
+            re.sub('\n', '\n    ', f'    {nn_model_summary}')
         )
         self._log_record[log_id] = True
         return model_str, nn_model_summary
@@ -221,7 +221,7 @@ class TensorboardModelLog:
             TensorboardModelLog: self.
         """
         self.tensorboard.add_scalar('Loss/train', train_loss, epoch)
-        self.tensorboard.add_scalar("Accuracy/train", train_accuracy, epoch)
+        self.tensorboard.add_scalar('Accuracy/train', train_accuracy, epoch)
         if self.layer_data:
             self._add_layer_data(epoch=epoch)
         return self

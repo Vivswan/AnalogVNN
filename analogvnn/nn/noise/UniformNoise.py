@@ -20,6 +20,7 @@ class UniformNoise(Layer, BackwardIdentity):
         leakage (nn.Parameter): the leakage of the uniform noise.
         precision (nn.Parameter): the precision of the uniform noise.
     """
+
     __constants__ = ['low', 'high', 'leakage', 'precision']
     low: nn.Parameter
     high: nn.Parameter
@@ -33,7 +34,7 @@ class UniformNoise(Layer, BackwardIdentity):
             leakage: Optional[float] = None,
             precision: Optional[int] = None
     ):
-        """initialize the uniform noise function.
+        """Initialize the uniform noise function.
 
         Args:
             low (float): the lower bound of the uniform noise.
@@ -44,7 +45,7 @@ class UniformNoise(Layer, BackwardIdentity):
         super(UniformNoise, self).__init__()
 
         if (low is None or high is None) + (leakage is None) + (precision is None) != 1:
-            raise ValueError("only 2 out of 3 arguments are needed (scale, leakage, precision)")
+            raise ValueError('only 2 out of 3 arguments are needed (scale, leakage, precision)')
 
         low, high, leakage, precision = to_float_tensor(low, high, leakage, precision)
 
@@ -61,7 +62,7 @@ class UniformNoise(Layer, BackwardIdentity):
 
     @staticmethod
     def calc_high_low(leakage: TENSOR_OPERABLE, precision: TENSOR_OPERABLE) -> Tuple[TENSOR_OPERABLE, TENSOR_OPERABLE]:
-        """calculate the high and low from leakage and precision.
+        """Calculate the high and low from leakage and precision.
 
         Args:
             leakage (TENSOR_OPERABLE): the leakage of the uniform noise.
@@ -75,7 +76,7 @@ class UniformNoise(Layer, BackwardIdentity):
 
     @staticmethod
     def calc_leakage(low: TENSOR_OPERABLE, high: TENSOR_OPERABLE, precision: TENSOR_OPERABLE) -> TENSOR_OPERABLE:
-        """calculate the leakage from low, high and precision.
+        """Calculate the leakage from low, high and precision.
 
         Args:
             low (TENSOR_OPERABLE): the lower bound of the uniform noise.
@@ -89,7 +90,7 @@ class UniformNoise(Layer, BackwardIdentity):
 
     @staticmethod
     def calc_precision(low: TENSOR_OPERABLE, high: TENSOR_OPERABLE, leakage: TENSOR_OPERABLE) -> TENSOR_OPERABLE:
-        """calculate the precision from low, high and leakage.
+        """Calculate the precision from low, high and leakage.
 
         Args:
             low (TENSOR_OPERABLE): the lower bound of the uniform noise.
@@ -103,7 +104,7 @@ class UniformNoise(Layer, BackwardIdentity):
 
     @property
     def mean(self) -> Tensor:
-        """the mean of the uniform noise.
+        """The mean of the uniform noise.
 
         Returns:
             Tensor: the mean of the uniform noise.
@@ -112,7 +113,7 @@ class UniformNoise(Layer, BackwardIdentity):
 
     @property
     def stddev(self) -> Tensor:
-        """the standard deviation of the uniform noise.
+        """The standard deviation of the uniform noise.
 
         Returns:
             Tensor: the standard deviation of the uniform noise.
@@ -121,7 +122,7 @@ class UniformNoise(Layer, BackwardIdentity):
 
     @property
     def variance(self) -> Tensor:
-        """the variance of the uniform noise.
+        """The variance of the uniform noise.
 
         Returns:
             Tensor: the variance of the uniform noise.
@@ -129,7 +130,7 @@ class UniformNoise(Layer, BackwardIdentity):
         return (self.high - self.low).pow(2) / 12
 
     def pdf(self, x: Tensor) -> Tensor:
-        """the probability density function of the uniform noise.
+        """The probability density function of the uniform noise.
 
         Args:
             x (Tensor): the input tensor.
@@ -140,7 +141,7 @@ class UniformNoise(Layer, BackwardIdentity):
         return torch.exp(self.log_prob(x=x))
 
     def log_prob(self, x: Tensor) -> Tensor:
-        """the log probability density function of the uniform noise.
+        """The log probability density function of the uniform noise.
 
         Args:
             x (Tensor): the input tensor.
@@ -153,7 +154,7 @@ class UniformNoise(Layer, BackwardIdentity):
         return torch.log(lb.mul(ub)) - torch.log(self.high - self.low)
 
     def cdf(self, x: TENSOR_OPERABLE) -> TENSOR_OPERABLE:
-        """the cumulative distribution function of the uniform noise.
+        """The cumulative distribution function of the uniform noise.
 
         Args:
             x (TENSOR_OPERABLE): the input tensor.
@@ -165,7 +166,7 @@ class UniformNoise(Layer, BackwardIdentity):
         return result.clamp(min=0, max=1)
 
     def forward(self, x: Tensor) -> Tensor:
-        """add the uniform noise to the input tensor.
+        """Add the uniform noise to the input tensor.
 
         Args:
             x (Tensor): the input tensor.
@@ -176,7 +177,7 @@ class UniformNoise(Layer, BackwardIdentity):
         return torch.distributions.Uniform(low=x + self.low, high=x + self.high).sample()
 
     def extra_repr(self) -> str:
-        """the extra representation of the uniform noise.
+        """The extra representation of the uniform noise.
 
         Returns:
             str: the extra representation of the uniform noise.

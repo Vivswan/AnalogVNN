@@ -2,9 +2,9 @@ import sys
 
 import importlib_metadata
 
-__package__ = "analogvnn"
+__package__ = 'analogvnn'
 __version__ = importlib_metadata.version(__package__)
-__author__ = "Vivswan Shah (vivswanshah@pitt.edu)"
+__author__ = 'Vivswan Shah (vivswanshah@pitt.edu)'
 
 if sys.version_info < (3, 7, 0):
     import warnings

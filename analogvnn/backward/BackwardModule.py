@@ -25,6 +25,7 @@ class BackwardModule(abc.ABC):
         _autograd_backward (Type[AutogradBackward]): The autograd backward function.
         _disable_autograd_backward (bool): If True the autograd backward function is disabled.
     """
+
     _layer: Optional[nn.Module]
     _empty_holder_tensor: Tensor = torch.ones((1,), requires_grad=True)
     _autograd_backward: Type[AutogradBackward] = None
@@ -32,9 +33,7 @@ class BackwardModule(abc.ABC):
 
     # noinspection PyAbstractClass
     class AutogradBackward(autograd.Function):
-        """Autograd function is used as an optimization and proper calculation of gradients
-        when using the autograd engine.
-        """
+        """Optimization and proper calculation of gradients when using the autograd engine."""
 
         # noinspection PyMethodOverriding
         @staticmethod
@@ -65,7 +64,6 @@ class BackwardModule(abc.ABC):
             Returns:
                 TENSORS: The gradients of the input of the function.
             """
-
             backward_module: BackwardModule = ctx.backward_module
             results = backward_module._call_impl_backward(*grad_outputs)
 
@@ -99,7 +97,7 @@ class BackwardModule(abc.ABC):
         Raises:
             NotImplementedError: If the forward pass is not implemented.
         """
-        raise NotImplementedError(f"Module [{type(self).__name__}] is missing the required \"forward\" function")
+        raise NotImplementedError(f'Module [{type(self).__name__}] is missing the required "forward" function')
 
     forward._implemented = False
 
@@ -117,7 +115,7 @@ class BackwardModule(abc.ABC):
         Raises:
             NotImplementedError: If the backward pass is not implemented.
         """
-        raise NotImplementedError(f"Module [{type(self).__name__}] is missing the required \"backward\" function")
+        raise NotImplementedError(f'Module [{type(self).__name__}] is missing the required "backward" function')
 
     def _call_impl_forward(self, *args: Tensor, **kwarg: Tensor) -> TENSORS:
         """Calls Forward pass of the layer.
@@ -168,7 +166,7 @@ class BackwardModule(abc.ABC):
         Returns:
             bool: True if the forward pass is implemented, False otherwise.
         """
-        return not hasattr(self.forward, "_implemented")
+        return not hasattr(self.forward, '_implemented')
 
     @property
     def layer(self) -> Optional[nn.Module]:
@@ -205,11 +203,11 @@ class BackwardModule(abc.ABC):
             ValueError: If the layer is not an instance of nn.Module.
         """
         if isinstance(self, nn.Module):
-            raise ValueError(f"layer of Backward Module is set to itself")
+            raise ValueError('layer of Backward Module is set to itself')
         if self._layer is not None:
-            raise ValueError(f"changing the layer of Backward Module is not allowed")
+            raise ValueError('changing the layer of Backward Module is not allowed')
         if layer is not None and not isinstance(layer, nn.Module):
-            raise ValueError(f'layer not instance of Layer class')
+            raise ValueError('layer not instance of Layer class')
 
         self._layer = layer
         self._set_autograd_backward()
@@ -222,7 +220,7 @@ class BackwardModule(abc.ABC):
         else:
             # noinspection PyTypeChecker
             self._autograd_backward = type(
-                f"{layer.__class__.__name__}AutoGrad",
+                f'{layer.__class__.__name__}AutoGrad',
                 (BackwardModule.AutogradBackward,),
                 {}
             )
@@ -271,6 +269,6 @@ class BackwardModule(abc.ABC):
         """
         if isinstance(self, nn.Module) or self == self._layer:
             return super(BackwardModule, self).__getattr__(name)
-        if not str(name).startswith("__") and self._layer is not None and hasattr(self._layer, name):
+        if not str(name).startswith('__') and self._layer is not None and hasattr(self._layer, name):
             return getattr(self._layer, name)
         raise AttributeError("'{}' object has no attribute '{}'".format(type(self).__name__, name))

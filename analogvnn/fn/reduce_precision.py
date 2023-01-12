@@ -7,14 +7,13 @@ __all__ = ['reduce_precision', 'stochastic_reduce_precision']
 
 
 def reduce_precision(x: TENSOR_OPERABLE, precision: TENSOR_OPERABLE, divide: TENSOR_OPERABLE) -> TENSOR_OPERABLE:
-    """`reduce_precision` takes `x` and reduces its precision to `precision` by rounding to the
-    nearest multiple of `precision`.
-    
+    """Takes `x` and reduces its precision to `precision` by rounding to the nearest multiple of `precision`.
+
     Args:
       x (TENSOR_OPERABLE): Tensor
       precision (TENSOR_OPERABLE): the precision of the quantization.
       divide (TENSOR_OPERABLE): the number of bits to be reduced
-    
+
     Returns:
       TENSOR_OPERABLE: TENSOR_OPERABLE with the same shape as x, but with values rounded to the nearest
       multiple of precision.
@@ -29,9 +28,8 @@ def reduce_precision(x: TENSOR_OPERABLE, precision: TENSOR_OPERABLE, divide: TEN
 
 
 def stochastic_reduce_precision(x: TENSOR_OPERABLE, precision: TENSOR_OPERABLE) -> TENSOR_OPERABLE:
-    """`stochastic_reduce_precision` takes `x` and reduces its precision to `precision` by rounding to the
-    nearest multiple of `precision` with a stochastic rounding scheme.
-    
+    """Takes `x` and reduces its precision by rounding to the nearest multiple of `precision` with stochastic scheme.
+
     Args:
         x (TENSOR_OPERABLE): Tensor
         precision (TENSOR_OPERABLE): the precision of the quantization.

@@ -20,6 +20,7 @@ class PseudoParameterModule(nn.Module):
         original (PseudoParameter): the original parameters.
         _transformed (nn.Parameter): the transformed parameters.
     """
+
     original: PseudoParameter
     _transformed: nn.Parameter
 
@@ -53,7 +54,7 @@ class PseudoParameterModule(nn.Module):
     """Alias for __call__"""
 
     def set_original_data(self, data: Tensor) -> PseudoParameterModule:
-        """set data to the original parameter.
+        """Set data to the original parameter.
 
         Args:
             data (Tensor): the data to set.
@@ -92,6 +93,7 @@ class PseudoParameter(Parameter):
         module (PseudoParameterModule): the module that wraps the parameter and the transformation.
         transformation (Callable): the transformation.
     """
+
     _transformation: Callable
     _transformed: nn.Parameter
     _module: PseudoParameterModule
@@ -145,7 +147,7 @@ class PseudoParameter(Parameter):
         try:
             self._transformed.data = self._transformation(self)
         except Exception as e:
-            raise RuntimeError(f"here: {e.args}") from e
+            raise RuntimeError(f'here: {e.args}') from e
         return self._transformed
 
     def __repr__(self):
@@ -260,7 +262,7 @@ class PseudoParameter(Parameter):
             for sub_module in module.children():
                 if sub_module == module:
                     continue
-                if hasattr(module, "parametrizations") and (
+                if hasattr(module, 'parametrizations') and (
                         sub_module is module.parametrizations or sub_module in module.parametrizations
                 ):
                     continue
