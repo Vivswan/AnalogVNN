@@ -44,6 +44,7 @@ class ModelGraphState:
             use_autograd_graph: If True, the autograd graph is used to calculate the gradients.
             allow_loops: If True, the graph is allowed to contain loops.
         """
+        super(ModelGraphState, self).__init__()
         self.allow_loops = allow_loops
         self.use_autograd_graph = use_autograd_graph
 

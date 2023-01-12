@@ -36,6 +36,7 @@ class ArgsKwargs:
             args: The arguments.
             kwargs: The keyword arguments.
         """
+        super(ArgsKwargs, self).__init__()
         if args is None:
             args = []
         if kwargs is None:

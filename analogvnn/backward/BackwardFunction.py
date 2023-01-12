@@ -26,7 +26,7 @@ class BackwardFunction(BackwardModule, ABC):
             backward_function (Callable): The function used to compute the backward gradient.
             layer (nn.Module): The layer that this backward module is associated with.
         """
-        super().__init__(layer)
+        super(BackwardFunction, self).__init__(layer)
         self._backward_function = backward_function
 
     @property

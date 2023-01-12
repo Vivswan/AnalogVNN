@@ -19,6 +19,7 @@ class CPUCuda:
 
     def __init__(self):
         """Initialize the CPUCuda class."""
+        super(CPUCuda, self).__init__()
         self._device = None
         self.device_name = None
         self.reset_device()

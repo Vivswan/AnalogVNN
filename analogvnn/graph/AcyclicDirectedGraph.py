@@ -48,6 +48,7 @@ class AcyclicDirectedGraph(abc.ABC):
         Raises:
             NotImplementedError: If allow_loops is True, since this is not implemented yet.
         """
+        super(AcyclicDirectedGraph, self).__init__()
         self.graph = nx.MultiDiGraph()
         self.graph_state = graph_state
         self._is_static = False

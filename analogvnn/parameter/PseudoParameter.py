@@ -30,7 +30,7 @@ class PseudoParameterModule(nn.Module):
             original (PseudoParameter): the original parameters.
             transformed (nn.Parameter): the transformed parameters.
         """
-        super().__init__()
+        super(PseudoParameterModule, self).__init__()
         self.original = original
         self._transformed = transformed
 
@@ -118,7 +118,7 @@ class PseudoParameter(Parameter):
             *args: additional arguments.
             **kwargs: additional keyword arguments.
         """
-        super().__init__(data, requires_grad, *args, **kwargs)
+        super(PseudoParameter, self).__init__(data, requires_grad, *args, **kwargs)
         self._transformed = nn.Parameter(data=data, requires_grad=requires_grad)
         self._transformed.original = self
         self._transformation = self.identity
