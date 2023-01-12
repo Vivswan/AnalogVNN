@@ -25,6 +25,7 @@ class TensorboardModelLog:
         layer_data (bool): whether to log the layer data.
         _log_record (Dict[str, bool]): the log record.
     """
+
     model: nn.Module
     tensorboard: Optional[SummaryWriter]
     layer_data: bool
@@ -47,7 +48,7 @@ class TensorboardModelLog:
             os.mkdir(log_dir)
 
         self.set_log_dir(log_dir)
-        if hasattr(model, "subscribe_tensorboard"):
+        if hasattr(model, 'subscribe_tensorboard'):
             model.subscribe_tensorboard(tensorboard=self)
 
     def set_log_dir(self, log_dir: str) -> TensorboardModelLog:
@@ -62,17 +63,16 @@ class TensorboardModelLog:
         Raises:
             ValueError: if the log directory is invalid.
         """
-
         # https://github.com/tensorflow/tensorboard/pull/6135
         from tensorboard.compat import tf
-        if getattr(tf, "io", None) is None:
+        if getattr(tf, 'io', None) is None:
             import tensorboard.compat.tensorflow_stub as new_tf
             tf.__dict__.update(new_tf.__dict__)
 
         if os.path.isdir(log_dir):
             self.tensorboard = SummaryWriter(log_dir=log_dir)
         else:
-            raise ValueError(f"Log directory {log_dir} does not exist.")
+            raise ValueError(f'Log directory {log_dir} does not exist.')
         return self
 
     def _add_layer_data(self, epoch: int = None):
@@ -81,16 +81,11 @@ class TensorboardModelLog:
         Args:
             epoch (int): the epoch to add the data for.
         """
-        idx = 0
-        for module in self.model.modules():
-            if isinstance(module, nn.Sequential) or isinstance(module, nn.ModuleList) or (module == self):
+        for name, parameter in self.model.named_parameters():
+            if not parameter.requires_grad:
                 continue
 
-            idx += 1
-            if hasattr(module, "bias") and hasattr(module.bias, "size"):
-                self.tensorboard.add_histogram(f"{idx}-{module}.bias", module.bias, epoch)
-            if hasattr(module, "weight") and hasattr(module.weight, "size"):
-                self.tensorboard.add_histogram(f"{idx}-{module}.weight", module.weight, epoch)
+            self.tensorboard.add_histogram(name, parameter.data, epoch)
 
     def on_compile(self, layer_data: bool = True):
         """Called when the model is compiled.
@@ -166,7 +161,6 @@ class TensorboardModelLog:
         Raises:
             ImportError: if torchinfo (https://github.com/tyleryep/torchinfo) is not installed.
         """
-
         try:
             import torchinfo
         except ImportError as e:
@@ -244,12 +238,16 @@ class TensorboardModelLog:
             TensorboardModelLog: self.
         """
         self.tensorboard.add_scalar('Loss/test', test_loss, epoch)
-        self.tensorboard.add_scalar("Accuracy/test", test_accuracy, epoch)
+        self.tensorboard.add_scalar('Accuracy/test', test_accuracy, epoch)
         return self
 
     # noinspection PyUnusedLocal
     def close(self, *args, **kwargs):
         """Close the tensorboard.
+
+        Args:
+            *args: ignored.
+            **kwargs: ignored.
         """
         if self.tensorboard is not None:
             self.tensorboard.close()
