@@ -91,7 +91,7 @@ def get_fn_name(fn: Callable, show_attrs: bool, max_attr_chars: int) -> str:
         name = name[:-8]
     if not show_attrs:
         return name
-    attrs = dict()
+    attrs = {}
     for attr in dir(fn):
         if not attr.startswith(SAVED_PREFIX):
             continue
@@ -164,16 +164,16 @@ class AutoGradDot:
         except ImportError as e:
             raise ImportError('requires graphviz: https://pygraphviz.github.io/') from e
 
-        node_attr = dict(
-            style='filled',
-            shape='box',
-            align='left',
-            fontsize='12',
-            ranksep='0.1',
-            height='0.2',
-            fontname='monospace'
-        )
-        self.dot = Digraph(node_attr=node_attr, graph_attr=dict(size='12,12'), format='svg')
+        node_attr = {
+            'style': 'filled',
+            'shape': 'box',
+            'align': 'left',
+            'fontsize': '12',
+            'ranksep': '0.1',
+            'height': '0.2',
+            'fontname': 'monospace'
+        }
+        self.dot = Digraph(node_attr=node_attr, graph_attr={'size': '12,12'}, format='svg')
         # noinspection PyProtectedMember
         self.add_ignore_tensor(BackwardModule._empty_holder_tensor)
 
@@ -788,14 +788,16 @@ def get_autograd_dot_from_trace(trace) -> Digraph:
     graph = trace.graph()
     list_of_nodes = parse_trace_graph(graph)
 
-    node_attr = dict(style='filled',
-                     shape='box',
-                     align='left',
-                     fontsize='12',
-                     ranksep='0.1',
-                     height='0.2')
+    node_attr = {
+        'style': 'filled',
+        'shape': 'box',
+        'align': 'left',
+        'fontsize': '12',
+        'ranksep': '0.1',
+        'height': '0.2'
+    }
 
-    dot = Digraph(node_attr=node_attr, graph_attr=dict(size='12,12'))
+    dot = Digraph(node_attr=node_attr, graph_attr={'size': '12,12'})
 
     for node in list_of_nodes:
         dot.node(node.name, label=node.name.replace('/', '\n'))

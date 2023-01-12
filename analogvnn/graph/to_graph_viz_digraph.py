@@ -36,18 +36,20 @@ def to_graphviz_digraph(from_graph: networkx.DiGraph, real_label: bool = False) 
     except ImportError as e:
         raise ImportError('requires graphviz: https://pygraphviz.github.io/') from e
     strict = networkx.number_of_selfloops(from_graph) == 0 and not from_graph.is_multigraph()
-    node_attr = dict(style='filled',
-                     shape='box',
-                     align='left',
-                     fontsize='10',
-                     ranksep='0.1',
-                     height='0.2',
-                     fontname='monospace')
+    node_attr = {
+        'style': 'filled',
+        'shape': 'box',
+        'align': 'left',
+        'fontsize': '10',
+        'ranksep': '0.1',
+        'height': '0.2',
+        'fontname': 'monospace'
+    }
     new_graph = Digraph(
         name=from_graph.name,
         strict=strict,
         node_attr=node_attr,
-        graph_attr=dict(size='12,12'),
+        graph_attr={'size': '12,12'},
         format='svg'
     )
 

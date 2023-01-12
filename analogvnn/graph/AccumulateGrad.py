@@ -134,7 +134,7 @@ class AccumulateGrad:
             raise NotImplementedError('WTF!Why!')
 
         return ArgsKwargs(
-            args=[grad_inputs_args[i] for i in sorted(list(grad_inputs_args.keys()))],
+            args=[grad_inputs_args[i] for i in sorted(grad_inputs_args.keys())],
             kwargs=grad_inputs_kwargs
         )
 
