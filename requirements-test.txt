@@ -1,0 +1,8 @@
+# Testing
+flake8
+flake8-docstrings
+flake8-quotes
+flake8-bugbear
+flake8-comprehensions
+flake8-executable
+flake8-coding

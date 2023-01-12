@@ -1,0 +1,22 @@
+[flake8]
+max-line-length = 120
+
+extend-ignore =
+    C101, # Coding magic comment
+    D100, # Missing docstring in public module
+    D104, # Missing docstring in public package
+    D401, # First line should be in imperative mood
+
+per-file-ignores =
+    sample_code.py: D100, D101, D102, D103, D104
+    sample_code_with_logs.py: D100, D101, D102, D103, D104
+
+exclude =
+    ./.git,
+    ./venv,
+    ./_data,
+    ./dist,
+    ./unit_tests,
+
+max-complexity = 10
+optional-ascii-coding = True

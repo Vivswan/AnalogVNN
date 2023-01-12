@@ -79,12 +79,6 @@ full = [
     "graphviz",
     #"python-graphviz",
 ]
-dev = [
-    "setuptools>=61.0.0",
-    "build", # building the package {pyproject-build}
-    "twine", # to publish on pypi {twine upload --repository-url=https://test.pypi.org/legacy/ dist/*} {twine upload dist/*}
-    "johnnydep" # to see dependencies {johnnydep <package>}
-]
 doc = [
     "sphinx>=4.2.0",
     "sphinx-autobuild",
@@ -99,14 +93,30 @@ doc = [
     "sphinxext-opengraph",
     "sphinxcontrib-katex", # for math
 ]
-all = ["analogvnn[full,dev,doc]"]
+flake8 = [
+    "flake8",
+    "flake8-docstrings",
+    "flake8-quotes",
+    "flake8-bugbear",
+    "flake8-comprehensions",
+    "flake8-executable",
+    "flake8-coding",
+]
+dev = [
+    "setuptools>=61.0.0",
+    "build", # building the package {pyproject-build}
+    "twine", # to publish on pypi {twine upload --repository-url=https://test.pypi.org/legacy/ dist/*} {twine upload dist/*}
+    "johnnydep", # to see dependencies {johnnydep <package>}
+]
+test = ["analogvnn[flake8]"]
+all = ["analogvnn[full,dev,doc,test]"]
 [project.urls]
-"Homepage" = "https://github.com/Vivswan/AnalogVNN"
+"Author" = "https://vivswan.github.io/"
 "Bug Reports" = "https://github.com/Vivswan/AnalogVNN/issues"
 "Documentation" = "https://analogvnn.readthedocs.io/en/latest/"
-"Say Thanks!" = "https://github.com/Vivswan"
+"Homepage" = "https://github.com/Vivswan/AnalogVNN"
+"Say Thanks!" = "https://vivswan.github.io/"
 "Source" = "https://github.com/Vivswan/AnalogVNN"
-"Author" = "https://vivswan.github.io/"
 
 # The following would provide a command line executable called `sample`
 # which executes the function `main` from this package when invoked.

@@ -7,12 +7,6 @@ scipy
 networkx
 importlib_metadata
 
-# Development
-setuptools>=61.0.0
-build # building the package {pyproject-build}
-twine # to publish on pypi {twine upload --repository-url=https://test.pypi.org/legacy/ dist/*} {twine upload dist/*}
-johnnydep # to see dependencies {johnnydep <package>}
-
 # Full
 tensorflow
 tensorboard
@@ -20,17 +14,3 @@ torchinfo
 pillow
 # conda install python-graphviz graphviz
 graphviz
-
-# Docs
-sphinx>=4.2.0
-sphinx-autobuild
-rst-to-myst[sphinx]
-myst_parser
-furo
-sphinx-rtd-theme
-sphinx-autoapi
-sphinx-copybutton
-sphinx-notfound-page
-sphinx-inline-tabs
-sphinxext-opengraph
-sphinxcontrib-katex  # math
