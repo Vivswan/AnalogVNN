@@ -48,9 +48,9 @@ def __nn_Module_init_updated__(function: Callable) -> Callable:
 
     return new_function
 
-
-nn.Module.__init__ = __nn_Module_init_updated__(nn.Module.__init__)
-""" nn.Module.__init__ is updated to support multiple parent classes at same time. """
+if not hasattr(nn.Module, "call_super_init"):
+    nn.Module.__init__ = __nn_Module_init_updated__(nn.Module.__init__)
+    """ nn.Module.__init__ is updated to support multiple parent classes at same time. """
 
 
 class Layer(nn.Module):
@@ -62,12 +62,17 @@ class Layer(nn.Module):
         _backward_module (Optional[BackwardModule]): Backward module of the layer.
         _use_autograd_graph (bool): If True, the autograd graph is used to calculate the gradients.
         graphs (Optional[ModelGraph]): Contains Forward and Backward Graphs of the layer.
+        call_super_init (bool): If True, the super class __init__ of nn.Module is called
+        https://github.com/pytorch/pytorch/pull/91819
     """
     _inputs: Union[None, ArgsKwargs]
     _outputs: Union[None, Tensor, Sequence[Tensor]]
     _backward_module: Optional[BackwardModule]
     _use_autograd_graph: bool
     graphs: Optional[ModelGraph]
+
+    # https://github.com/pytorch/pytorch/pull/91819
+    call_super_init: bool = True
 
     def __init__(self):
         """Initializes the layer."""
