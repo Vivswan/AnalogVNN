@@ -9,8 +9,7 @@ __all__ = ['BackwardIdentity']
 
 
 class BackwardIdentity(BackwardModule, ABC):
-    """The backward module that returns the output gradients as the input gradients.
-    """
+    """The backward module that returns the output gradients as the input gradients."""
 
     def backward(self, *grad_output: Tensor, **grad_output_kwarg: Tensor) -> TENSORS:
         """Returns the output gradients as the input gradients.

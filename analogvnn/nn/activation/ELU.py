@@ -15,12 +15,13 @@ class SELU(Activation):
         alpha (nn.Parameter): the alpha parameter.
         scale_factor (nn.Parameter): the scale factor parameter.
     """
+
     __constants__ = ['alpha', 'scale_factor']
     alpha: nn.Parameter
     scale_factor: nn.Parameter
 
     def __init__(self, alpha: float = 1.0507, scale_factor: float = 1.):
-        """initialize the scaled exponential linear unit (SELU) activation function.
+        """Initialize the scaled exponential linear unit (SELU) activation function.
 
         Args:
             alpha (float): the alpha parameter.
@@ -31,7 +32,7 @@ class SELU(Activation):
         self.scale_factor = nn.Parameter(torch.tensor(scale_factor), requires_grad=False)
 
     def forward(self, x: Tensor) -> Tensor:
-        """forward pass of the scaled exponential linear unit (SELU) activation function.
+        """Forward pass of the scaled exponential linear unit (SELU) activation function.
 
         Args:
             x (Tensor): the input tensor.
@@ -45,7 +46,7 @@ class SELU(Activation):
         )
 
     def backward(self, grad_output: Optional[Tensor]) -> Optional[Tensor]:
-        """backward pass of the scaled exponential linear unit (SELU) activation function.
+        """Backward pass of the scaled exponential linear unit (SELU) activation function.
 
         Args:
             grad_output (Optional[Tensor]): the gradient of the output tensor.
@@ -59,8 +60,7 @@ class SELU(Activation):
 
     @staticmethod
     def initialise(tensor: Tensor) -> Tensor:
-        """initialize the tensor using xavier uniform initialization with gain associated
-        with the scaled exponential linear unit (SELU) activation function.
+        """Initialisation of tensor using xavier uniform, gain associated with SELU activation function.
 
         Args:
             tensor (Tensor): the tensor to be initialized.
@@ -72,8 +72,7 @@ class SELU(Activation):
 
     @staticmethod
     def initialise_(tensor: Tensor) -> Tensor:
-        """in-place initialize the tensor using xavier uniform initialization with gain associated
-        with the scaled exponential linear unit (SELU) activation function.
+        """In-place initialisation of tensor using xavier uniform, gain associated with SELU activation function.
 
         Args:
             tensor (Tensor): the tensor to be initialized.
@@ -93,7 +92,7 @@ class ELU(SELU):
     """
 
     def __init__(self, alpha: float = 1.0507):
-        """initialize the exponential linear unit (ELU) activation function.
+        """Initialize the exponential linear unit (ELU) activation function.
 
         Args:
             alpha (float): the alpha parameter.

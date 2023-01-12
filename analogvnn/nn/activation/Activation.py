@@ -9,12 +9,11 @@ __all__ = ['Activation', 'InitImplement']
 
 
 class InitImplement:
-    """ Implements the initialization of parameters using the activation function.
-    """
+    """Implements the initialisation of parameters using the activation function."""
 
     @staticmethod
     def initialise(tensor: Tensor) -> Tensor:
-        """initialize the tensor using xavier uniform initialization.
+        """Initialisation of tensor using xavier uniform initialisation.
 
         Args:
             tensor (Tensor): the tensor to be initialized.
@@ -26,7 +25,7 @@ class InitImplement:
 
     @staticmethod
     def initialise_(tensor: Tensor) -> Tensor:
-        """in-place initialize the tensor using xavier uniform initialization.
+        """In-place initialisation of tensor using xavier uniform initialisation.
 
         Args:
             tensor (Tensor): the tensor to be initialized.
@@ -38,6 +37,4 @@ class InitImplement:
 
 
 class Activation(Layer, BackwardModule, InitImplement, abc.ABC):
-    """This class is base class for all activation functions.
-    """
-    pass
+    """This class is base class for all activation functions."""

@@ -14,9 +14,10 @@ class GraphEnum(enum.Enum):
         OUTPUT (GraphEnum): GraphEnum.OUTPUT
         STOP (GraphEnum): GraphEnum.STOP
     """
-    INPUT = "INPUT"
-    OUTPUT = "OUTPUT"
-    STOP = "STOP"
+
+    INPUT = 'INPUT'
+    OUTPUT = 'OUTPUT'
+    STOP = 'STOP'
 
 
 GRAPH_NODE_TYPE = Union[GraphEnum, Callable]

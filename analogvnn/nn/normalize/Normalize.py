@@ -5,6 +5,4 @@ __all__ = ['Normalize']
 
 
 class Normalize(Layer, BackwardIdentity):
-    """This class is base class for all normalization functions.
-    """
-    pass
+    """This class is base class for all normalization functions."""

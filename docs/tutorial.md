@@ -94,14 +94,14 @@ To convert a digital model to its analog counterpart the following steps needs t
         precision_class=ReducePrecision,
         precision=2 ** 4,
         noise_class=GaussianNoise,
-        leakage=0.2
+        leakage=0.5
     )
     weight_model = WeightModel(
         norm_class=Clamp,
         precision_class=ReducePrecision,
         precision=2 ** 4,
         noise_class=GaussianNoise,
-        leakage=0.2
+        leakage=0.5
     )
 
     # Setting Model Parameters

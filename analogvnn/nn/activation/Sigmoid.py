@@ -9,12 +9,11 @@ __all__ = ['Logistic', 'Sigmoid']
 
 
 class Logistic(Activation):
-    """Implements the logistic activation function.
-    """
+    """Implements the logistic activation function."""
 
     @staticmethod
     def forward(x: Tensor) -> Tensor:
-        """forward pass of the logistic activation function.
+        """Forward pass of the logistic activation function.
 
         Args:
             x (Tensor): the input tensor.
@@ -25,7 +24,7 @@ class Logistic(Activation):
         return 1 / (1 + torch.exp(-x))
 
     def backward(self, grad_output: Optional[Tensor]) -> Optional[Tensor]:
-        """backward pass of the logistic activation function.
+        """Backward pass of the logistic activation function.
 
         Args:
             grad_output (Optional[Tensor]): the gradient of the output tensor.
@@ -39,8 +38,7 @@ class Logistic(Activation):
 
     @staticmethod
     def initialise(tensor: Tensor) -> Tensor:
-        """initialize the tensor using xavier uniform initialization with gain associated
-        with the logistic activation function.
+        """Initialisation of tensor using xavier uniform, gain associated with logistic activation function.
 
         Args:
             tensor (Tensor): the tensor to be initialized.
@@ -52,8 +50,7 @@ class Logistic(Activation):
 
     @staticmethod
     def initialise_(tensor: Tensor) -> Tensor:
-        """in-place initialize the tensor using xavier uniform initialization with gain associated
-        with the logistic activation function.
+        """In-place initialisation of tensor using xavier uniform, gain associated with logistic activation function.
 
         Args:
             tensor (Tensor): the tensor to be initialized.
@@ -65,6 +62,4 @@ class Logistic(Activation):
 
 
 class Sigmoid(Logistic):
-    """Implements the sigmoid activation function.
-    """
-    pass
+    """Implements the sigmoid activation function."""

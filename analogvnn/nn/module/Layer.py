@@ -18,14 +18,14 @@ __all__ = ['Layer']
 
 # https://github.com/pytorch/pytorch/pull/91819
 def __nn_Module_init_updated__(function: Callable) -> Callable:
-    """ Wrapper for nn.Module.__init__ to support multiple parent classes at same time.
+    """Wrapper for nn.Module.__init__ to support multiple parent classes at same time.
+
     Args:
         function (Callable): nn.Module.__init__ function
 
     Returns:
         Callable: Wrapped function
     """
-
     # noinspection PyUnusedLocal
     def _temp(*args, **kwargs) -> ...:
         pass
@@ -49,8 +49,9 @@ def __nn_Module_init_updated__(function: Callable) -> Callable:
     return new_function
 
 
-nn.Module.__init__ = __nn_Module_init_updated__(nn.Module.__init__)
-""" nn.Module.__init__ is updated to support multiple parent classes at same time. """
+if not hasattr(nn.Module, 'call_super_init'):
+    nn.Module.__init__ = __nn_Module_init_updated__(nn.Module.__init__)
+    """nn.Module.__init__ is updated to support multiple parent classes at same time. """
 
 
 class Layer(nn.Module):
@@ -62,12 +63,18 @@ class Layer(nn.Module):
         _backward_module (Optional[BackwardModule]): Backward module of the layer.
         _use_autograd_graph (bool): If True, the autograd graph is used to calculate the gradients.
         graphs (Optional[ModelGraph]): Contains Forward and Backward Graphs of the layer.
+        call_super_init (bool): If True, the super class __init__ of nn.Module is called
+        https://github.com/pytorch/pytorch/pull/91819
     """
+
     _inputs: Union[None, ArgsKwargs]
     _outputs: Union[None, Tensor, Sequence[Tensor]]
     _backward_module: Optional[BackwardModule]
     _use_autograd_graph: bool
     graphs: Optional[ModelGraph]
+
+    # https://github.com/pytorch/pytorch/pull/91819
+    call_super_init: bool = True
 
     def __init__(self):
         """Initializes the layer."""
@@ -180,7 +187,7 @@ class Layer(nn.Module):
         elif callable(backward_class):
             self._backward_module = BackwardFunction(backward_class, self)
         else:
-            raise TypeError(f"Backward Module is not set for '{self}'")
+            raise TypeError(f'Backward Module is not set for "{self}"')
 
         return self
 
@@ -194,7 +201,7 @@ class Layer(nn.Module):
             Callable: Wrapped function.
         """
         # noinspection PyUnresolvedReferences
-        if hasattr(function, "__wrapper__") and function.__wrapper__ == Layer._forward_wrapper:
+        if hasattr(function, '__wrapper__') and function.__wrapper__ == Layer._forward_wrapper:
             return function
 
         if not isinstance(self.backward_function, BackwardModule):
@@ -213,7 +220,7 @@ class Layer(nn.Module):
 
         new_forward.__wrapped__ = function
         new_forward.__wrapper__ = Layer._forward_wrapper
-        setattr(self, "forward", new_forward)
+        self.forward = new_forward
         return new_forward
 
     def _call_impl_forward(self, *args: Tensor, **kwargs: Tensor) -> TENSORS:
@@ -231,7 +238,7 @@ class Layer(nn.Module):
         else:
             forward_functions = self.forward
 
-        if hasattr(forward_functions, "__wrapped__"):
+        if hasattr(forward_functions, '__wrapped__'):
             forward_functions = forward_functions.__wrapped__
 
         return forward_functions(*args, **kwargs)

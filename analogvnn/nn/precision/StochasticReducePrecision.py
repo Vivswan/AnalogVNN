@@ -15,27 +15,28 @@ class StochasticReducePrecision(Layer, BackwardIdentity):
     Attributes:
         precision (nn.Parameter): the precision of the output tensor.
     """
+
     __constants__ = ['precision']
     precision: nn.Parameter
 
     def __init__(self, precision: int = 8):
-        """initialize the StochasticReducePrecision module.
+        """Initialize the StochasticReducePrecision module.
 
         Args:
             precision (int): the precision of the output tensor.
         """
         super(StochasticReducePrecision, self).__init__()
         if precision < 1:
-            raise ValueError("precision has to be more than 0, but got {}".format(precision))
+            raise ValueError('precision has to be more than 0, but got {}'.format(precision))
 
         if precision != int(precision):
-            raise ValueError("precision must be int, but got {}".format(precision))
+            raise ValueError('precision must be int, but got {}'.format(precision))
 
         self.precision = nn.Parameter(torch.tensor(precision), requires_grad=False)
 
     @property
     def precision_width(self) -> Tensor:
-        """the precision width
+        """The precision width.
 
         Returns:
             Tensor: the precision width
@@ -44,7 +45,7 @@ class StochasticReducePrecision(Layer, BackwardIdentity):
 
     @property
     def bit_precision(self) -> Tensor:
-        """the bit precision of the ReducePrecision module.
+        """The bit precision of the ReducePrecision module.
 
         Returns:
             Tensor: the bit precision of the ReducePrecision module.
@@ -53,7 +54,7 @@ class StochasticReducePrecision(Layer, BackwardIdentity):
 
     @staticmethod
     def convert_to_precision(bit_precision: TENSOR_OPERABLE) -> TENSOR_OPERABLE:
-        """convert the bit precision to the precision.
+        """Convert the bit precision to the precision.
 
         Args:
             bit_precision (TENSOR_OPERABLE): the bit precision.
@@ -64,7 +65,7 @@ class StochasticReducePrecision(Layer, BackwardIdentity):
         return 2 ** bit_precision - 1
 
     def extra_repr(self) -> str:
-        """the extra __repr__ string of the StochasticReducePrecision module.
+        """The extra __repr__ string of the StochasticReducePrecision module.
 
         Returns:
             str: string
@@ -72,7 +73,7 @@ class StochasticReducePrecision(Layer, BackwardIdentity):
         return f'precision={self.precision}'
 
     def forward(self, x: Tensor) -> Tensor:
-        """forward function of the StochasticReducePrecision module.
+        """Forward function of the StochasticReducePrecision module.
 
         Args:
             x (Tensor): input tensor.

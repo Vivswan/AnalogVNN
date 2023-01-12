@@ -16,12 +16,13 @@ __all__ = ['GaussianNoise']
 
 class GaussianNoise(Layer, BackwardIdentity):
     """Implements the Gaussian noise function.
-    
+
     Attributes:
         std (nn.Parameter): the standard deviation of the Gaussian noise.
         leakage (nn.Parameter): the leakage of the Gaussian noise.
         precision (nn.Parameter): the precision of the Gaussian noise.
     """
+
     __constants__ = ['std', 'leakage', 'precision']
     std: nn.Parameter
     leakage: nn.Parameter
@@ -33,8 +34,8 @@ class GaussianNoise(Layer, BackwardIdentity):
             leakage: Optional[float] = None,
             precision: Optional[int] = None
     ):
-        """initialize the Gaussian noise function.
-        
+        """Initialize the Gaussian noise function.
+
         Args:
             std (float): the standard deviation of the Gaussian noise.
             leakage (float): the leakage of the Gaussian noise.
@@ -43,7 +44,7 @@ class GaussianNoise(Layer, BackwardIdentity):
         super(GaussianNoise, self).__init__()
 
         if (std is None) + (leakage is None) + (precision is None) != 1:
-            raise ValueError("only 2 out of 3 arguments are needed (std, leakage, precision)")
+            raise ValueError('only 2 out of 3 arguments are needed (std, leakage, precision)')
 
         std, leakage, precision = to_float_tensor(std, leakage, precision)
 
@@ -60,12 +61,12 @@ class GaussianNoise(Layer, BackwardIdentity):
 
     @staticmethod
     def calc_std(leakage: TENSOR_OPERABLE, precision: TENSOR_OPERABLE) -> TENSOR_OPERABLE:
-        """calculate the standard deviation of the Gaussian noise.
-        
+        """Calculate the standard deviation of the Gaussian noise.
+
         Args:
             leakage (float): the leakage of the Gaussian noise.
             precision (int): the precision of the Gaussian noise.
-            
+
         Returns:
             float: the standard deviation of the Gaussian noise.
         """
@@ -73,12 +74,12 @@ class GaussianNoise(Layer, BackwardIdentity):
 
     @staticmethod
     def calc_precision(std: TENSOR_OPERABLE, leakage: TENSOR_OPERABLE) -> TENSOR_OPERABLE:
-        """calculate the precision of the Gaussian noise.
-        
+        """Calculate the precision of the Gaussian noise.
+
         Args:
             std (float): the standard deviation of the Gaussian noise.
             leakage (float): the leakage of the Gaussian noise.
-            
+
         Returns:
             int: the precision of the Gaussian noise.
         """
@@ -86,12 +87,12 @@ class GaussianNoise(Layer, BackwardIdentity):
 
     @staticmethod
     def calc_leakage(std: TENSOR_OPERABLE, precision: TENSOR_OPERABLE) -> TENSOR_OPERABLE:
-        """calculate the leakage of the Gaussian noise.
-        
+        """Calculate the leakage of the Gaussian noise.
+
         Args:
             std (float): the standard deviation of the Gaussian noise.
             precision (int): the precision of the Gaussian noise.
-            
+
         Returns:
             float: the leakage of the Gaussian noise.
         """
@@ -99,8 +100,8 @@ class GaussianNoise(Layer, BackwardIdentity):
 
     @property
     def stddev(self) -> Tensor:
-        """the standard deviation of the Gaussian noise.
-        
+        """The standard deviation of the Gaussian noise.
+
         Returns:
             Tensor: the standard deviation of the Gaussian noise.
         """
@@ -108,32 +109,32 @@ class GaussianNoise(Layer, BackwardIdentity):
 
     @property
     def variance(self) -> Tensor:
-        """the variance of the Gaussian noise.
-        
+        """The variance of the Gaussian noise.
+
         Returns:
             Tensor: the variance of the Gaussian noise.
         """
         return self.stddev.pow(2)
 
     def pdf(self, x: Tensor, mean: Tensor = 0) -> Tensor:
-        """calculate the probability density function of the Gaussian noise.
-        
+        """Calculate the probability density function of the Gaussian noise.
+
         Args:
             x (Tensor): the input tensor.
             mean (Tensor): the mean of the Gaussian noise.
-            
+
         Returns:
             Tensor: the probability density function of the Gaussian noise.
         """
         return torch.exp(self.log_prob(x=x, mean=mean))
 
     def log_prob(self, x: Tensor, mean: Tensor = 0) -> Tensor:
-        """calculate the log probability density function of the Gaussian noise.
-        
+        """Calculate the log probability density function of the Gaussian noise.
+
         Args:
             x (Tensor): the input tensor.
             mean (Tensor): the mean of the Gaussian noise.
-            
+
         Returns:
             Tensor: the log probability density function of the Gaussian noise.
         """
@@ -146,25 +147,25 @@ class GaussianNoise(Layer, BackwardIdentity):
 
     @staticmethod
     def static_cdf(x: TENSOR_OPERABLE, std: TENSOR_OPERABLE, mean: TENSOR_OPERABLE = 0.) -> TENSOR_OPERABLE:
-        """calculate the cumulative distribution function of the Gaussian noise.
-        
+        """Calculate the cumulative distribution function of the Gaussian noise.
+
         Args:
             x (TENSOR_OPERABLE): the input tensor.
             std (TENSOR_OPERABLE): the standard deviation of the Gaussian noise.
             mean (TENSOR_OPERABLE): the mean of the Gaussian noise.
-            
+
         Returns:
             TENSOR_OPERABLE: the cumulative distribution function of the Gaussian noise.
         """
         return 1 / 2 * (1 + math.erf((x - mean) / (std * math.sqrt(2))))
 
     def cdf(self, x: Tensor, mean: Tensor = 0) -> Tensor:
-        """calculate the cumulative distribution function of the Gaussian noise.
-        
+        """Calculate the cumulative distribution function of the Gaussian noise.
+
         Args:
             x (Tensor): the input tensor.
             mean (Tensor): the mean of the Gaussian noise.
-            
+
         Returns:
             Tensor: the cumulative distribution function of the Gaussian noise.
         """
@@ -173,19 +174,19 @@ class GaussianNoise(Layer, BackwardIdentity):
         return self.static_cdf(x=x, std=self.std, mean=mean)
 
     def forward(self, x: Tensor) -> Tensor:
-        """add the Gaussian noise to the input tensor.
-        
+        """Add the Gaussian noise to the input tensor.
+
         Args:
             x (Tensor): the input tensor.
-            
+
         Returns:
             Tensor: the output tensor.
         """
         return torch.normal(mean=x, std=self.std)
 
     def extra_repr(self) -> str:
-        """the extra representation of the Gaussian noise.
-        
+        """The extra representation of the Gaussian noise.
+
         Returns:
             str: the extra representation of the Gaussian noise.
         """

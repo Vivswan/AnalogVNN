@@ -25,6 +25,7 @@ class TensorboardModelLog:
         layer_data (bool): whether to log the layer data.
         _log_record (Dict[str, bool]): the log record.
     """
+
     model: nn.Module
     tensorboard: Optional[SummaryWriter]
     layer_data: bool
@@ -37,6 +38,7 @@ class TensorboardModelLog:
             model (nn.Module): the model to log.
             log_dir (str): the directory to log to.
         """
+        super(TensorboardModelLog, self).__init__()
         self.model = model
         self.tensorboard = None
         self.layer_data = True
@@ -46,7 +48,7 @@ class TensorboardModelLog:
             os.mkdir(log_dir)
 
         self.set_log_dir(log_dir)
-        if hasattr(model, "subscribe_tensorboard"):
+        if hasattr(model, 'subscribe_tensorboard'):
             model.subscribe_tensorboard(tensorboard=self)
 
     def set_log_dir(self, log_dir: str) -> TensorboardModelLog:
@@ -61,17 +63,16 @@ class TensorboardModelLog:
         Raises:
             ValueError: if the log directory is invalid.
         """
-
         # https://github.com/tensorflow/tensorboard/pull/6135
         from tensorboard.compat import tf
-        if getattr(tf, "io", None) is None:
+        if getattr(tf, 'io', None) is None:
             import tensorboard.compat.tensorflow_stub as new_tf
             tf.__dict__.update(new_tf.__dict__)
 
         if os.path.isdir(log_dir):
             self.tensorboard = SummaryWriter(log_dir=log_dir)
         else:
-            raise ValueError(f"Log directory {log_dir} does not exist.")
+            raise ValueError(f'Log directory {log_dir} does not exist.')
         return self
 
     def _add_layer_data(self, epoch: int = None):
@@ -80,16 +81,11 @@ class TensorboardModelLog:
         Args:
             epoch (int): the epoch to add the data for.
         """
-        idx = 0
-        for module in self.model.modules():
-            if isinstance(module, nn.Sequential) or isinstance(module, nn.ModuleList) or (module == self):
+        for name, parameter in self.model.named_parameters():
+            if not parameter.requires_grad:
                 continue
 
-            idx += 1
-            if hasattr(module, "bias") and hasattr(module.bias, "size"):
-                self.tensorboard.add_histogram(f"{idx}-{module}.bias", module.bias, epoch)
-            if hasattr(module, "weight") and hasattr(module.weight, "size"):
-                self.tensorboard.add_histogram(f"{idx}-{module}.weight", module.weight, epoch)
+            self.tensorboard.add_histogram(name, parameter.data, epoch)
 
     def on_compile(self, layer_data: bool = True):
         """Called when the model is compiled.
@@ -123,7 +119,7 @@ class TensorboardModelLog:
         if model is None:
             model = self.model
 
-        log_id = f"{self.tensorboard.log_dir}_{TensorboardModelLog.add_graph.__name__}_{id(model)}"
+        log_id = f'{self.tensorboard.log_dir}_{TensorboardModelLog.add_graph.__name__}_{id(model)}'
         if log_id in self._log_record:
             return self
 
@@ -136,7 +132,7 @@ class TensorboardModelLog:
             use_autograd_graph = model.use_autograd_graph
             model.use_autograd_graph = False
 
-        graph_path = Path(self.tensorboard.log_dir).joinpath(f"graph_{model.__class__.__name__}_{id(model)}")
+        graph_path = Path(self.tensorboard.log_dir).joinpath(f'graph_{model.__class__.__name__}_{id(model)}')
         with SummaryWriter(log_dir=str(graph_path)) as graph_writer:
             graph_writer.add_graph(model, torch.zeros(input_size).to(model.device))
 
@@ -165,16 +161,15 @@ class TensorboardModelLog:
         Raises:
             ImportError: if torchinfo (https://github.com/tyleryep/torchinfo) is not installed.
         """
-
         try:
             import torchinfo
         except ImportError as e:
-            raise ImportError("requires torchinfo: https://github.com/tyleryep/torchinfo") from e
+            raise ImportError('requires torchinfo: https://github.com/tyleryep/torchinfo') from e
 
         if model is None:
             model = self.model
 
-        log_id = f"{self.tensorboard.log_dir}_{TensorboardModelLog.add_summary.__name__}_{id(model)}"
+        log_id = f'{self.tensorboard.log_dir}_{TensorboardModelLog.add_summary.__name__}_{id(model)}'
 
         if input_size is None:
             data_shape = next(iter(train_loader))[0].shape
@@ -198,18 +193,18 @@ class TensorboardModelLog:
 
         nn_model_summary.formatting.verbose = torchinfo.Verbosity.VERBOSE
         model_str = str(model)
-        nn_model_summary = f"{nn_model_summary}"
+        nn_model_summary = f'{nn_model_summary}'
 
         if log_id in self._log_record:
             return model_str, nn_model_summary
 
         self.tensorboard.add_text(
-            f"str ({model.__class__.__name__})",
-            re.sub("\n", "\n    ", f"    {model_str}")
+            f'str ({model.__class__.__name__})',
+            re.sub('\n', '\n    ', f'    {model_str}')
         )
         self.tensorboard.add_text(
-            f"summary ({model.__class__.__name__})",
-            re.sub("\n", "\n    ", f"    {nn_model_summary}")
+            f'summary ({model.__class__.__name__})',
+            re.sub('\n', '\n    ', f'    {nn_model_summary}')
         )
         self._log_record[log_id] = True
         return model_str, nn_model_summary
@@ -226,7 +221,7 @@ class TensorboardModelLog:
             TensorboardModelLog: self.
         """
         self.tensorboard.add_scalar('Loss/train', train_loss, epoch)
-        self.tensorboard.add_scalar("Accuracy/train", train_accuracy, epoch)
+        self.tensorboard.add_scalar('Accuracy/train', train_accuracy, epoch)
         if self.layer_data:
             self._add_layer_data(epoch=epoch)
         return self
@@ -243,12 +238,16 @@ class TensorboardModelLog:
             TensorboardModelLog: self.
         """
         self.tensorboard.add_scalar('Loss/test', test_loss, epoch)
-        self.tensorboard.add_scalar("Accuracy/test", test_accuracy, epoch)
+        self.tensorboard.add_scalar('Accuracy/test', test_accuracy, epoch)
         return self
 
     # noinspection PyUnusedLocal
     def close(self, *args, **kwargs):
         """Close the tensorboard.
+
+        Args:
+            *args: ignored.
+            **kwargs: ignored.
         """
         if self.tensorboard is not None:
             self.tensorboard.close()

@@ -13,10 +13,11 @@ class Identity(Activation):
     Attributes:
         name (str): the name of the activation function.
     """
+
     name: Optional[str]
 
     def __init__(self, name=None):
-        """initialize the identity activation function.
+        """Initialize the identity activation function.
 
         Args:
             name (str): the name of the activation function.
@@ -25,7 +26,7 @@ class Identity(Activation):
         self.name = name
 
     def extra_repr(self) -> str:
-        """extra __repr__ of the identity activation function.
+        """Extra __repr__ of the identity activation function.
 
         Returns:
             str: the extra representation of the identity activation function.
@@ -37,7 +38,7 @@ class Identity(Activation):
 
     @staticmethod
     def forward(x: Tensor) -> Tensor:
-        """forward pass of the identity activation function.
+        """Forward pass of the identity activation function.
 
         Args:
             x (Tensor): the input tensor.
@@ -48,7 +49,7 @@ class Identity(Activation):
         return x
 
     def backward(self, grad_output: Optional[Tensor]) -> Optional[Tensor]:
-        """backward pass of the identity activation function.
+        """Backward pass of the identity activation function.
 
         Args:
             grad_output (Optional[Tensor]): the gradient of the output tensor.

@@ -10,8 +10,7 @@ __all__ = ['FullSequential']
 
 
 class FullSequential(Sequential):
-    """A sequential model where backward graph is the reverse of forward graph.
-    """
+    """A sequential model where backward graph is the reverse of forward graph."""
 
     def compile(self, device: Optional[torch.device] = None, layer_data: bool = True):
         """Compile the model and add forward and backward graph.

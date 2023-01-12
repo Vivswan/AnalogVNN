@@ -36,6 +36,7 @@ class Model(Layer):
         accuracy_function (Callable): The accuracy function of the model.
         device (torch.device): The device of the model.
     """
+
     __constants__ = ['device']
 
     _compiled: bool
@@ -77,7 +78,8 @@ class Model(Layer):
 
     @property
     def use_autograd_graph(self):
-        """ Is the autograd graph used for the model.
+        """Is the autograd graph used for the model.
+
         Returns:
             bool: If True, the autograd graph is used to calculate the gradients.
         """
@@ -85,7 +87,7 @@ class Model(Layer):
 
     @use_autograd_graph.setter
     def use_autograd_graph(self, use_autograd_graph: bool):
-        """ Set if the autograd graph is used for the model.
+        """Set if the autograd graph is used for the model.
 
         Args:
             use_autograd_graph (bool): If True, the autograd graph is used to calculate the gradients.
@@ -251,7 +253,7 @@ class Model(Layer):
         try:
             from analogvnn.utils.TensorboardModelLog import TensorboardModelLog
         except ImportError as e:
-            raise ImportError("requires tensorboard https://www.tensorflow.org/") from e
+            raise ImportError('requires tensorboard https://www.tensorflow.org/') from e
 
         self.tensorboard = TensorboardModelLog(self, log_dir=log_dir)
         self.subscribe_tensorboard(self.tensorboard)
