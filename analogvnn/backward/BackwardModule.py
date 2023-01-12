@@ -26,9 +26,9 @@ class BackwardModule(abc.ABC):
         _disable_autograd_backward (bool): If True the autograd backward function is disabled.
     """
     _layer: Optional[nn.Module]
-    _empty_holder_tensor: Tensor
-    _autograd_backward: Type[AutogradBackward]
-    _disable_autograd_backward: bool
+    _empty_holder_tensor: Tensor = torch.ones((1,), requires_grad=True)
+    _autograd_backward: Type[AutogradBackward] = None
+    _disable_autograd_backward: bool = False
 
     # noinspection PyAbstractClass
     class AutogradBackward(autograd.Function):
@@ -82,12 +82,7 @@ class BackwardModule(abc.ABC):
         """
         super(BackwardModule, self).__init__()
         self._layer = None
-        self._empty_holder_tensor = torch.ones((1,), requires_grad=True)
-        self._empty_holder_tensor.names = ('_empty_holder_tensor',)
-        # noinspection PyTypeChecker
-        self._autograd_backward = None
-        self._autograd_backward = self._set_autograd_backward()
-        self._disable_autograd_backward = False
+        self._set_autograd_backward()
         if not isinstance(self, nn.Module):
             self.set_layer(layer)
 
