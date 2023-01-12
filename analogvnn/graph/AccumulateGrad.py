@@ -10,14 +10,16 @@ __all__ = ['AccumulateGrad']
 
 
 class AccumulateGrad:
-    """AccumulateGrad is a module that accumulates the gradients of the outputs of the module
-    it is attached to. It has no parameters of its own.
+    """AccumulateGrad is a module that accumulates the gradients of the outputs of the module it is attached to.
+
+     It has no parameters of its own.
 
     Attributes:
         module (nn.Module): Module to accumulate gradients for.
         input_output_connections (Dict[str, Dict[str, Union[None, bool, int, str, GRAPH_NODE_TYPE]]]): input/output
         connections.
     """
+
     input_output_connections: Dict[str, Dict[str, Union[None, bool, int, str, GRAPH_NODE_TYPE]]]
     module: Union[nn.Module, Callable]
 
@@ -27,6 +29,7 @@ class AccumulateGrad:
         Args:
             module (Union[nn.Module, Callable]): Module from which to accumulate gradients.
         """
+        super(AccumulateGrad, self).__init__()
         self.input_output_connections = {}
         self.module = module
 
@@ -36,9 +39,9 @@ class AccumulateGrad:
         Returns:
             str: String representation of the module.
         """
-        return f"AccumulateGrad({self.module})"
+        return f'AccumulateGrad({self.module})'
 
-    def __call__(
+    def __call__(  # noqa: C901
             self,
             grad_outputs_args_kwargs: ArgsKwargs,
             forward_input_output_graph: Dict[GRAPH_NODE_TYPE, InputOutput]
@@ -128,10 +131,10 @@ class AccumulateGrad:
                 grad_inputs_args[forward_in_arg] += grad_output
                 continue
 
-            raise NotImplementedError("WTF!Why!")
+            raise NotImplementedError('WTF!Why!')
 
         return ArgsKwargs(
-            args=[grad_inputs_args[i] for i in sorted(list(grad_inputs_args.keys()))],
+            args=[grad_inputs_args[i] for i in sorted(grad_inputs_args.keys())],
             kwargs=grad_inputs_kwargs
         )
 

@@ -17,6 +17,7 @@ class BackwardFunction(BackwardModule, ABC):
     Attributes:
         _backward_function (Callable): The function used to compute the backward gradient.
     """
+
     _backward_function: Callable
 
     def __init__(self, backward_function: Callable, layer: nn.Module = None):
@@ -26,7 +27,7 @@ class BackwardFunction(BackwardModule, ABC):
             backward_function (Callable): The function used to compute the backward gradient.
             layer (nn.Module): The layer that this backward module is associated with.
         """
-        super().__init__(layer)
+        super(BackwardFunction, self).__init__(layer)
         self._backward_function = backward_function
 
     @property
@@ -60,8 +61,7 @@ class BackwardFunction(BackwardModule, ABC):
         return self
 
     def backward(self, *grad_output: Tensor, **grad_output_kwarg: Tensor) -> TENSORS:
-        """Computes the backward gradient of the input of the layer with respect to the output of the layer
-        using the backward function.
+        """Computes the backward gradient of inputs with respect to outputs using the backward function.
 
         Args:
             *grad_output (Tensor): The gradients of the output of the layer.
@@ -74,6 +74,6 @@ class BackwardFunction(BackwardModule, ABC):
             NotImplementedError: If the backward function is not set.
         """
         if self._backward_function is None:
-            raise ValueError("set backward_function first before invoking backward")
+            raise ValueError('set backward_function first before invoking backward')
 
         return self._backward_function(*grad_output, **grad_output_kwarg)

@@ -28,6 +28,7 @@ class ModelGraphState:
         output (Tensor): the output of the forward pass.
         loss (Tensor): the loss.
     """
+
     allow_loops: bool
     use_autograd_graph: bool
     forward_input_output_graph: Optional[Dict[GRAPH_NODE_TYPE, InputOutput]]
@@ -44,6 +45,7 @@ class ModelGraphState:
             use_autograd_graph: If True, the autograd graph is used to calculate the gradients.
             allow_loops: If True, the graph is allowed to contain loops.
         """
+        super(ModelGraphState, self).__init__()
         self.allow_loops = allow_loops
         self.use_autograd_graph = use_autograd_graph
 
@@ -77,10 +79,10 @@ class ModelGraphState:
         """
         if exception:
             if self.outputs is None:
-                raise RuntimeError("output is not set.")
+                raise RuntimeError('output is not set.')
 
             if self._loss is None:
-                raise RuntimeError("loss is not set.")
+                raise RuntimeError('loss is not set.')
         else:
             return not (self.outputs is None or self._loss is None)
 

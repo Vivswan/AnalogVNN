@@ -9,12 +9,10 @@ __all__ = ['BackwardUsingForward']
 
 
 class BackwardUsingForward(BackwardModule, ABC):
-    """The backward module that uses the forward function to compute the backward gradient.
-    """
+    """The backward module that uses the forward function to compute the backward gradient."""
 
     def backward(self, *grad_output: Tensor, **grad_output_kwarg: Tensor) -> TENSORS:
-        """Computes the backward gradient of the input of the layer with respect to the output of the layer
-        using the forward function.
+        """Computes the backward gradient of inputs with respect to outputs using the forward function.
 
         Args:
             *grad_output (Tensor): The gradients of the output of the layer.

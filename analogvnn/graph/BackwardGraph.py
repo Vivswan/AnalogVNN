@@ -22,7 +22,7 @@ class BackwardGraph(AcyclicDirectedGraph):
     """The backward graph."""
 
     def __call__(self, gradient: TENSORS = None) -> ArgsKwargsOutput:
-        """Backward pass through the backward graph
+        """Backward pass through the backward graph.
 
         Args:
             gradient (TENSORS): gradient of the loss function w.r.t. the output of the forward graph
@@ -53,7 +53,7 @@ class BackwardGraph(AcyclicDirectedGraph):
         return result
 
     def compile(self, is_static=True):
-        """Compile the graph
+        """Compile the graph.
 
         Args:
             is_static (bool): If True, the graph is not changing during runtime and will be cached.
@@ -69,8 +69,8 @@ class BackwardGraph(AcyclicDirectedGraph):
 
         return super().compile(is_static=is_static)
 
-    def from_forward(self, forward_graph: Union[AcyclicDirectedGraph, nx.DiGraph]) -> BackwardGraph:
-        """Create a backward graph from inverting forward graph
+    def from_forward(self, forward_graph: Union[AcyclicDirectedGraph, nx.DiGraph]) -> BackwardGraph:  # noqa: C901
+        """Create a backward graph from inverting forward graph.
 
         Args:
             forward_graph (Union[AcyclicDirectedGraph, nx.DiGraph]): The forward graph.
@@ -83,9 +83,9 @@ class BackwardGraph(AcyclicDirectedGraph):
 
         graph = forward_graph.reverse(copy=True)
         for _, _, attr in graph.edges(data=True):
-            attr["in_arg"], attr["out_arg"] = attr["out_arg"], attr["in_arg"]
-            attr["in_kwarg"], attr["out_kwarg"] = attr["out_kwarg"], attr["in_kwarg"]
-            attr["label"] = AcyclicDirectedGraph._create_edge_label(**attr)
+            attr['in_arg'], attr['out_arg'] = attr['out_arg'], attr['in_arg']
+            attr['in_kwarg'], attr['out_kwarg'] = attr['out_kwarg'], attr['in_kwarg']
+            attr['label'] = AcyclicDirectedGraph._create_edge_label(**attr)
 
         new_graph = nx.MultiDiGraph()
         for v in graph.nodes():
@@ -95,75 +95,75 @@ class BackwardGraph(AcyclicDirectedGraph):
 
             if len(all_predecessors) == 1 and len(graph.get_edge_data(all_predecessors[0], v)) == 1:
                 attr = graph.get_edge_data(all_predecessors[0], v)[0]
-                if attr["in_arg"] == attr["in_kwarg"] == attr["in_arg"] == attr["in_arg"] is True:
+                if attr['in_arg'] == attr['in_kwarg'] == attr['in_arg'] == attr['in_arg'] is True:
                     new_graph.add_edge(all_predecessors[0], v, **attr)
                     continue
 
             akc = AccumulateGrad(v)
             for u in all_predecessors:
-                for key, attr in graph.get_edge_data(u, v).items():
-                    if attr["in_arg"] is None or attr["in_kwarg"] is None:
-                        uuid_str = str(uuid.uuid4()).replace("-", "")
+                for _, attr in graph.get_edge_data(u, v).items():
+                    if attr['in_arg'] is None or attr['in_kwarg'] is None:
+                        uuid_str = str(uuid.uuid4()).replace('-', '')
                         new_graph.add_edge(u, akc, **{
-                            "in_arg": attr["in_arg"],
-                            "in_kwarg": attr["in_kwarg"],
-                            "out_arg": None,
-                            "out_kwarg": uuid_str,
-                            "real_label": " ".join(attr["label"].split(" ")[:-1] + ["{" + uuid_str + "}"]),
-                            "label": attr["label"]
+                            'in_arg': attr['in_arg'],
+                            'in_kwarg': attr['in_kwarg'],
+                            'out_arg': None,
+                            'out_kwarg': uuid_str,
+                            'real_label': ' '.join(attr['label'].split(' ')[:-1] + ['{' + uuid_str + '}']),
+                            'label': attr['label']
                         })
                         akc.input_output_connections[uuid_str] = {
                             **attr,
-                            "from": u,
+                            'from': u,
                         }
                     else:
-                        uuid_str = str(uuid.uuid4()).replace("-", "")
+                        uuid_str = str(uuid.uuid4()).replace('-', '')
                         new_graph.add_edge(u, akc, **{
-                            "in_arg": True,
-                            "in_kwarg": None,
-                            "out_arg": None,
-                            "out_kwarg": uuid_str,
-                            "real_label": "[] -> {" + uuid_str + "}",
-                            "label": "[] -> []",
+                            'in_arg': True,
+                            'in_kwarg': None,
+                            'out_arg': None,
+                            'out_kwarg': uuid_str,
+                            'real_label': '[] -> {' + uuid_str + '}',
+                            'label': '[] -> []',
                         })
                         akc.input_output_connections[uuid_str] = {
                             **attr,
-                            "in_kwarg": None,
-                            "out_kwarg": None,
-                            "from": u,
+                            'in_kwarg': None,
+                            'out_kwarg': None,
+                            'from': u,
                         }
-                        uuid_str = str(uuid.uuid4()).replace("-", "")
+                        uuid_str = str(uuid.uuid4()).replace('-', '')
                         new_graph.add_edge(u, akc, **{
-                            "in_arg": None,
-                            "in_kwarg": True,
-                            "out_arg": None,
-                            "out_kwarg": uuid_str,
-                            "real_label": "{} -> {" + uuid_str + "}",
-                            "label": "{} -> {}",
+                            'in_arg': None,
+                            'in_kwarg': True,
+                            'out_arg': None,
+                            'out_kwarg': uuid_str,
+                            'real_label': '{} -> {' + uuid_str + '}',
+                            'label': '{} -> {}',
                         })
                         akc.input_output_connections[uuid_str] = {
                             **attr,
-                            "in_arg": None,
-                            "out_arg": None,
-                            "from": u,
+                            'in_arg': None,
+                            'out_arg': None,
+                            'from': u,
                         }
 
             new_graph.add_edge(akc, v, **{
-                "in_arg": True,
-                "in_kwarg": True,
-                "out_arg": True,
-                "out_kwarg": True,
-                "len": 0,
+                'in_arg': True,
+                'in_kwarg': True,
+                'out_arg': True,
+                'out_kwarg': True,
+                'len': 0,
             })
 
         for v in graph.nodes():
-            new_graph.nodes[v]["fillcolor"] = "lightblue"
+            new_graph.nodes[v]['fillcolor'] = 'lightblue'
         self.graph = new_graph
         return self
 
     @torch.no_grad()
     def calculate(self, *args, **kwargs) -> ArgsKwargsOutput:
-        """Calculate the gradient of the whole graph w.r.t. loss
+        """Calculate the gradient of the whole graph w.r.t. loss.
 
         Args:
             *args: The gradients args of outputs.
@@ -175,9 +175,8 @@ class BackwardGraph(AcyclicDirectedGraph):
         Raises:
             ValueError: If no forward pass has been performed yet.
         """
-
         if self.graph_state.forward_input_output_graph is None:
-            raise ValueError("No forward pass has been performed yet. Please preform a forward pass first.")
+            raise ValueError('No forward pass has been performed yet. Please preform a forward pass first.')
 
         input_output_graph = self._pass(self.OUTPUT, *args, **kwargs)
         self.graph_state.forward_input_output_graph = None
@@ -188,7 +187,7 @@ class BackwardGraph(AcyclicDirectedGraph):
             return None
 
     def _pass(self, from_node: GRAPH_NODE_TYPE, *args, **kwargs) -> Dict[GRAPH_NODE_TYPE, InputOutput]:
-        """Perform the backward pass through the graph
+        """Perform the backward pass through the graph.
 
         Args:
             from_node (GRAPH_NODE_TYPE): The node to start the backward pass from.
@@ -222,7 +221,7 @@ class BackwardGraph(AcyclicDirectedGraph):
 
         return input_output_graph
 
-    def _calculate_gradients(
+    def _calculate_gradients(  # noqa: C901
             self,
             module: Union[AccumulateGrad, Layer, BackwardModule, Callable],
             grad_outputs: InputOutput

@@ -12,8 +12,7 @@ __all__ = ['Linear', 'LinearBackpropagation']
 
 
 class LinearBackpropagation(BackwardModule):
-    """The backpropagation module of a linear layer.
-    """
+    """The backpropagation module of a linear layer."""
 
     def forward(self, x: Tensor):
         """Forward pass of the linear layer.
@@ -60,6 +59,7 @@ class Linear(Layer):
         weight (nn.Parameter): The weight of the layer.
         bias (nn.Parameter): The bias of the layer.
     """
+
     __constants__ = ['in_features', 'out_features']
     in_features: int
     out_features: int

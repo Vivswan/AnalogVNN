@@ -30,6 +30,7 @@ class AcyclicDirectedGraph(abc.ABC):
         STOP (GraphEnum): GraphEnum.STOP
 
     """
+
     graph: nx.MultiDiGraph
     graph_state: ModelGraphState
     _is_static: bool
@@ -48,17 +49,18 @@ class AcyclicDirectedGraph(abc.ABC):
         Raises:
             NotImplementedError: If allow_loops is True, since this is not implemented yet.
         """
+        super(AcyclicDirectedGraph, self).__init__()
         self.graph = nx.MultiDiGraph()
         self.graph_state = graph_state
         self._is_static = False
         self._static_graphs = {}
 
         if self.graph_state.allow_loops:
-            raise NotImplementedError("Loops are not implemented yet. Coming soon...")
+            raise NotImplementedError('Loops are not implemented yet. Coming soon...')
 
     @abc.abstractmethod
     def __call__(self, *args, **kwargs):
-        """Performs pass through the graph
+        """Performs pass through the graph.
 
         Args:
             *args: Arguments
@@ -111,9 +113,9 @@ class AcyclicDirectedGraph(abc.ABC):
             to_remove = []
             for key, edge in existing_edges.items():
                 if not (
-                        edge["out_arg"] == attr["out_arg"] is not None
+                        edge['out_arg'] == attr['out_arg'] is not None
                         or
-                        edge["out_kwarg"] == attr["out_kwarg"] is not None
+                        edge['out_kwarg'] == attr['out_kwarg'] is not None
                 ):
                     continue
                 to_remove.append(key)
@@ -121,11 +123,11 @@ class AcyclicDirectedGraph(abc.ABC):
                 self.graph.remove_edge(u_of_edge, v_of_edge, key=key)
 
         self.graph.add_edge(u_of_edge, v_of_edge, **attr)
-        self.graph.nodes[u_of_edge]["fillcolor"] = "lightblue"
-        self.graph.nodes[v_of_edge]["fillcolor"] = "lightblue"
+        self.graph.nodes[u_of_edge]['fillcolor'] = 'lightblue'
+        self.graph.nodes[v_of_edge]['fillcolor'] = 'lightblue'
         return self
 
-    @staticmethod
+    @staticmethod  # noqa: C901
     def check_edge_parameters(
             in_arg: Union[None, int, bool],
             in_kwarg: Union[None, str, bool],
@@ -170,16 +172,16 @@ class AcyclicDirectedGraph(abc.ABC):
         if in_arg is True or in_kwarg is True:
             #  All -> All
             if in_arg not in [True, None]:
-                raise ValueError(f'Invalid value for in_arg: "{in_arg}')
+                raise ValueError(f'Invalid value for in_arg: "{in_arg}"')
             if in_kwarg not in [True, None]:
-                raise ValueError(f'Invalid value for in_kwarg: "{in_kwarg}')
+                raise ValueError(f'Invalid value for in_kwarg: "{in_kwarg}"')
             if out_arg not in [True, None]:
-                raise ValueError(f'Invalid value for out_arg: "{out_arg}')
+                raise ValueError(f'Invalid value for out_arg: "{out_arg}"')
             if out_kwarg not in [True, None]:
-                raise ValueError(f'Invalid value for out_kwarg: "{out_kwarg}')
+                raise ValueError(f'Invalid value for out_kwarg: "{out_kwarg}"')
 
             if in_arg is True and out_kwarg is True:
-                raise ValueError(f'Invalid value in_arg -> out_kwarg')
+                raise ValueError('Invalid value "in_arg -> out_kwarg" not allowed')
 
             if (in_arg is True or in_kwarg is True) and (out_arg is None and out_kwarg is None):
                 out_arg = in_arg
@@ -206,12 +208,12 @@ class AcyclicDirectedGraph(abc.ABC):
             out_kwarg = True
 
         attr = {
-            "in_arg": in_arg,
-            "in_kwarg": in_kwarg,
-            "out_arg": out_arg,
-            "out_kwarg": out_kwarg,
+            'in_arg': in_arg,
+            'in_kwarg': in_kwarg,
+            'out_arg': out_arg,
+            'out_kwarg': out_kwarg,
         }
-        attr["label"] = AcyclicDirectedGraph._create_edge_label(**attr)
+        attr['label'] = AcyclicDirectedGraph._create_edge_label(**attr)
 
         return attr
 
@@ -235,28 +237,28 @@ class AcyclicDirectedGraph(abc.ABC):
         Returns:
             str: The edge's label.
         """
-        label = ""
+        label = ''
         if in_arg == in_kwarg == out_arg == out_kwarg is True:
-            return "* -> *"
+            return '* -> *'
 
         if in_arg is True:
-            label += "[]"
+            label += '[]'
         elif in_arg is not None:
-            label += "[" + str(in_arg) + "]"
+            label += '[' + str(in_arg) + ']'
         if in_kwarg is True:
-            label += "{}"
+            label += '{}'
         elif in_kwarg is not None:
-            label += "{" + str(in_kwarg) + "}"
+            label += '{' + str(in_kwarg) + '}'
 
-        label += " -> "
+        label += ' -> '
         if out_arg is True:
-            label += "[]"
+            label += '[]'
         elif out_arg is not None:
-            label += "[" + str(out_arg) + "]"
+            label += '[' + str(out_arg) + ']'
         if out_kwarg is True:
-            label += "{}"
+            label += '{}'
         elif out_kwarg is not None:
-            label += "{" + str(out_kwarg) + "}"
+            label += '{' + str(out_kwarg) + '}'
 
         return label
 
@@ -297,16 +299,16 @@ class AcyclicDirectedGraph(abc.ABC):
             args_index = []
             for u in graph.predecessors(v):
                 for _, edge_data in graph.get_edge_data(u, v).items():
-                    if isinstance(edge_data["out_arg"], int) and not isinstance(edge_data["out_arg"], bool):
+                    if isinstance(edge_data['out_arg'], int) and not isinstance(edge_data['out_arg'], bool):
                         args_index.append(edge_data)
 
             if len(args_index) == 0:
                 continue
 
-            args_index = sorted(args_index, key=lambda x: x["out_arg"])
+            args_index = sorted(args_index, key=lambda x: x['out_arg'])
             for index, value in enumerate(args_index):
-                value["out_arg"] = index
-                value["label"] = AcyclicDirectedGraph._create_edge_label(**value)
+                value['out_arg'] = index
+                value['label'] = AcyclicDirectedGraph._create_edge_label(**value)
 
         return graph
 
@@ -340,7 +342,7 @@ class AcyclicDirectedGraph(abc.ABC):
 
         return self._static_graphs[from_node]
 
-    def parse_args_kwargs(
+    def parse_args_kwargs(  # noqa: C901
             self,
             input_output_graph: Dict[GRAPH_NODE_TYPE, InputOutput],
             module: GRAPH_NODE_TYPE,
@@ -361,12 +363,12 @@ class AcyclicDirectedGraph(abc.ABC):
         kwargs = {}
         for p in predecessors:
             edge_data = self.graph.get_edge_data(p, module)
-            for k, v in edge_data.items():
+            for _, v in edge_data.items():
                 previous_outputs = input_output_graph[p].outputs
-                in_arg = v["in_arg"]
-                in_kwarg = v["in_kwarg"]
-                out_arg = v["out_arg"]
-                out_kwarg = v["out_kwarg"]
+                in_arg = v['in_arg']
+                in_kwarg = v['in_kwarg']
+                out_arg = v['out_arg']
+                out_kwarg = v['out_kwarg']
 
                 # 0
                 if in_arg is True and out_arg is True and in_kwarg is True and out_kwarg is True:
@@ -414,7 +416,7 @@ class AcyclicDirectedGraph(abc.ABC):
                     kwargs[out_kwarg] = previous_outputs
                     continue
 
-                raise NotImplementedError("WTF!Why!")
+                raise NotImplementedError('WTF!Why!')
 
         args = [args[k] for k in sorted(args.keys())] + extra_args
         inputs = ArgsKwargs(

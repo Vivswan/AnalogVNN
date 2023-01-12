@@ -21,6 +21,8 @@ pip install analogvnn
 
 ![3 Layered Linear Photonic Analog Neural Network](docs/_static/analogvnn_model.png)
 
+[//]: # (![3 Layered Linear Photonic Analog Neural Network]&#40;https://github.com/Vivswan/AnalogVNN/raw/v1.0.0/docs/_static/analogvnn_model.png&#41;)
+
 ## Abstract
 
 **AnalogVNN** is a simulation framework built on PyTorch which can simulate the effects of
@@ -53,5 +55,5 @@ Or in textual form:
 
 ```text
 Vivswan Shah, and Nathan Youngblood. "AnalogVNN: A fully modular framework for modeling 
-and optimizing photonic neural networks." *arXiv preprint arXiv:2210.10048 (2022)*.
+and optimizing photonic neural networks." arXiv preprint arXiv:2210.10048 (2022).
 ```

@@ -9,12 +9,11 @@ __all__ = ['Tanh']
 
 
 class Tanh(Activation):
-    """Implements the tanh activation function.
-    """
+    """Implements the tanh activation function."""
 
     @staticmethod
     def forward(x: Tensor) -> Tensor:
-        """forward pass of the tanh activation function.
+        """Forward pass of the tanh activation function.
 
         Args:
             x (Tensor): the input tensor.
@@ -25,7 +24,7 @@ class Tanh(Activation):
         return torch.tanh(x)
 
     def backward(self, grad_output: Optional[Tensor]) -> Optional[Tensor]:
-        """backward pass of the tanh activation function.
+        """Backward pass of the tanh activation function.
 
         Args:
             grad_output (Optional[Tensor]): the gradient of the output tensor.
@@ -39,8 +38,7 @@ class Tanh(Activation):
 
     @staticmethod
     def initialise(tensor: Tensor) -> Tensor:
-        """initialize the tensor using xavier uniform initialization with gain associated
-        with the tanh activation function.
+        """Initialisation of tensor using xavier uniform, gain associated with tanh.
 
         Args:
             tensor (Tensor): the tensor to be initialized.
@@ -52,8 +50,7 @@ class Tanh(Activation):
 
     @staticmethod
     def initialise_(tensor: Tensor) -> Tensor:
-        """in-place initialize the tensor using xavier uniform initialization with gain associated
-        with the tanh activation function.
+        """In-place initialisation of tensor using xavier uniform, gain associated with tanh.
 
         Args:
             tensor (Tensor): the tensor to be initialized.

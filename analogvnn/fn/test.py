@@ -18,7 +18,6 @@ def test(model: nn.Module, test_loader: DataLoader, test_run: bool = False) -> T
     Returns:
         tuple: the loss and accuracy of the model on the test set.
     """
-
     model.eval()
     total_loss = 0
     total_accuracy = 0
