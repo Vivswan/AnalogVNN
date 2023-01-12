@@ -14,6 +14,7 @@ import torch
 from torch import Tensor, nn
 from torch.nn import Parameter
 
+from analogvnn.backward.BackwardModule import BackwardModule
 from analogvnn.nn.module.Layer import Layer
 from analogvnn.utils.is_cpu_cuda import is_cpu_cuda
 
@@ -151,7 +152,7 @@ class AutoGradDot:
     show_saved: bool = dataclasses.field(default=False, repr=False, hash=False)
     max_attr_chars: int = dataclasses.field(default=50, repr=False, hash=False)
     _called: bool = False
-    _ignore_tensor_names: Dict[str, bool] = dataclasses.field(default_factory=dict, repr=False, hash=False)
+    _ignore_tensor: Dict[int, bool] = dataclasses.field(default_factory=dict, repr=False, hash=False)
 
     def __post_init__(self):
         """Create the graphviz graph.
@@ -175,7 +176,8 @@ class AutoGradDot:
             fontname='monospace'
         )
         self.dot = Digraph(node_attr=node_attr, graph_attr=dict(size="12,12"), format="svg")
-        self.add_ignore_tensor_names("_empty_holder_tensor")
+        # noinspection PyProtectedMember
+        self.add_ignore_tensor(BackwardModule._empty_holder_tensor)
 
     @property
     def inputs(self) -> Sequence[Tensor]:
@@ -293,15 +295,15 @@ class AutoGradDot:
         return self
 
     @property
-    def ignore_tensor_names(self) -> Dict[str, bool]:
-        return self._ignore_tensor_names
+    def ignore_tensor(self) -> Dict[int, bool]:
+        return self._ignore_tensor
 
-    def add_ignore_tensor_names(self, name: str):
-        self._ignore_tensor_names[name] = True
+    def add_ignore_tensor(self, tensor: Tensor):
+        self._ignore_tensor[id(tensor)] = True
         return self
 
-    def del_ignore_tensor_names(self, name: str):
-        self._ignore_tensor_names.pop(name, None)
+    def del_ignore_tensor(self, tensor: Tensor):
+        self._ignore_tensor.pop(id(tensor), None)
         return self
 
     def get_tensor_name(self, tensor: Tensor, name: Optional[str] = None) -> Tuple[str, str]:
@@ -416,17 +418,34 @@ class AutoGradDot:
         return item in self._seen
 
 
-def _add_grad_fn(grad_fn, autograd_dot: AutoGradDot):
-    """Add a grad_fn to the graph.
+def _add_grad_fn(link: Union[Tensor, Callable], autograd_dot: AutoGradDot) -> Optional[List]:
+    """Add a link to the graph.
 
     Args:
-        grad_fn (Any): the Tensor.grad_fn.
+        link (Union[Tensor, Callable]): the Tensor or Tensor.grad_fn.
         autograd_dot (AutoGradDot): the AutoGradDot object.
     """
-    assert not torch.is_tensor(grad_fn)
-    if autograd_dot.is_seen(grad_fn):
-        return
+    if autograd_dot.is_seen(link):
+        return None
 
+    next_links = []
+
+    if isinstance(link, Tensor):
+        tensor = link
+
+        autograd_dot.add_tensor(tensor, fillcolor='darkolivegreen1' if not tensor._is_view() else 'darkolivegreen3')
+
+        if tensor.grad_fn:
+            next_links.append(tensor.grad_fn)
+            autograd_dot.add_edge(tensor.grad_fn, tensor)
+
+        if tensor._is_view():
+            next_links.append(tensor._base)
+            autograd_dot.add_edge(tensor._base, tensor, style="dotted")
+
+        return next_links
+
+    grad_fn = link
     # add the node for this grad_fn
     autograd_dot.add_fn(grad_fn)
 
@@ -467,12 +486,12 @@ def _add_grad_fn(grad_fn, autograd_dot: AutoGradDot):
             if (
                     u[0].__class__.__name__ == 'AccumulateGrad' and
                     hasattr(u[0], 'variable') and
-                    autograd_dot.get_tensor_name(u[0].variable)[0] in autograd_dot.ignore_tensor_names
+                    id(u[0].variable) in autograd_dot.ignore_tensor
             ):
                 continue
 
             autograd_dot.add_edge(u[0], grad_fn)
-            _add_grad_fn(u[0], autograd_dot=autograd_dot)
+            next_links.append(u[0])
 
     # note: this used to show .saved_tensors in pytorch0.2, but stopped
     # working* as it was moved to ATen and Variable-Tensor merged
@@ -484,27 +503,7 @@ def _add_grad_fn(grad_fn, autograd_dot: AutoGradDot):
             autograd_dot.add_edge(t, grad_fn)
             autograd_dot.add_tensor(t, fillcolor='orange')
 
-
-def _add_base_tensor(tensor: Tensor, autograd_dot: AutoGradDot, fillcolor: str = 'darkolivegreen1'):
-    """Add a base tensor to the graph.
-
-    Args:
-        tensor (Tensor): the base tensor.
-        autograd_dot (AutoGradDot): the AutoGradDot object.
-        fillcolor (str): the color of the base tensor in graph. Defaults to 'darkolivegreen1'.
-    """
-    if autograd_dot.is_seen(tensor):
-        return
-
-    autograd_dot.add_tensor(tensor, fillcolor=fillcolor)
-
-    if tensor.grad_fn:
-        _add_grad_fn(tensor.grad_fn, autograd_dot=autograd_dot)
-        autograd_dot.add_edge(tensor.grad_fn, tensor)
-
-    if tensor._is_view():
-        _add_base_tensor(tensor._base, autograd_dot=autograd_dot, fillcolor='darkolivegreen3')
-        autograd_dot.add_edge(tensor._base, tensor, style="dotted")
+    return next_links
 
 
 def _compile_autograd_obj(
@@ -554,9 +553,12 @@ def _compile_autograd_obj(
     if additional_params is not None:
         autograd_dot.param_map.update(additional_params)
 
-    # handle multiple outputs
-    for v in autograd_dot.outputs:
-        _add_base_tensor(tensor=v, autograd_dot=autograd_dot)
+    deque = list(autograd_dot.outputs)
+
+    while len(deque) > 0:
+        r = _add_grad_fn(deque.pop(0), autograd_dot=autograd_dot)
+        if r is not None:
+            deque += r
 
     resize_graph(autograd_dot.dot)
 
