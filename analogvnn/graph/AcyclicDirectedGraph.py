@@ -363,7 +363,7 @@ class AcyclicDirectedGraph(abc.ABC):
         kwargs = {}
         for p in predecessors:
             edge_data = self.graph.get_edge_data(p, module)
-            for k, v in edge_data.items():
+            for _, v in edge_data.items():
                 previous_outputs = input_output_graph[p].outputs
                 in_arg = v['in_arg']
                 in_kwarg = v['in_kwarg']

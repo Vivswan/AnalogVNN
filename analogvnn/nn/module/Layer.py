@@ -220,7 +220,7 @@ class Layer(nn.Module):
 
         new_forward.__wrapped__ = function
         new_forward.__wrapper__ = Layer._forward_wrapper
-        setattr(self, 'forward', new_forward)
+        self.forward = new_forward
         return new_forward
 
     def _call_impl_forward(self, *args: Tensor, **kwargs: Tensor) -> TENSORS:

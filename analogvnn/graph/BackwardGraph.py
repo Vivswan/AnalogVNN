@@ -101,7 +101,7 @@ class BackwardGraph(AcyclicDirectedGraph):
 
             akc = AccumulateGrad(v)
             for u in all_predecessors:
-                for key, attr in graph.get_edge_data(u, v).items():
+                for _, attr in graph.get_edge_data(u, v).items():
                     if attr['in_arg'] is None or attr['in_kwarg'] is None:
                         uuid_str = str(uuid.uuid4()).replace('-', '')
                         new_graph.add_edge(u, akc, **{

@@ -245,7 +245,7 @@ class BackwardModule(abc.ABC):
             tensor.backward(gradient=grad, inputs=tensor)
         except Exception:
             # noinspection PyProtectedMember
-            for key, value in tensor._backward_hooks.items():
+            for _, value in tensor._backward_hooks.items():
                 grad = value(grad)
 
             if tensor.grad is None:
