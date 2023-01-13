@@ -52,16 +52,18 @@ class ModelGraphState:
         self.forward_input_output_graph = None
         self._loss = None
 
-    # noinspection PyUnusedLocal
-    @staticmethod
-    def ready_for_forward(exception: bool = False) -> bool:
+    # noinspection PyUnusedLocal,PyMethodMayBeStatic
+    def ready_for_forward(self, exception: bool = False) -> bool:
         """Check if the state is ready for forward pass.
 
         Args:
-            exception (bool): if True, raise an exception if the state is not ready for forward pass.
+            exception (bool): If True, an exception is raised if the state is not ready for forward pass.
 
         Returns:
             bool: True if the state is ready for forward pass.
+
+        Raises:
+            RuntimeError: If the state is not ready for forward pass and exception is True.
         """
         return True
 
