@@ -154,6 +154,7 @@ class WeightModel(FullSequential):
 
 def run_linear3_model():
     """The main function to train photonics image classifier with 3 linear/dense nn for MNIST dataset."""
+    is_cpu_cuda.use_cuda_if_available()
     torch.backends.cudnn.benchmark = True
     torch.manual_seed(0)
     data_path = Path('_data')
