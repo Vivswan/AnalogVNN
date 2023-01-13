@@ -94,6 +94,24 @@ class Model(Layer):
         """
         self.graphs.use_autograd_graph = use_autograd_graph
 
+    def __call__(self, *args, **kwargs):
+        """Call the model.
+
+        Args:
+            *args: The arguments of the model.
+            **kwargs: The keyword arguments of the model.
+
+        Returns:
+            TENSORS: The output of the model.
+
+        Raises:
+            RuntimeError: if the model is not compiled.
+        """
+        if not self._compiled:
+            raise RuntimeError('Model is not compiled yet.')
+
+        return super(Model, self).__call__(*args, **kwargs)
+
     def compile(self, device: Optional[torch.device] = None, layer_data: bool = True):
         """Compile the model.
 
