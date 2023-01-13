@@ -3,8 +3,12 @@ import sys
 import importlib_metadata
 
 __package__ = 'analogvnn'
-__version__ = importlib_metadata.version(__package__)
 __author__ = 'Vivswan Shah (vivswanshah@pitt.edu)'
+
+try:
+    __version__ = importlib_metadata.version(__package__)
+except importlib_metadata.PackageNotFoundError:
+    __version__ = 'local'
 
 if sys.version_info < (3, 7, 0):
     import warnings
