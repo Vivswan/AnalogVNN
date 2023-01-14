@@ -30,6 +30,7 @@ class ReducePrecision(Layer, BackwardIdentity):
             divide (float): the rounding value that is if divide is 0.5,
              then 0.6 will be rounded to 1.0 and 0.4 will be rounded to 0.0.
         """
+
         super(ReducePrecision, self).__init__()
         if precision < 1:
             raise ValueError(f'precision has to be more than 0, but got {precision}')
@@ -50,6 +51,7 @@ class ReducePrecision(Layer, BackwardIdentity):
         Returns:
             Tensor: the precision width
         """
+
         return 1 / self.precision
 
     @property
@@ -59,6 +61,7 @@ class ReducePrecision(Layer, BackwardIdentity):
         Returns:
             Tensor: the bit precision of the ReducePrecision module.
         """
+
         return torch.log2(self.precision + 1)
 
     @staticmethod
@@ -71,6 +74,7 @@ class ReducePrecision(Layer, BackwardIdentity):
         Returns:
             TENSOR_OPERABLE: the precision.
         """
+
         return 2 ** bit_precision - 1
 
     def extra_repr(self) -> str:
@@ -79,6 +83,7 @@ class ReducePrecision(Layer, BackwardIdentity):
         Returns:
             str: string
         """
+
         return f'precision={int(self.precision)}, divide={float(self.divide):0.2f}'
 
     def forward(self, x: Tensor) -> Tensor:
@@ -90,4 +95,5 @@ class ReducePrecision(Layer, BackwardIdentity):
         Returns:
             Tensor: the output tensor.
         """
+
         return reduce_precision(x, self.precision, self.divide)

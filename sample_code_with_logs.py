@@ -32,6 +32,7 @@ def load_vision_dataset(dataset, path, batch_size, is_cuda=False, grayscale=True
     Returns:
         A tuple containing the train and test data loaders, the input shape, and a tuple of class labels.
     """
+
     dataset_kwargs = {
         'batch_size': batch_size,
         'shuffle': True
@@ -73,6 +74,7 @@ def cross_entropy_accuracy(output, target) -> float:
     Returns:
         float: accuracy from 0 to 1
     """
+
     _, preds = torch.max(output.data, 1)
     correct = (preds == target).sum().item()
     return correct / len(output)
@@ -93,6 +95,7 @@ class LinearModel(FullSequential):
             (i.e., the probability that the digital values transmitted and detected are different after passing through
             the analog channel).
         """
+
         super(LinearModel, self).__init__()
 
         self.activation_class = activation_class
@@ -116,6 +119,7 @@ class LinearModel(FullSequential):
         Args:
             layer (BaseLayer): digital layer module
         """
+
         self.all_layers.append(self.norm_class())
         self.all_layers.append(self.precision_class(precision=self.precision))
         self.all_layers.append(self.noise_class(leakage=self.leakage, precision=self.precision))
@@ -141,6 +145,7 @@ class WeightModel(FullSequential):
             (i.e., the probability that the digital values transmitted and detected are different after passing through
             the analog channel).
         """
+
         super(WeightModel, self).__init__()
         self.all_layers = []
 
@@ -154,6 +159,7 @@ class WeightModel(FullSequential):
 
 def run_linear3_model():
     """The main function to train photonics image classifier with 3 linear/dense nn for MNIST dataset."""
+
     is_cpu_cuda.use_cuda_if_available()
     torch.backends.cudnn.benchmark = True
     torch.manual_seed(0)

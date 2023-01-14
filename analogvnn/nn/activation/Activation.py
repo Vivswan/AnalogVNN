@@ -21,6 +21,7 @@ class InitImplement:
         Returns:
             Tensor: the initialized tensor.
         """
+
         return nn.init.xavier_uniform(tensor)
 
     @staticmethod
@@ -33,6 +34,7 @@ class InitImplement:
         Returns:
             Tensor: the initialized tensor.
         """
+
         return nn.init.xavier_uniform_(tensor)
 
 

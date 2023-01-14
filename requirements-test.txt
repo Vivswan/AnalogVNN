@@ -6,3 +6,6 @@ flake8-bugbear
 flake8-comprehensions
 flake8-executable
 flake8-coding
+flake8-return
+flake8-noreturn
+flake8-deprecated

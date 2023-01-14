@@ -29,6 +29,7 @@ class AccumulateGrad:
         Args:
             module (Union[nn.Module, Callable]): Module from which to accumulate gradients.
         """
+
         super(AccumulateGrad, self).__init__()
         self.input_output_connections = {}
         self.module = module
@@ -39,6 +40,7 @@ class AccumulateGrad:
         Returns:
             str: String representation of the module.
         """
+
         return f'AccumulateGrad({self.module})'
 
     def __call__(  # noqa: C901
@@ -55,6 +57,7 @@ class AccumulateGrad:
         Returns:
             ArgsKwargs: The output gradients.
         """
+
         grad_inputs_args = {}
         grad_inputs_kwargs = {}
         for key, grad_output in grad_outputs_args_kwargs.kwargs.items():

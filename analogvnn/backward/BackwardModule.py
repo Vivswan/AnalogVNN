@@ -50,6 +50,7 @@ class BackwardModule(abc.ABC):
             Returns:
                 TENSORS: The output of the function.
             """
+
             ctx.backward_module = backward_module
             return ctx.backward_module._call_impl_forward(*args, **kwargs)
 
@@ -64,6 +65,7 @@ class BackwardModule(abc.ABC):
             Returns:
                 TENSORS: The gradients of the input of the function.
             """
+
             backward_module: BackwardModule = ctx.backward_module
             results = backward_module._call_impl_backward(*grad_outputs)
 
@@ -78,6 +80,7 @@ class BackwardModule(abc.ABC):
         Args:
             layer (nn.Module): The layer for which the backward gradient is computed.
         """
+
         super(BackwardModule, self).__init__()
         self._layer = None
         self._set_autograd_backward()
@@ -97,6 +100,7 @@ class BackwardModule(abc.ABC):
         Raises:
             NotImplementedError: If the forward pass is not implemented.
         """
+
         raise NotImplementedError(f'Module [{type(self).__name__}] is missing the required "forward" function')
 
     forward._implemented = False
@@ -115,6 +119,7 @@ class BackwardModule(abc.ABC):
         Raises:
             NotImplementedError: If the backward pass is not implemented.
         """
+
         raise NotImplementedError(f'Module [{type(self).__name__}] is missing the required "backward" function')
 
     def _call_impl_forward(self, *args: Tensor, **kwarg: Tensor) -> TENSORS:
@@ -127,6 +132,7 @@ class BackwardModule(abc.ABC):
         Returns:
             TENSORS: The output of the layer.
         """
+
         return self.forward(*args, **kwarg)
 
     def _call_impl_backward(self, *grad_output: Tensor, **grad_output_kwarg: Tensor) -> TENSORS:
@@ -139,6 +145,7 @@ class BackwardModule(abc.ABC):
         Returns:
             TENSORS: The gradients of the input of the layer.
         """
+
         return self.backward(*grad_output, **grad_output_kwarg)
 
     __call__: Callable[..., Any] = _call_impl_backward
@@ -155,6 +162,7 @@ class BackwardModule(abc.ABC):
         Returns:
             TENSORS: The output of the layer.
         """
+
         if to_apply and not self._disable_autograd_backward:
             return self._autograd_backward.apply(self, self._empty_holder_tensor, *args, **kwargs)
         else:
@@ -166,6 +174,7 @@ class BackwardModule(abc.ABC):
         Returns:
             bool: True if the forward pass is implemented, False otherwise.
         """
+
         return not hasattr(self.forward, '_implemented')
 
     @property
@@ -175,6 +184,7 @@ class BackwardModule(abc.ABC):
         Returns:
             Optional[nn.Module]: layer
         """
+
         return self.get_layer()
 
     def get_layer(self) -> Optional[nn.Module]:
@@ -183,6 +193,7 @@ class BackwardModule(abc.ABC):
         Returns:
             Optional[nn.Module]: layer
         """
+
         if isinstance(self, nn.Module):
             return self
         else:
@@ -202,6 +213,7 @@ class BackwardModule(abc.ABC):
             ValueError: If the layer is already set.
             ValueError: If the layer is not an instance of nn.Module.
         """
+
         if isinstance(self, nn.Module):
             raise ValueError('layer of Backward Module is set to itself')
         if self._layer is not None:
@@ -237,6 +249,7 @@ class BackwardModule(abc.ABC):
         Returns:
             Optional[Tensor]: the gradient of the tensor.
         """
+
         if tensor is None or tensor.requires_grad is False:
             return None
 
@@ -267,6 +280,7 @@ class BackwardModule(abc.ABC):
         Raises:
             AttributeError: If the attribute is not found.
         """
+
         if isinstance(self, nn.Module) or self == self._layer:
             return super(BackwardModule, self).__getattr__(name)
         if not str(name).startswith('__') and self._layer is not None and hasattr(self._layer, name):

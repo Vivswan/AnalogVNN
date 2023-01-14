@@ -49,6 +49,7 @@ def size_to_str(size):
     Returns:
         str: the string representation of the size.
     """
+
     return '(' + ', '.join(['%d' % s for s in size]) + ')'
 
 
@@ -67,6 +68,7 @@ def resize_graph(dot: Digraph, size_per_element: float = 0.15, min_size: float =
             size_per_element**2 pixels.
         min_size (float): Minimum size of graph.
     """
+
     # Get the approximate number of nodes and edges
     num_rows = len(dot.body)
     content_size = num_rows * size_per_element
@@ -86,6 +88,7 @@ def get_fn_name(fn: Callable, show_attrs: bool, max_attr_chars: int) -> str:
     Returns:
         str: the name of the function.
     """
+
     name = str(type(fn).__name__)
     if name.endswith('Backward'):
         name = name[:-8]
@@ -159,6 +162,7 @@ class AutoGradDot:
         Raises:
             ImportError: if graphviz (https://pygraphviz.github.io/) is not available.
         """
+
         try:
             from graphviz import Digraph
         except ImportError as e:
@@ -184,6 +188,7 @@ class AutoGradDot:
         Returns:
             Sequence[Tensor]: the arg inputs to the module.
         """
+
         return self._inputs
 
     @inputs.setter
@@ -193,6 +198,7 @@ class AutoGradDot:
         Args:
             inputs (Union[Tensor, Sequence[Tensor]]): the inputs to the module.
         """
+
         self._inputs = inputs
         self._called = False
 
@@ -213,6 +219,7 @@ class AutoGradDot:
         Args:
             Dict[str, Tensor]: the keyword inputs to the module.
         """
+
         return self._inputs_kwargs
 
     @inputs_kwargs.setter
@@ -222,6 +229,7 @@ class AutoGradDot:
         Args:
             inputs_kwargs (Dict[str, Tensor]): the keyword inputs to the module.
         """
+
         self._inputs_kwargs = inputs_kwargs
         self._called = False
 
@@ -239,6 +247,7 @@ class AutoGradDot:
         Returns:
             Optional[Sequence[Tensor]]: the outputs of the module.
         """
+
         return self._outputs
 
     @outputs.setter
@@ -259,6 +268,7 @@ class AutoGradDot:
         Returns:
             nn.Module: the module to be traced.
         """
+
         return self._module
 
     @module.setter
@@ -268,6 +278,7 @@ class AutoGradDot:
         Args:
             module (nn.Module): the module.
         """
+
         self._module = module
         self._called = False
 
@@ -285,6 +296,7 @@ class AutoGradDot:
         Returns:
             AutoGradDot: self.
         """
+
         self.param_map = {}
         self._seen = set()
         self.inputs = self.inputs
@@ -299,6 +311,7 @@ class AutoGradDot:
         Returns:
             Dict[int, bool]: the ignore tensor dict.
         """
+
         return self._ignore_tensor
 
     def add_ignore_tensor(self, tensor: Tensor):
@@ -310,6 +323,7 @@ class AutoGradDot:
         Returns:
             AutoGradDot: self.
         """
+
         self._ignore_tensor[id(tensor)] = True
         return self
 
@@ -322,6 +336,7 @@ class AutoGradDot:
         Returns:
             AutoGradDot: self.
         """
+
         self._ignore_tensor.pop(id(tensor), None)
         return self
 
@@ -335,6 +350,7 @@ class AutoGradDot:
         Returns:
             Tuple[str, str]: the name and size of the tensor.
         """
+
         if not name:
             if id(tensor) in self.param_map:
                 name = self.param_map[id(tensor)]
@@ -362,6 +378,7 @@ class AutoGradDot:
         Returns:
             AutoGradDot: self.
         """
+
         self._seen.add(tensor)
         self.dot.node(
             name=str(id(tensor)),
@@ -382,6 +399,7 @@ class AutoGradDot:
         Returns:
             AutoGradDot: self.
         """
+
         self._seen.add(fn)
         self.dot.node(
             name=str(id(fn)),
@@ -404,6 +422,7 @@ class AutoGradDot:
         Returns:
             AutoGradDot: self.
         """
+
         self.dot.edge(
             tail_name=str(id(u)),
             head_name=str(id(v)),
@@ -422,6 +441,7 @@ class AutoGradDot:
         Returns:
             AutoGradDot: self.
         """
+
         self._seen.add(item)
         return self
 
@@ -434,6 +454,7 @@ class AutoGradDot:
         Returns:
             bool: True if the item is in the seen set.
         """
+
         return item in self._seen
 
 
@@ -444,6 +465,7 @@ def _add_grad_fn(link: Union[Tensor, Callable], autograd_dot: AutoGradDot) -> Op
         link (Union[Tensor, Callable]): the Tensor or Tensor.grad_fn.
         autograd_dot (AutoGradDot): the AutoGradDot object.
     """
+
     if autograd_dot.is_seen(link):
         return None
 
@@ -558,6 +580,7 @@ def _compile_autograd_obj(
     Returns:
         AutoGradDot: graphviz representation of autograd graph
     """
+
     if LooseVersion(torch.__version__) < LooseVersion('1.9') and (show_attrs or show_saved):
         warnings.warn(
             'make_dot: showing grad_fn attributes and saved variables'
@@ -625,6 +648,7 @@ def make_autograd_obj_from_outputs(
     Returns:
         AutoGradDot: graphviz representation of autograd graph
     """
+
     autograd_dot = AutoGradDot()
     autograd_dot.outputs = outputs
     named_params = dict(named_params)
@@ -665,6 +689,7 @@ def make_autograd_obj_from_module(
     Returns:
         AutoGradDot: graphviz representation of autograd graph
     """
+
     assert isinstance(module, nn.Module)
     new_args = []
     new_kwargs = {}
@@ -773,6 +798,7 @@ def get_autograd_dot_from_trace(trace) -> Digraph:
     Returns:
         graphviz.Digraph: the resulting graph.
     """
+
     try:
         from graphviz import Digraph
     except ImportError as e:
@@ -835,6 +861,7 @@ def get_autograd_dot_from_outputs(
     Returns:
         Digraph: graphviz representation of autograd graph
     """
+
     return make_autograd_obj_from_outputs(
         outputs=outputs,
         named_params=named_params,
@@ -874,6 +901,7 @@ def get_autograd_dot_from_module(
     Returns:
         Digraph: graphviz representation of autograd graph
     """
+
     return make_autograd_obj_from_module(
         module,
         *args,
@@ -913,6 +941,7 @@ def save_autograd_graph_from_outputs(
     Returns:
         str: The (possibly relative) path of the rendered file.
     """
+
     return get_autograd_dot_from_outputs(
         outputs=outputs,
         named_params=named_params,
@@ -954,6 +983,7 @@ def save_autograd_graph_from_module(
     Returns:
         str: The (possibly relative) path of the rendered file.
     """
+
     return get_autograd_dot_from_module(
         module,
         *args,
@@ -976,4 +1006,5 @@ def save_autograd_graph_from_trace(filename: Union[str, Path], trace) -> str:
     Returns:
         str: The (possibly relative) path of the rendered file.
     """
+
     return get_autograd_dot_from_trace(trace).render(filename, format='svg', cleanup=True)

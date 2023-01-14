@@ -25,6 +25,7 @@ class Sequential(Model, nn.Sequential):
         Returns:
             torch.Tensor: The output of the model.
         """
+
         if not self._compiled:
             self.compile()
 
@@ -40,6 +41,7 @@ class Sequential(Model, nn.Sequential):
         Returns:
             Sequential: self
         """
+
         arr = [self.graphs.INPUT, *list(self.registered_modules()), self.graphs.OUTPUT]
         self.graphs.forward_graph.add_connection(*arr)
         return super().compile(device, layer_data)
@@ -50,4 +52,5 @@ class Sequential(Model, nn.Sequential):
         Args:
             *args (nn.Module): The modules to add.
         """
+
         return self.extend(args)

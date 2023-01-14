@@ -26,6 +26,7 @@ def to_graphviz_digraph(from_graph: networkx.DiGraph, real_label: bool = False) 
         ImportError: if pygraphviz (https://pygraphviz.github.io/) is not available.
         ImportError: if graphviz (https://pygraphviz.github.io/) is not available.
     """
+
     try:
         # noinspection PyPackageRequirements
         import pygraphviz  # noqa: F401

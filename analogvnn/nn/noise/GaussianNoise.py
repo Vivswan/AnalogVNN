@@ -41,6 +41,7 @@ class GaussianNoise(Layer, BackwardIdentity):
             leakage (float): the leakage of the Gaussian noise.
             precision (int): the precision of the Gaussian noise.
         """
+
         super(GaussianNoise, self).__init__()
 
         if (std is None) + (leakage is None) + (precision is None) != 1:
@@ -70,6 +71,7 @@ class GaussianNoise(Layer, BackwardIdentity):
         Returns:
             float: the standard deviation of the Gaussian noise.
         """
+
         return 1 / (2 * precision * scipy.special.erfinv(1 - leakage) * math.sqrt(2))
 
     @staticmethod
@@ -83,6 +85,7 @@ class GaussianNoise(Layer, BackwardIdentity):
         Returns:
             int: the precision of the Gaussian noise.
         """
+
         return 1 / (2 * std * scipy.special.erfinv(1 - leakage) * math.sqrt(2))
 
     @staticmethod
@@ -96,6 +99,7 @@ class GaussianNoise(Layer, BackwardIdentity):
         Returns:
             float: the leakage of the Gaussian noise.
         """
+
         return 2 * GaussianNoise.static_cdf(x=-1 / (2 * precision), std=std)
 
     @property
@@ -105,6 +109,7 @@ class GaussianNoise(Layer, BackwardIdentity):
         Returns:
             Tensor: the standard deviation of the Gaussian noise.
         """
+
         return self.std
 
     @property
@@ -114,6 +119,7 @@ class GaussianNoise(Layer, BackwardIdentity):
         Returns:
             Tensor: the variance of the Gaussian noise.
         """
+
         return self.stddev.pow(2)
 
     def pdf(self, x: Tensor, mean: Tensor = 0) -> Tensor:
@@ -126,6 +132,7 @@ class GaussianNoise(Layer, BackwardIdentity):
         Returns:
             Tensor: the probability density function of the Gaussian noise.
         """
+
         return torch.exp(self.log_prob(x=x, mean=mean))
 
     def log_prob(self, x: Tensor, mean: Tensor = 0) -> Tensor:
@@ -138,6 +145,7 @@ class GaussianNoise(Layer, BackwardIdentity):
         Returns:
             Tensor: the log probability density function of the Gaussian noise.
         """
+
         x = x if isinstance(x, Tensor) else torch.tensor(x, requires_grad=False)
         mean = mean if isinstance(mean, Tensor) else torch.tensor(mean, requires_grad=False)
 
@@ -157,6 +165,7 @@ class GaussianNoise(Layer, BackwardIdentity):
         Returns:
             TENSOR_OPERABLE: the cumulative distribution function of the Gaussian noise.
         """
+
         return 1 / 2 * (1 + math.erf((x - mean) / (std * math.sqrt(2))))
 
     def cdf(self, x: Tensor, mean: Tensor = 0) -> Tensor:
@@ -169,6 +178,7 @@ class GaussianNoise(Layer, BackwardIdentity):
         Returns:
             Tensor: the cumulative distribution function of the Gaussian noise.
         """
+
         x = x if isinstance(x, Tensor) else torch.tensor(x, requires_grad=False)
         mean = mean if isinstance(mean, Tensor) else torch.tensor(mean, requires_grad=False)
         return self.static_cdf(x=x, std=self.std, mean=mean)
@@ -182,6 +192,7 @@ class GaussianNoise(Layer, BackwardIdentity):
         Returns:
             Tensor: the output tensor.
         """
+
         return torch.normal(mean=x, std=self.std)
 
     def extra_repr(self) -> str:
@@ -190,4 +201,5 @@ class GaussianNoise(Layer, BackwardIdentity):
         Returns:
             str: the extra representation of the Gaussian noise.
         """
+
         return f'std={float(self.std):.4f}, leakage={float(self.leakage):.4f}, precision={int(self.precision)}'

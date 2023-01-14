@@ -26,6 +26,7 @@ def __nn_Module_init_updated__(function: Callable) -> Callable:
     Returns:
         Callable: Wrapped function
     """
+
     # noinspection PyUnusedLocal
     def _temp(*args, **kwargs) -> ...:
         pass
@@ -92,6 +93,7 @@ class Layer(nn.Module):
             *inputs: Inputs of the forward pass.
             **kwargs: Keyword arguments of the forward pass.
         """
+
         self._forward_wrapper(self.forward)
         outputs = super(Layer, self).__call__(*inputs, **kwargs)
         if self.training:
@@ -107,6 +109,7 @@ class Layer(nn.Module):
         Returns:
             bool: use_autograd_graph.
         """
+
         if self.graphs is not None:
             return self.graphs.use_autograd_graph
         return self._use_autograd_graph
@@ -118,6 +121,7 @@ class Layer(nn.Module):
         Args:
             use_autograd_graph (bool): use_autograd_graph.
         """
+
         self._use_autograd_graph = use_autograd_graph
         if self.graphs is not None:
             self.graphs.use_autograd_graph = use_autograd_graph
@@ -129,6 +133,7 @@ class Layer(nn.Module):
         Returns:
             ArgsKwargsOutput: inputs.
         """
+
         return ArgsKwargs.from_args_kwargs_object(self._inputs)
 
     @property
@@ -138,6 +143,7 @@ class Layer(nn.Module):
         Returns:
             Union[None, Tensor, Sequence[Tensor]]: outputs.
         """
+
         return self._outputs
 
     @property
@@ -147,6 +153,7 @@ class Layer(nn.Module):
         Returns:
             Union[None, Callable, BackwardModule]: backward_function.
         """
+
         if self._backward_module is not None:
             return self._backward_module
 
@@ -162,6 +169,7 @@ class Layer(nn.Module):
         Args:
             function (Union[BackwardModule, Type[BackwardModule], Callable]): backward_function.
         """
+
         self.set_backward_function(function)
 
     def set_backward_function(self, backward_class: Union[Callable, BackwardModule, Type[BackwardModule]]) -> Layer:
@@ -176,6 +184,7 @@ class Layer(nn.Module):
         Raises:
             TypeError: If backward_class is not a callable or BackwardModule.
         """
+
         if backward_class == self:
             return self
 
@@ -197,8 +206,7 @@ class Layer(nn.Module):
             prefix: str = '',
             remove_duplicate: bool = True
     ) -> Iterator[Tuple[str, nn.Module]]:
-        """Returns an iterator over all registered modules in the network, yielding
-        both the name of the module and the module itself.
+        """Returns an iterator over registered modules under self.
 
         Args:
             memo: a memo to store the set of modules already added to the result
@@ -213,6 +221,7 @@ class Layer(nn.Module):
             Duplicate modules are returned only once. In the following
             example, ``l`` will be returned only once.
         """
+
         if memo is None:
             memo = set()
 
@@ -220,9 +229,9 @@ class Layer(nn.Module):
             memo.add(self.backward_function)
 
         for name, module in super(Layer, self).named_modules(
-            memo=memo,
-            prefix=prefix,
-            remove_duplicate=remove_duplicate
+                memo=memo,
+                prefix=prefix,
+                remove_duplicate=remove_duplicate
         ):
             if module is self:
                 continue
@@ -239,6 +248,7 @@ class Layer(nn.Module):
             Duplicate modules are returned only once. In the following
             example, ``l`` will be returned only once.
         """
+
         for _, module in self.named_registered_modules():
             yield module
 
@@ -251,6 +261,7 @@ class Layer(nn.Module):
         Returns:
             Callable: Wrapped function.
         """
+
         # noinspection PyUnresolvedReferences
         if hasattr(function, '__wrapper__') and function.__wrapper__ == Layer._forward_wrapper:
             return function
@@ -284,6 +295,7 @@ class Layer(nn.Module):
         Returns:
             TENSORS: Outputs of the forward pass.
         """
+
         if isinstance(self.backward_function, BackwardModule) and self.backward_function.has_forward():
             forward_functions = self.backward_function.forward
         else:

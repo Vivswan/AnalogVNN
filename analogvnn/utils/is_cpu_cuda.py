@@ -20,6 +20,7 @@ class CPUCuda:
 
     def __init__(self):
         """Initialize the CPUCuda class."""
+
         super(CPUCuda, self).__init__()
         self._device = None
         self.device_name = None
@@ -31,6 +32,7 @@ class CPUCuda:
         Returns:
             CPUCuda: self
         """
+
         self.set_device('cpu')
         return self
 
@@ -40,6 +42,7 @@ class CPUCuda:
         Returns:
             CPUCuda: self
         """
+
         if torch.cuda.is_available():
             self.set_device(f'cuda:{torch.cuda.current_device()}')
         return self
@@ -53,6 +56,7 @@ class CPUCuda:
         Returns:
             CPUCuda: self
         """
+
         self._device = torch.device(device_name)
         self.device_name = self._device.type
         return self
@@ -64,6 +68,7 @@ class CPUCuda:
         Returns:
             torch.device: the device.
         """
+
         return self._device
 
     @property
@@ -73,6 +78,7 @@ class CPUCuda:
         Returns:
             bool: True if the device is cpu, False otherwise.
         """
+
         return self.device_name.startswith('cpu')
 
     @property
@@ -82,6 +88,7 @@ class CPUCuda:
         Returns:
             bool: True if the device is cuda, False otherwise.
         """
+
         return self.device_name.startswith('cuda')
 
     @property
@@ -91,6 +98,7 @@ class CPUCuda:
         Returns:
             tuple: the device and True if the device is cuda, False otherwise.
         """
+
         return self.device, self.is_cuda
 
     def get_module_device(self, module) -> torch.device:
@@ -102,6 +110,7 @@ class CPUCuda:
         Returns:
             torch.device: the device of the module.
         """
+
         # noinspection PyBroadException
         try:
             device: torch.device = getattr(module, 'device', None)

@@ -25,6 +25,7 @@ class StochasticReducePrecision(Layer, BackwardIdentity):
         Args:
             precision (int): the precision of the output tensor.
         """
+
         super(StochasticReducePrecision, self).__init__()
         if precision < 1:
             raise ValueError('precision has to be more than 0, but got {}'.format(precision))
@@ -41,6 +42,7 @@ class StochasticReducePrecision(Layer, BackwardIdentity):
         Returns:
             Tensor: the precision width
         """
+
         return 1 / self.precision
 
     @property
@@ -50,6 +52,7 @@ class StochasticReducePrecision(Layer, BackwardIdentity):
         Returns:
             Tensor: the bit precision of the ReducePrecision module.
         """
+
         return torch.log2(self.precision + 1)
 
     @staticmethod
@@ -62,6 +65,7 @@ class StochasticReducePrecision(Layer, BackwardIdentity):
         Returns:
             TENSOR_OPERABLE: the precision.
         """
+
         return 2 ** bit_precision - 1
 
     def extra_repr(self) -> str:
@@ -70,6 +74,7 @@ class StochasticReducePrecision(Layer, BackwardIdentity):
         Returns:
             str: string
         """
+
         return f'precision={self.precision}'
 
     def forward(self, x: Tensor) -> Tensor:
@@ -81,4 +86,5 @@ class StochasticReducePrecision(Layer, BackwardIdentity):
         Returns:
             Tensor: output tensor.
         """
+
         return stochastic_reduce_precision(x, self.precision)
