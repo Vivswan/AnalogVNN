@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import typing
-from typing import Callable, Optional, Tuple
+from typing import Callable, Optional, Tuple, Set, Iterator
 
 import torch
-from torch import optim, Tensor
+from torch import optim, Tensor, nn
 from torch.utils.data import DataLoader
 
 from analogvnn.fn.test import test
@@ -76,6 +76,24 @@ class Model(Layer):
         self.accuracy_function = None
         self.device = device
 
+    def __call__(self, *args, **kwargs):
+        """Call the model.
+
+        Args:
+            *args: The arguments of the model.
+            **kwargs: The keyword arguments of the model.
+
+        Returns:
+            TENSORS: The output of the model.
+
+        Raises:
+            RuntimeError: if the model is not compiled.
+        """
+        if not self._compiled:
+            raise RuntimeError('Model is not compiled yet.')
+
+        return super(Model, self).__call__(*args, **kwargs)
+
     @property
     def use_autograd_graph(self):
         """Is the autograd graph used for the model.
@@ -94,23 +112,35 @@ class Model(Layer):
         """
         self.graphs.use_autograd_graph = use_autograd_graph
 
-    def __call__(self, *args, **kwargs):
-        """Call the model.
+    def named_registered_modules(
+            self,
+            memo: Optional[Set[nn.Module]] = None,
+            prefix: str = '',
+            remove_duplicate: bool = True
+    ) -> Iterator[Tuple[str, nn.Module]]:
+        """Returns an iterator over registered modules under self,
+        yielding both the name of the module and the module itself.
 
         Args:
-            *args: The arguments of the model.
-            **kwargs: The keyword arguments of the model.
+            memo: a memo to store the set of modules already added to the result
+            prefix: a prefix that will be added to the name of the module
+            remove_duplicate: whether to remove the duplicated module instances in the result
+                or not
 
-        Returns:
-            TENSORS: The output of the model.
+        Yields:
+            (str, nn.Module): Tuple of name and module
 
-        Raises:
-            RuntimeError: if the model is not compiled.
+        Note:
+            Duplicate modules are returned only once. In the following
+            example, ``l`` will be returned only once.
         """
-        if not self._compiled:
-            raise RuntimeError('Model is not compiled yet.')
+        if memo is None:
+            memo = set()
 
-        return super(Model, self).__call__(*args, **kwargs)
+        memo.add(self.optimizer)
+        memo.add(self.loss_function)
+        memo.add(self.accuracy_function)
+        return super(Model, self).named_registered_modules(memo=memo, prefix=prefix, remove_duplicate=remove_duplicate)
 
     def compile(self, device: Optional[torch.device] = None, layer_data: bool = True):
         """Compile the model.

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import functools
-from typing import Union, Type, Callable, Sequence, Optional, TYPE_CHECKING
+from typing import Union, Type, Callable, Sequence, Optional, TYPE_CHECKING, Set, Iterator, Tuple
 
 from torch import nn, Tensor
 
@@ -190,6 +190,57 @@ class Layer(nn.Module):
             raise TypeError(f'Backward Module is not set for "{self}"')
 
         return self
+
+    def named_registered_modules(
+            self,
+            memo: Optional[Set[nn.Module]] = None,
+            prefix: str = '',
+            remove_duplicate: bool = True
+    ) -> Iterator[Tuple[str, nn.Module]]:
+        """Returns an iterator over all registered modules in the network, yielding
+        both the name of the module and the module itself.
+
+        Args:
+            memo: a memo to store the set of modules already added to the result
+            prefix: a prefix that will be added to the name of the module
+            remove_duplicate: whether to remove the duplicated module instances in the result
+                or not
+
+        Yields:
+            (str, Module): Tuple of name and module
+
+        Note:
+            Duplicate modules are returned only once. In the following
+            example, ``l`` will be returned only once.
+        """
+        if memo is None:
+            memo = set()
+
+        if self.backward_function != self:
+            memo.add(self.backward_function)
+
+        for name, module in super(Layer, self).named_modules(
+            memo=memo,
+            prefix=prefix,
+            remove_duplicate=remove_duplicate
+        ):
+            if module is self:
+                continue
+
+            yield name, module
+
+    def registered_modules(self) -> Iterator[nn.Module]:
+        """Returns an iterator over registered modules under self.
+
+        Yields:
+            nn.Module: a module in the network
+
+        Note:
+            Duplicate modules are returned only once. In the following
+            example, ``l`` will be returned only once.
+        """
+        for _, module in self.named_registered_modules():
+            yield module
 
     def _forward_wrapper(self, function: Callable) -> Callable:
         """Wrapper for the forward function.
