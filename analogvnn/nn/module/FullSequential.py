@@ -22,7 +22,6 @@ class FullSequential(Sequential):
         Returns:
             FullSequential: self
         """
-
-        arr = [self.graphs.INPUT, *list(self.registered_modules()), self.graphs.OUTPUT]
+        arr = [self.graphs.INPUT, *list(self.registered_children()), self.graphs.OUTPUT]
         self.graphs.backward_graph.add_connection(*reversed(arr))
         return super().compile(device, layer_data)

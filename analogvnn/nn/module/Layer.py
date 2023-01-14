@@ -200,22 +200,19 @@ class Layer(nn.Module):
 
         return self
 
-    def named_registered_modules(
+    def named_registered_children(
             self,
-            memo: Optional[Set[nn.Module]] = None,
-            prefix: str = '',
-            remove_duplicate: bool = True
+            memo: Optional[Set[nn.Module]] = None
     ) -> Iterator[Tuple[str, nn.Module]]:
-        """Returns an iterator over registered modules under self.
+        """Returns an iterator over immediate registered children modules, yielding both
+        the name of the module.
 
         Args:
             memo: a memo to store the set of modules already added to the result
-            prefix: a prefix that will be added to the name of the module
-            remove_duplicate: whether to remove the duplicated module instances in the result
-                or not
+
 
         Yields:
-            (str, Module): Tuple of name and module
+            (str, Module): Tuple containing a name and child module
 
         Note:
             Duplicate modules are returned only once. In the following
@@ -225,21 +222,17 @@ class Layer(nn.Module):
         if memo is None:
             memo = set()
 
-        if self.backward_function != self:
-            memo.add(self.backward_function)
+        memo.add(self.backward_function)
+        memo.add(self)
 
-        for name, module in super(Layer, self).named_modules(
-                memo=memo,
-                prefix=prefix,
-                remove_duplicate=remove_duplicate
-        ):
-            if module is self:
+        for name, module in self.named_children():
+            if module in memo:
                 continue
 
             yield name, module
 
-    def registered_modules(self) -> Iterator[nn.Module]:
-        """Returns an iterator over registered modules under self.
+    def registered_children(self) -> Iterator[nn.Module]:
+        r"""Returns an iterator over immediate registered children modules.
 
         Yields:
             nn.Module: a module in the network
@@ -249,7 +242,7 @@ class Layer(nn.Module):
             example, ``l`` will be returned only once.
         """
 
-        for _, module in self.named_registered_modules():
+        for _, module in self.named_registered_children():
             yield module
 
     def _forward_wrapper(self, function: Callable) -> Callable:

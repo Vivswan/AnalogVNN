@@ -41,8 +41,7 @@ class Sequential(Model, nn.Sequential):
         Returns:
             Sequential: self
         """
-
-        arr = [self.graphs.INPUT, *list(self.registered_modules()), self.graphs.OUTPUT]
+        arr = [self.graphs.INPUT, *list(self.registered_children()), self.graphs.OUTPUT]
         self.graphs.forward_graph.add_connection(*arr)
         return super().compile(device, layer_data)
 
@@ -52,5 +51,5 @@ class Sequential(Model, nn.Sequential):
         Args:
             *args (nn.Module): The modules to add.
         """
-
+        
         return self.extend(args)

@@ -198,15 +198,19 @@ def run_linear3_model():
         leakage=0.5
     )
 
+    # Parametrizing Parameters of the Models
+    PseudoParameter.parametrize_module(nn_model, transformation=weight_model)
+
     # Setting Model Parameters
     nn_model.loss_function = nn.CrossEntropyLoss()
     nn_model.accuracy_function = cross_entropy_accuracy
+    nn_model.optimizer = optim.Adam(params=nn_model.parameters())
+
+    # Compile Model
     nn_model.compile(device=device)
     weight_model.compile(device=device)
 
-    PseudoParameter.parametrize_module(nn_model, transformation=weight_model)
-    nn_model.optimizer = optim.Adam(params=nn_model.parameters())
-
+    # Creating Tensorboard for Visualization and Saving the Model
     nn_model.create_tensorboard(str(data_path.joinpath('tensorboard')))
 
     print('Saving Summary and Graphs...')
@@ -246,7 +250,7 @@ def run_linear3_model():
 
     # Training
     print('Starting Training...')
-    for epoch in range(10):
+    for epoch in range(1):
         train_loss, train_accuracy = nn_model.train_on(train_loader, epoch=epoch)
         test_loss, test_accuracy = nn_model.test_on(test_loader, epoch=epoch)
 
