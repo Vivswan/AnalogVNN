@@ -222,8 +222,8 @@ class Layer(nn.Module):
         if memo is None:
             memo = set()
 
-        memo.add(self.backward_function)
         memo.add(self)
+        memo.add(self.backward_function)
 
         for name, module in self.named_children():
             if module in memo:

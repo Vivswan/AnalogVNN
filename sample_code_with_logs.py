@@ -250,7 +250,7 @@ def run_linear3_model():
 
     # Training
     print('Starting Training...')
-    for epoch in range(1):
+    for epoch in range(10):
         train_loss, train_accuracy = nn_model.train_on(train_loader, epoch=epoch)
         test_loss, test_accuracy = nn_model.test_on(test_loader, epoch=epoch)
 
