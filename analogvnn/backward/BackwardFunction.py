@@ -27,6 +27,7 @@ class BackwardFunction(BackwardModule, ABC):
             backward_function (Callable): The function used to compute the backward gradient.
             layer (nn.Module): The layer that this backward module is associated with.
         """
+
         super(BackwardFunction, self).__init__(layer)
         self._backward_function = backward_function
 
@@ -37,6 +38,7 @@ class BackwardFunction(BackwardModule, ABC):
         Returns:
             Callable: The function used to compute the backward gradient.
         """
+
         return self._backward_function
 
     @backward_function.setter
@@ -46,6 +48,7 @@ class BackwardFunction(BackwardModule, ABC):
         Args:
             backward_function (Callable): The function used to compute the backward gradient with.
         """
+
         self.set_backward_function(backward_function)
 
     def set_backward_function(self, backward_function: Callable) -> BackwardFunction:
@@ -57,6 +60,7 @@ class BackwardFunction(BackwardModule, ABC):
         Returns:
             BackwardFunction: self.
         """
+
         self._backward_function = backward_function
         return self
 
@@ -73,6 +77,7 @@ class BackwardFunction(BackwardModule, ABC):
         Raises:
             NotImplementedError: If the backward function is not set.
         """
+
         if self._backward_function is None:
             raise ValueError('set backward_function first before invoking backward')
 

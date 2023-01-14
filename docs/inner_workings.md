@@ -15,13 +15,14 @@ the parameter of layer of `Parameter` class to `PseudoParameters`.
 layer to get parameterized data
 
 PyTorch's ParameterizedParameters vs AnalogVNN's PseudoParameters:
+
 - Similarity (Forward or Parameterizing the data):
   > Data &#8594; ParameterizingModel &#8594; Parameterized Data
 - Difference (Backward or Gradient Calculations):
-  - ParameterizedParameters
-    > Parameterized Data &#8594; ParameterizingModel &#8594; Data
-  - PseudoParameters
-    > Parameterized Data &#8594; Data
+    - ParameterizedParameters
+      > Parameterized Data &#8594; ParameterizingModel &#8594; Data
+    - PseudoParameters
+      > Parameterized Data &#8594; Data
 
 So, by using `PseudoParameters` class the gradients of the parameter are calculated in such a way that
 the ParameterizingModel was never present.

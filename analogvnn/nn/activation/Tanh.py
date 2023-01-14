@@ -21,6 +21,7 @@ class Tanh(Activation):
         Returns:
             Tensor: the output tensor.
         """
+
         return torch.tanh(x)
 
     def backward(self, grad_output: Optional[Tensor]) -> Optional[Tensor]:
@@ -32,6 +33,7 @@ class Tanh(Activation):
         Returns:
             Optional[Tensor]: the gradient of the input tensor.
         """
+
         x = self.inputs
         grad = 1 - torch.pow(torch.tanh(x), 2)
         return grad_output * grad
@@ -46,6 +48,7 @@ class Tanh(Activation):
         Returns:
             Tensor: the initialized tensor.
         """
+
         return nn.init.xavier_uniform(tensor, gain=nn.init.calculate_gain('tanh'))
 
     @staticmethod
@@ -58,4 +61,5 @@ class Tanh(Activation):
         Returns:
             Tensor: the initialized tensor.
         """
+
         return nn.init.xavier_uniform_(tensor, gain=nn.init.calculate_gain('tanh'))

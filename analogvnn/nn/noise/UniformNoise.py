@@ -42,6 +42,7 @@ class UniformNoise(Layer, BackwardIdentity):
             leakage (float): the leakage of the uniform noise.
             precision (int): the precision of the uniform noise.
         """
+
         super(UniformNoise, self).__init__()
 
         if (low is None or high is None) + (leakage is None) + (precision is None) != 1:
@@ -71,6 +72,7 @@ class UniformNoise(Layer, BackwardIdentity):
         Returns:
             Tuple[TENSOR_OPERABLE, TENSOR_OPERABLE]: the high and low of the uniform noise.
         """
+
         v = 1 / (1 - leakage) * (1 / precision)
         return -v / 2, v / 2
 
@@ -86,6 +88,7 @@ class UniformNoise(Layer, BackwardIdentity):
         Returns:
             TENSOR_OPERABLE: the leakage of the uniform noise.
         """
+
         return 1 - min(1, (1 / precision) * (1 / (high - low)))
 
     @staticmethod
@@ -100,6 +103,7 @@ class UniformNoise(Layer, BackwardIdentity):
         Returns:
             TENSOR_OPERABLE: the precision of the uniform noise.
         """
+
         return 1 / (1 - leakage) * (1 / (high - low))
 
     @property
@@ -109,6 +113,7 @@ class UniformNoise(Layer, BackwardIdentity):
         Returns:
             Tensor: the mean of the uniform noise.
         """
+
         return (self.high + self.low) / 2
 
     @property
@@ -118,6 +123,7 @@ class UniformNoise(Layer, BackwardIdentity):
         Returns:
             Tensor: the standard deviation of the uniform noise.
         """
+
         return (self.high - self.low) / 12 ** 0.5
 
     @property
@@ -127,6 +133,7 @@ class UniformNoise(Layer, BackwardIdentity):
         Returns:
             Tensor: the variance of the uniform noise.
         """
+
         return (self.high - self.low).pow(2) / 12
 
     def pdf(self, x: Tensor) -> Tensor:
@@ -138,6 +145,7 @@ class UniformNoise(Layer, BackwardIdentity):
         Returns:
             Tensor: the probability density function of the uniform noise.
         """
+
         return torch.exp(self.log_prob(x=x))
 
     def log_prob(self, x: Tensor) -> Tensor:
@@ -149,6 +157,7 @@ class UniformNoise(Layer, BackwardIdentity):
         Returns:
             Tensor: the log probability density function of the uniform noise.
         """
+
         lb = self.low.le(x).type_as(self.low)
         ub = self.high.gt(x).type_as(self.low)
         return torch.log(lb.mul(ub)) - torch.log(self.high - self.low)
@@ -162,6 +171,7 @@ class UniformNoise(Layer, BackwardIdentity):
         Returns:
             TENSOR_OPERABLE: the cumulative distribution function of the uniform noise.
         """
+
         result = (x - self.low) / (self.high - self.low)
         return result.clamp(min=0, max=1)
 
@@ -174,6 +184,7 @@ class UniformNoise(Layer, BackwardIdentity):
         Returns:
             Tensor: the output tensor.
         """
+
         return torch.distributions.Uniform(low=x + self.low, high=x + self.high).sample()
 
     def extra_repr(self) -> str:
@@ -182,6 +193,7 @@ class UniformNoise(Layer, BackwardIdentity):
         Returns:
             str: the extra representation of the uniform noise.
         """
+
         return f'high={float(self.high):.4f}' \
                f', low={float(self.low):.4f}' \
                f', leakage={float(self.leakage):.4f}' \

@@ -30,6 +30,7 @@ class BackwardGraph(AcyclicDirectedGraph):
         Returns:
             ArgsKwargsOutput: gradient of the inputs function w.r.t. loss
         """
+
         self.graph_state.ready_for_backward(exception=True)
 
         if len(gradient) == 0:
@@ -64,6 +65,7 @@ class BackwardGraph(AcyclicDirectedGraph):
         Raises:
             ValueError: If no forward pass has been performed yet.
         """
+
         if not self.graph.has_node(self.OUTPUT):
             raise ValueError("OUTPUT doesn't exist in the forward graph. Please preform a forward pass first.")
 
@@ -78,6 +80,7 @@ class BackwardGraph(AcyclicDirectedGraph):
         Returns:
             BackwardGraph: self.
         """
+
         if isinstance(forward_graph, AcyclicDirectedGraph):
             forward_graph = forward_graph.graph
 
@@ -175,6 +178,7 @@ class BackwardGraph(AcyclicDirectedGraph):
         Raises:
             ValueError: If no forward pass has been performed yet.
         """
+
         if self.graph_state.forward_input_output_graph is None:
             raise ValueError('No forward pass has been performed yet. Please preform a forward pass first.')
 
@@ -197,6 +201,7 @@ class BackwardGraph(AcyclicDirectedGraph):
         Returns:
             Dict[GRAPH_NODE_TYPE, InputOutput]: The input and output gradients of each node.
         """
+
         static_graph: List[Tuple[GRAPH_NODE_TYPE, List[GRAPH_NODE_TYPE]]] = self._create_static_sub_graph(from_node)
         input_output_graph: Dict[GRAPH_NODE_TYPE, InputOutput] = {
             from_node: InputOutput(inputs=ArgsKwargs(
@@ -235,6 +240,7 @@ class BackwardGraph(AcyclicDirectedGraph):
         Returns:
             ArgsKwargs: The input gradients of the module.
         """
+
         if module in self.graph_state.forward_input_output_graph:
             module_inputs_outputs = self.graph_state.forward_input_output_graph[module]
         else:

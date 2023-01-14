@@ -11,7 +11,7 @@ name = "analogvnn"
 [project]
 # $ pip install analogvnn
 name = "analogvnn"
-version = "1.0.0rc5"
+version = "1.0.0rc6"
 description = "A fully modular framework for modeling and optimizing analog/photonic neural networks"  # Optional
 readme = "README.md"
 requires-python = ">=3.7"
@@ -60,7 +60,7 @@ dependencies = [
     "scipy",
     "numpy>=1.16.5",
     "networkx",
-    "importlib_metadata",
+    "importlib-metadata<5.0.0,>=2.0.0; python_version < '3.8'",
 ]
 
 # List additional groups of dependencies here (e.g. development
@@ -101,6 +101,9 @@ flake8 = [
     "flake8-comprehensions",
     "flake8-executable",
     "flake8-coding",
+    "flake8-return",
+#    "flake8-noreturn; python_version >= '3.8'",
+    "flake8-deprecated",
 ]
 dev = [
     "setuptools>=61.0.0",

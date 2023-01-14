@@ -21,6 +21,7 @@ class SiLU(Activation):
         Returns:
             Tensor: the output tensor.
         """
+
         return x / (1 + torch.exp(-x))
 
     def backward(self, grad_output: Optional[Tensor]) -> Optional[Tensor]:
@@ -32,6 +33,7 @@ class SiLU(Activation):
         Returns:
             Optional[Tensor]: the gradient of the input tensor.
         """
+
         x = self.inputs
         neg_e = torch.exp(-x)
         grad = (1 + neg_e + x * neg_e) / torch.pow(1 + neg_e, 2)

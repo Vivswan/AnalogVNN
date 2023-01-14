@@ -16,4 +16,5 @@ def dirac_delta(x: TENSOR_OPERABLE, a: TENSOR_OPERABLE = 0.001) -> TENSOR_OPERAB
         TENSOR_OPERABLE: TENSOR_OPERABLE with the same shape as x, but with values equal to the Dirac delta function
         of x.
     """
+
     return 1 / (np.abs(a) * np.sqrt(np.pi)) * np.exp(-((x / a) ** 2))

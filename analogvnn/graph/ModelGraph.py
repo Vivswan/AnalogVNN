@@ -25,6 +25,7 @@ class ModelGraph(ModelGraphState):
             use_autograd_graph: If True, the autograd graph is used to calculate the gradients.
             allow_loops: If True, the graph is allowed to contain loops.
         """
+
         super(ModelGraph, self).__init__(use_autograd_graph, allow_loops)
         self.forward_graph = ForwardGraph(self)
         self.backward_graph = BackwardGraph(self)
@@ -39,6 +40,7 @@ class ModelGraph(ModelGraphState):
         Returns:
             ModelGraph: self.
         """
+
         self.forward_graph.compile(is_static=is_static)
 
         if auto_backward_graph:

@@ -38,6 +38,7 @@ class ArgsKwargs:
             args: The arguments.
             kwargs: The keyword arguments.
         """
+
         super(ArgsKwargs, self).__init__()
         if args is None:
             args = []
@@ -55,10 +56,12 @@ class ArgsKwargs:
 
     def is_empty(self):
         """Returns whether the ArgsKwargs object is empty."""
+
         return len(self.args) == 0 and not bool(self.kwargs)
 
     def __repr__(self):
         """Returns a string representation of the parameter."""
+
         return f'ArgsKwargs(args={self.args}, kwargs={self.kwargs})'
 
     @classmethod
@@ -71,6 +74,7 @@ class ArgsKwargs:
         Returns:
             ArgsKwargs: The ArgsKwargs object
         """
+
         if isinstance(outputs, cls):
             pass
         elif isinstance(outputs, dict):
@@ -91,6 +95,7 @@ class ArgsKwargs:
         Returns:
             ArgsKwargsOutput: object or tuple or dict
         """
+
         if len(outputs.kwargs.keys()) > 0:
             return outputs
         elif len(outputs.args) > 1:

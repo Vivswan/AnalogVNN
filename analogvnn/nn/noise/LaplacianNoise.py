@@ -40,6 +40,7 @@ class LaplacianNoise(Layer, BackwardIdentity):
             leakage (float): the leakage of the Laplacian noise.
             precision (int): the precision of the Laplacian noise.
         """
+
         super(LaplacianNoise, self).__init__()
 
         if (scale is None) + (leakage is None) + (precision is None) != 1:
@@ -69,6 +70,7 @@ class LaplacianNoise(Layer, BackwardIdentity):
         Returns:
             float: the scale of the Laplacian noise.
         """
+
         return - 1 / (2 * math.log(leakage) * precision)
 
     @staticmethod
@@ -82,6 +84,7 @@ class LaplacianNoise(Layer, BackwardIdentity):
         Returns:
             int: the precision of the Laplacian noise.
         """
+
         return - 1 / (2 * math.log(leakage) * scale)
 
     @staticmethod
@@ -95,6 +98,7 @@ class LaplacianNoise(Layer, BackwardIdentity):
         Returns:
             float: the leakage of the Laplacian noise.
         """
+
         return 2 * LaplacianNoise.static_cdf(x=-1 / (2 * precision), scale=scale)
 
     @property
@@ -104,6 +108,7 @@ class LaplacianNoise(Layer, BackwardIdentity):
         Returns:
             Tensor: the standard deviation of the Laplacian noise.
         """
+
         return (2 ** 0.5) * self.scale
 
     @property
@@ -113,6 +118,7 @@ class LaplacianNoise(Layer, BackwardIdentity):
         Returns:
             Tensor: the variance of the Laplacian noise.
         """
+
         return 2 * self.scale.pow(2)
 
     def pdf(self, x: TENSOR_OPERABLE, loc: TENSOR_OPERABLE = 0) -> Tensor:
@@ -125,6 +131,7 @@ class LaplacianNoise(Layer, BackwardIdentity):
         Returns:
             Tensor: the probability density function of the Laplacian noise.
         """
+
         return torch.exp(self.log_prob(x=x, loc=loc))
 
     def log_prob(self, x: TENSOR_OPERABLE, loc: TENSOR_OPERABLE = 0) -> Tensor:
@@ -137,6 +144,7 @@ class LaplacianNoise(Layer, BackwardIdentity):
         Returns:
             Tensor: the log probability density function of the Laplacian noise.
         """
+
         x = x if isinstance(x, Tensor) else torch.tensor(x, requires_grad=False)
         loc = loc if isinstance(loc, Tensor) else torch.tensor(loc, requires_grad=False)
         return -torch.log(2 * self.scale) - torch.abs(x - loc) / self.scale
@@ -153,6 +161,7 @@ class LaplacianNoise(Layer, BackwardIdentity):
         Returns:
             TENSOR_OPERABLE: the cumulative distribution function of the Laplacian noise.
         """
+
         return 0.5 - 0.5 * np.sign(x - loc) * np.expm1(-abs(x - loc) / scale)
 
     def cdf(self, x: Tensor, loc: Tensor = 0) -> Tensor:
@@ -165,6 +174,7 @@ class LaplacianNoise(Layer, BackwardIdentity):
         Returns:
             Tensor: the cumulative distribution function of the Laplacian noise.
         """
+
         x = x if isinstance(x, Tensor) else torch.tensor(x, requires_grad=False)
         loc = loc if isinstance(loc, Tensor) else torch.tensor(loc, requires_grad=False)
         return self.static_cdf(x=x, scale=self.scale, loc=loc)
@@ -178,6 +188,7 @@ class LaplacianNoise(Layer, BackwardIdentity):
         Returns:
             Tensor: the output tensor with Laplacian noise.
         """
+
         return torch.distributions.Laplace(loc=x, scale=self.scale).sample()
 
     def extra_repr(self) -> str:
@@ -186,4 +197,5 @@ class LaplacianNoise(Layer, BackwardIdentity):
         Returns:
             str: the extra representation of the Laplacian noise.
         """
+
         return f'std={float(self.std):.4f}, leakage={float(self.leakage):.4f}, precision={int(self.precision)}'

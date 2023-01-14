@@ -31,6 +31,7 @@ class PseudoParameterModule(nn.Module):
             original (PseudoParameter): the original parameters.
             transformed (nn.Parameter): the transformed parameters.
         """
+
         super(PseudoParameterModule, self).__init__()
         self.original = original
         self._transformed = transformed
@@ -45,6 +46,7 @@ class PseudoParameterModule(nn.Module):
         Returns:
             nn.Parameter: The transformed parameter.
         """
+
         return self.original()
 
     forward = __call__
@@ -62,6 +64,7 @@ class PseudoParameterModule(nn.Module):
         Returns:
             PseudoParameterModule: self.
         """
+
         self.original.data = data
         return self
 
@@ -108,6 +111,7 @@ class PseudoParameter(Parameter):
         Returns:
             Any: the input tensor.
         """
+
         return x
 
     def __init__(self, data=None, requires_grad=True, transformation=None, *args, **kwargs):
@@ -120,6 +124,7 @@ class PseudoParameter(Parameter):
             *args: additional arguments.
             **kwargs: additional keyword arguments.
         """
+
         super(PseudoParameter, self).__init__(data, requires_grad, *args, **kwargs)
         self._transformed = nn.Parameter(data=data, requires_grad=requires_grad)
         self._transformed.original = self
@@ -144,6 +149,7 @@ class PseudoParameter(Parameter):
         Raises:
             RuntimeError: if the transformation callable fails.
         """
+
         try:
             self._transformed.data = self._transformation(self)
         except Exception as e:
@@ -156,6 +162,7 @@ class PseudoParameter(Parameter):
         Returns:
             str: the string representation.
         """
+
         return f'{PseudoParameter.__name__}(' \
                f'transform={self.transformation}' \
                f', data={self.data}' \
@@ -168,6 +175,7 @@ class PseudoParameter(Parameter):
         Returns:
             Tensor: the gradient.
         """
+
         return self._transformed.grad
 
     @property
@@ -177,6 +185,7 @@ class PseudoParameter(Parameter):
         Returns:
             PseudoParameterModule: the module.
         """
+
         return self._module
 
     @property
@@ -186,6 +195,7 @@ class PseudoParameter(Parameter):
         Returns:
             Callable: the transformation.
         """
+
         return self._transformation
 
     @transformation.setter
@@ -195,6 +205,7 @@ class PseudoParameter(Parameter):
         Args:
             transformation (Callable): the transformation.
         """
+
         self.set_transformation(transformation)
 
     def set_transformation(self, transformation) -> PseudoParameter:
@@ -206,6 +217,7 @@ class PseudoParameter(Parameter):
         Returns:
             PseudoParameter: self.
         """
+
         self._transformation = transformation
         if isinstance(self._transformation, nn.Module):
             self._transformation.eval()
@@ -223,6 +235,7 @@ class PseudoParameter(Parameter):
         Returns:
             PseudoParameter: the parameterized parameter.
         """
+
         assert hasattr(module, param_name)
 
         param = getattr(module, param_name)
@@ -249,6 +262,7 @@ class PseudoParameter(Parameter):
             transformation (Callable): the transformation.
             requires_grad (bool): if True, only parametrized parameters that require gradients.
         """
+
         with torch.no_grad():
             for name, parameter in list(module.named_parameters(recurse=False)):
                 if isinstance(parameter, cls):

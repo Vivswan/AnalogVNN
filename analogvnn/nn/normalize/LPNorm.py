@@ -25,6 +25,7 @@ class LPNorm(Normalize):
             p (int): the pth power of the Lp norm.
             make_max_1 (bool): if True, the maximum absolute value of the output tensor will be 1.
         """
+
         super(LPNorm, self).__init__()
         self.p = nn.Parameter(torch.tensor(p), requires_grad=False)
         self.make_max_1 = nn.Parameter(torch.tensor(make_max_1), requires_grad=False)
@@ -38,6 +39,7 @@ class LPNorm(Normalize):
         Returns:
             Tensor: the output tensor.
         """
+
         norm = x
         if len(x.shape) > 1:
             norm = torch.flatten(norm, start_dim=1)
@@ -64,6 +66,7 @@ class LPNormW(LPNorm):
         Returns:
             Tensor: the output tensor.
         """
+
         norm = torch.norm(x, self.p)
         norm = torch.clamp(norm, min=1e-4)
         x = torch.div(x, norm)
@@ -79,6 +82,7 @@ class L1Norm(LPNorm):
 
     def __init__(self):
         """Initializes the row-wise L1 normalization function."""
+
         super(L1Norm, self).__init__(p=1, make_max_1=False)
 
 
@@ -87,6 +91,7 @@ class L2Norm(LPNorm):
 
     def __init__(self):
         """Initializes the row-wise L2 normalization function."""
+
         super(L2Norm, self).__init__(p=2, make_max_1=False)
 
 
@@ -95,6 +100,7 @@ class L1NormW(LPNormW):
 
     def __init__(self):
         """Initializes the whole matrix L1 normalization function."""
+
         super(L1NormW, self).__init__(p=1, make_max_1=False)
 
 
@@ -103,6 +109,7 @@ class L2NormW(LPNormW):
 
     def __init__(self):
         """Initializes the whole matrix L2 normalization function."""
+
         super(L2NormW, self).__init__(p=2, make_max_1=False)
 
 
@@ -111,6 +118,7 @@ class L1NormM(LPNorm):
 
     def __init__(self):
         """Initializes the row-wise L1 normalization function with maximum absolute value of 1."""
+
         super(L1NormM, self).__init__(p=1, make_max_1=True)
 
 
@@ -119,6 +127,7 @@ class L2NormM(LPNorm):
 
     def __init__(self):
         """Initializes the row-wise L2 normalization function with maximum absolute value of 1."""
+
         super(L2NormM, self).__init__(p=2, make_max_1=True)
 
 
@@ -127,6 +136,7 @@ class L1NormWM(LPNormW):
 
     def __init__(self):
         """Initializes the whole matrix L1 normalization function with maximum absolute value of 1."""
+
         super(L1NormWM, self).__init__(p=1, make_max_1=True)
 
 
@@ -135,4 +145,5 @@ class L2NormWM(LPNormW):
 
     def __init__(self):
         """Initializes the whole matrix L2 normalization function with maximum absolute value of 1."""
+
         super(L2NormWM, self).__init__(p=2, make_max_1=True)

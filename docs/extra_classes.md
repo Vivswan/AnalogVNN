@@ -93,6 +93,7 @@ p & : \ p \gt x
 ```
 
 where:
+
 - p, q ∈ ℜ (p ≤ q, Default value for photonics p = −1 and q = 1)
 
 ## Noise

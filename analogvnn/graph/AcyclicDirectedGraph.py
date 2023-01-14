@@ -49,6 +49,7 @@ class AcyclicDirectedGraph(abc.ABC):
         Raises:
             NotImplementedError: If allow_loops is True, since this is not implemented yet.
         """
+
         super(AcyclicDirectedGraph, self).__init__()
         self.graph = nx.MultiDiGraph()
         self.graph_state = graph_state
@@ -69,6 +70,7 @@ class AcyclicDirectedGraph(abc.ABC):
         Raises:
             NotImplementedError: since method is abstract
         """
+
         raise NotImplementedError
 
     def add_connection(self, *args: GRAPH_NODE_TYPE):
@@ -80,6 +82,7 @@ class AcyclicDirectedGraph(abc.ABC):
         Returns:
             AcyclicDirectedGraph: self.
         """
+
         for i in range(1, len(args)):
             self.add_edge(args[i - 1], args[i])
         return self
@@ -106,6 +109,7 @@ class AcyclicDirectedGraph(abc.ABC):
         Returns:
             AcyclicDirectedGraph: self.
         """
+
         attr = self.check_edge_parameters(in_arg, in_kwarg, out_arg, out_kwarg)
         existing_edges = self.graph.get_edge_data(u_of_edge, v_of_edge)
 
@@ -148,6 +152,7 @@ class AcyclicDirectedGraph(abc.ABC):
         Raises:
             ValueError: If in and out parameters are invalid.
         """
+
         # @@@ in_arg: None    in_kwarg: None  out_arg: None   out_kwarg: None   0
         # @@  in_arg: True    in_kwarg: None  out_arg: True   out_kwarg: None   1
         #     in_arg: None    in_kwarg: True  out_arg: True   out_kwarg: None   2
@@ -237,6 +242,7 @@ class AcyclicDirectedGraph(abc.ABC):
         Returns:
             str: The edge's label.
         """
+
         label = ''
         if in_arg == in_kwarg == out_arg == out_kwarg is True:
             return '* -> *'
@@ -274,6 +280,7 @@ class AcyclicDirectedGraph(abc.ABC):
         Raises:
             ValueError: If the graph is not acyclic.
         """
+
         for i in nx.simple_cycles(self.graph):
             raise ValueError(f'Cycle detected: {i}')
 
@@ -292,6 +299,7 @@ class AcyclicDirectedGraph(abc.ABC):
         Returns:
             nx.MultiDiGraph: The graph with re-indexed output arguments.
         """
+
         # noinspection PyTypeChecker
         graph: nx.MultiDiGraph = graph.copy()
 
@@ -324,6 +332,7 @@ class AcyclicDirectedGraph(abc.ABC):
         Returns:
             List[Tuple[GRAPH_NODE_TYPE, List[GRAPH_NODE_TYPE]]]: The static sub graph.
         """
+
         if self._is_static and from_node in self._static_graphs:
             return self._static_graphs[from_node]
 
@@ -358,6 +367,7 @@ class AcyclicDirectedGraph(abc.ABC):
         Returns:
             ArgsKwargs: The arguments and keyword arguments.
         """
+
         args = {}
         extra_args = []
         kwargs = {}
@@ -436,4 +446,5 @@ class AcyclicDirectedGraph(abc.ABC):
         Returns:
             str: The (possibly relative) path of the rendered file.
         """
+
         return to_graphviz_digraph(self.graph, real_label=real_label).render(*args, **kwargs)

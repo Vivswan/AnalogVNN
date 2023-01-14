@@ -23,6 +23,7 @@ class LinearBackpropagation(BackwardModule):
         Returns:
             Tensor: The output of the linear layer.
         """
+
         if self.bias is not None:
             y = torch.addmm(self.bias, x, self.weight.t())
         else:
@@ -40,6 +41,7 @@ class LinearBackpropagation(BackwardModule):
         Returns:
             Optional[Tensor]: The gradient of the input.
         """
+
         grad_output = to_matrix(grad_output)
 
         weight = to_matrix(self.weight if weight is None else weight)
@@ -74,6 +76,7 @@ class Linear(Layer):
             out_features (int): The number of output features.
             bias (bool): True if the layer has a bias.
         """
+
         super(Linear, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
@@ -89,6 +92,7 @@ class Linear(Layer):
 
     def reset_parameters(self):
         """Reset the parameters of the layer."""
+
         nn.init.xavier_uniform_(self.weight)
         if self.bias is not None:
             fan_in, _ = nn.init._calculate_fan_in_and_fan_out(self.weight)
@@ -101,4 +105,5 @@ class Linear(Layer):
         Returns:
             str: The extra representation of the linear layer.
         """
+
         return f'in_features={self.in_features}, out_features={self.out_features}, bias={self.bias is not None}'

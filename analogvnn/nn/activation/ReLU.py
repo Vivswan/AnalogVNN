@@ -27,6 +27,7 @@ class PReLU(Activation):
         Args:
             alpha (float): the slope of the negative part of the activation function.
         """
+
         super(PReLU, self).__init__()
         self.alpha = nn.Parameter(torch.tensor(alpha), requires_grad=False)
         self._zero = nn.Parameter(torch.tensor(0), requires_grad=False)
@@ -40,6 +41,7 @@ class PReLU(Activation):
         Returns:
             Tensor: the output tensor.
         """
+
         return torch.minimum(self._zero, x) * self.alpha + torch.maximum(self._zero, x)
 
     def backward(self, grad_output: Optional[Tensor]) -> Optional[Tensor]:
@@ -51,6 +53,7 @@ class PReLU(Activation):
         Returns:
             Optional[Tensor]: the gradient of the input tensor.
         """
+
         x = self.inputs
         grad = (x < 0).type(torch.float) * self.alpha + (x >= 0).type(torch.float)
         return grad_output * grad
@@ -65,6 +68,7 @@ class PReLU(Activation):
         Returns:
             Tensor: the initialized tensor.
         """
+
         return nn.init.kaiming_uniform(tensor, a=math.sqrt(5), nonlinearity='leaky_relu')
 
     @staticmethod
@@ -77,6 +81,7 @@ class PReLU(Activation):
         Returns:
             Tensor: the initialized tensor.
         """
+
         return nn.init.kaiming_uniform_(tensor, a=math.sqrt(5), nonlinearity='leaky_relu')
 
 
@@ -89,6 +94,7 @@ class ReLU(PReLU):
 
     def __init__(self):
         """Initialize the rectified linear unit (ReLU) activation function."""
+
         super(ReLU, self).__init__(alpha=0)
 
     @staticmethod
@@ -101,6 +107,7 @@ class ReLU(PReLU):
         Returns:
             Tensor: the initialized tensor.
         """
+
         return nn.init.kaiming_uniform(tensor, a=math.sqrt(5), nonlinearity='relu')
 
     @staticmethod
@@ -113,6 +120,7 @@ class ReLU(PReLU):
         Returns:
             Tensor: the initialized tensor.
         """
+
         return nn.init.kaiming_uniform_(tensor, a=math.sqrt(5), nonlinearity='relu')
 
 
@@ -125,4 +133,5 @@ class LeakyReLU(PReLU):
 
     def __init__(self):
         """Initialize the leaky rectified linear unit (LeakyReLU) activation function."""
+
         super(LeakyReLU, self).__init__(alpha=0.01)
