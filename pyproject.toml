@@ -102,7 +102,7 @@ flake8 = [
     "flake8-executable",
     "flake8-coding",
     "flake8-return",
-    "flake8-noreturn",
+#    "flake8-noreturn; python_version >= '3.8'",
     "flake8-deprecated",
 ]
 dev = [

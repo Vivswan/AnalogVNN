@@ -51,5 +51,5 @@ class Sequential(Model, nn.Sequential):
         Args:
             *args (nn.Module): The modules to add.
         """
-        
+
         return self.extend(args)

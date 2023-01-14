@@ -204,8 +204,7 @@ class Layer(nn.Module):
             self,
             memo: Optional[Set[nn.Module]] = None
     ) -> Iterator[Tuple[str, nn.Module]]:
-        """Returns an iterator over immediate registered children modules, yielding both
-        the name of the module.
+        """Returns an iterator over immediate registered children modules.
 
         Args:
             memo: a memo to store the set of modules already added to the result

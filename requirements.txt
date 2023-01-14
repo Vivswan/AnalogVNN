@@ -5,12 +5,12 @@ torchaudio
 numpy
 scipy
 networkx
-importlib-metadata<5.0.0,>=2.0.0; python_version < "3.8"
+importlib-metadata<5.0.0,>=2.0.0; python_version < '3.8'
 
 # Full
-tensorflow
-tensorboard
+tensorflow>=2.0.0
+tensorboard>=2.0.0
 torchinfo
 pillow
-# conda install python-graphviz graphviz
+# conda install graphviz
 graphviz
