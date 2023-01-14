@@ -112,20 +112,15 @@ class Model(Layer):
         """
         self.graphs.use_autograd_graph = use_autograd_graph
 
-    def named_registered_modules(
+    def named_registered_children(
             self,
             memo: Optional[Set[nn.Module]] = None,
-            prefix: str = '',
-            remove_duplicate: bool = True
     ) -> Iterator[Tuple[str, nn.Module]]:
         """Returns an iterator over registered modules under self,
         yielding both the name of the module and the module itself.
 
         Args:
             memo: a memo to store the set of modules already added to the result
-            prefix: a prefix that will be added to the name of the module
-            remove_duplicate: whether to remove the duplicated module instances in the result
-                or not
 
         Yields:
             (str, nn.Module): Tuple of name and module
@@ -140,7 +135,7 @@ class Model(Layer):
         memo.add(self.optimizer)
         memo.add(self.loss_function)
         memo.add(self.accuracy_function)
-        return super(Model, self).named_registered_modules(memo=memo, prefix=prefix, remove_duplicate=remove_duplicate)
+        return super(Model, self).named_registered_children(memo=memo)
 
     def compile(self, device: Optional[torch.device] = None, layer_data: bool = True):
         """Compile the model.
