@@ -45,6 +45,7 @@ class ModelGraphState:
             use_autograd_graph: If True, the autograd graph is used to calculate the gradients.
             allow_loops: If True, the graph is allowed to contain loops.
         """
+
         super(ModelGraphState, self).__init__()
         self.allow_loops = allow_loops
         self.use_autograd_graph = use_autograd_graph
@@ -65,6 +66,7 @@ class ModelGraphState:
         Raises:
             RuntimeError: If the state is not ready for forward pass and exception is True.
         """
+
         return True
 
     def ready_for_backward(self, exception: bool = False) -> bool:
@@ -79,14 +81,15 @@ class ModelGraphState:
         Raises:
             RuntimeError: if the state is not ready for backward pass and exception is True.
         """
+
         if exception:
             if self.outputs is None:
                 raise RuntimeError('output is not set.')
 
             if self._loss is None:
                 raise RuntimeError('loss is not set.')
-        else:
-            return not (self.outputs is None or self._loss is None)
+
+        return not (self.outputs is None or self._loss is None)
 
     @property
     def inputs(self) -> Optional[ArgsKwargs]:
@@ -95,6 +98,7 @@ class ModelGraphState:
         Returns:
             ArgsKwargs: the inputs.
         """
+
         if self.INPUT not in self.forward_input_output_graph:
             return None
         return self.forward_input_output_graph[self.INPUT].inputs
@@ -106,6 +110,7 @@ class ModelGraphState:
         Returns:
             ArgsKwargs: the output.
         """
+
         if self.OUTPUT not in self.forward_input_output_graph:
             return None
         return self.forward_input_output_graph[self.OUTPUT].outputs
@@ -117,6 +122,7 @@ class ModelGraphState:
         Returns:
             Tensor: the loss.
         """
+
         return self._loss
 
     def set_loss(self, loss: Union[Tensor, None]) -> ModelGraphState:
@@ -128,5 +134,6 @@ class ModelGraphState:
         Returns:
             ModelGraphState: self.
         """
+
         self._loss = loss
         return self
