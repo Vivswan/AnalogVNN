@@ -21,6 +21,7 @@ class BackwardIdentity(BackwardModule, ABC):
         Returns:
             TENSORS: The gradients of the input of the layer.
         """
+
         if len(grad_output) == 0:
             return None
 

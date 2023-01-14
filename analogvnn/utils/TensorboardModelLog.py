@@ -38,6 +38,7 @@ class TensorboardModelLog:
             model (nn.Module): the model to log.
             log_dir (str): the directory to log to.
         """
+
         super(TensorboardModelLog, self).__init__()
         self.model = model
         self.tensorboard = None
@@ -63,6 +64,7 @@ class TensorboardModelLog:
         Raises:
             ValueError: if the log directory is invalid.
         """
+
         # https://github.com/tensorflow/tensorboard/pull/6135
         from tensorboard.compat import tf
         if getattr(tf, 'io', None) is None:
@@ -81,6 +83,7 @@ class TensorboardModelLog:
         Args:
             epoch (int): the epoch to add the data for.
         """
+
         for name, parameter in self.model.named_parameters():
             if not parameter.requires_grad:
                 continue
@@ -93,6 +96,7 @@ class TensorboardModelLog:
         Args:
             layer_data (bool): whether to log the layer data.
         """
+
         if self.layer_data:
             self.layer_data = layer_data
 
@@ -116,6 +120,7 @@ class TensorboardModelLog:
         Returns:
             TensorboardModelLog: self.
         """
+
         if model is None:
             model = self.model
 
@@ -161,6 +166,7 @@ class TensorboardModelLog:
         Raises:
             ImportError: if torchinfo (https://github.com/tyleryep/torchinfo) is not installed.
         """
+
         try:
             import torchinfo
         except ImportError as e:
@@ -220,6 +226,7 @@ class TensorboardModelLog:
         Returns:
             TensorboardModelLog: self.
         """
+
         self.tensorboard.add_scalar('Loss/train', train_loss, epoch)
         self.tensorboard.add_scalar('Accuracy/train', train_accuracy, epoch)
         if self.layer_data:
@@ -237,6 +244,7 @@ class TensorboardModelLog:
         Returns:
             TensorboardModelLog: self.
         """
+
         self.tensorboard.add_scalar('Loss/test', test_loss, epoch)
         self.tensorboard.add_scalar('Accuracy/test', test_accuracy, epoch)
         return self
@@ -249,6 +257,7 @@ class TensorboardModelLog:
             *args: ignored.
             **kwargs: ignored.
         """
+
         if self.tensorboard is not None:
             self.tensorboard.close()
             self.tensorboard = None
@@ -259,6 +268,7 @@ class TensorboardModelLog:
         Returns:
             TensorboardModelLog: self.
         """
+
         return self
 
     __exit__ = close

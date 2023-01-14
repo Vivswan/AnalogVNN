@@ -43,12 +43,15 @@ if __name__ == '__main__':
         def forward(self, x):
             return x + (torch.ones_like(x) * self.weight)
 
+
     class Symmetric(BackwardIdentity, Model):
         def forward(self, x):
             return torch.rand((1, x.size()[0])) @ x @ torch.rand((x.size()[1], 1))
 
+
     def pstr(s):
         return str(s).replace("  ", "").replace("\n", "")
+
 
     model = Layer()
     parametrization = Symmetric()

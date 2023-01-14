@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import typing
-from typing import Callable, Optional, Tuple
+from typing import Callable, Optional, Tuple, Set, Iterator
 
 import torch
-from torch import optim, Tensor
+from torch import optim, Tensor, nn
 from torch.utils.data import DataLoader
 
 from analogvnn.fn.test import test
@@ -59,6 +59,7 @@ class Model(Layer):
             tensorboard_log_dir (str): The log directory of the tensorboard logger.
             device (torch.device): The device to run the model on.
         """
+
         super(Model, self).__init__()
 
         self._compiled = False
@@ -76,6 +77,25 @@ class Model(Layer):
         self.accuracy_function = None
         self.device = device
 
+    def __call__(self, *args, **kwargs):
+        """Call the model.
+
+        Args:
+            *args: The arguments of the model.
+            **kwargs: The keyword arguments of the model.
+
+        Returns:
+            TENSORS: The output of the model.
+
+        Raises:
+            RuntimeError: if the model is not compiled.
+        """
+
+        if not self._compiled:
+            raise RuntimeError('Model is not compiled yet.')
+
+        return super(Model, self).__call__(*args, **kwargs)
+
     @property
     def use_autograd_graph(self):
         """Is the autograd graph used for the model.
@@ -83,6 +103,7 @@ class Model(Layer):
         Returns:
             bool: If True, the autograd graph is used to calculate the gradients.
         """
+
         return self.graphs.use_autograd_graph
 
     @use_autograd_graph.setter
@@ -92,7 +113,33 @@ class Model(Layer):
         Args:
             use_autograd_graph (bool): If True, the autograd graph is used to calculate the gradients.
         """
+
         self.graphs.use_autograd_graph = use_autograd_graph
+
+    def named_registered_children(
+            self,
+            memo: Optional[Set[nn.Module]] = None,
+    ) -> Iterator[Tuple[str, nn.Module]]:
+        """Returns an iterator over registered modules under self.
+
+        Args:
+            memo: a memo to store the set of modules already added to the result
+
+        Yields:
+            (str, nn.Module): Tuple of name and module
+
+        Note:
+            Duplicate modules are returned only once. In the following
+            example, ``l`` will be returned only once.
+        """
+
+        if memo is None:
+            memo = set()
+
+        memo.add(self.optimizer)
+        memo.add(self.loss_function)
+        memo.add(self.accuracy_function)
+        return super(Model, self).named_registered_children(memo=memo)
 
     def compile(self, device: Optional[torch.device] = None, layer_data: bool = True):
         """Compile the model.
@@ -104,6 +151,7 @@ class Model(Layer):
         Returns:
             Model: The compiled model.
         """
+
         if device is not None:
             self.device = device
 
@@ -128,6 +176,7 @@ class Model(Layer):
         Returns:
             TENSORS: The output of the model.
         """
+
         return self.graphs.forward_graph(inputs, self.training)
 
     @torch.no_grad()
@@ -140,6 +189,7 @@ class Model(Layer):
         Returns:
             TENSORS: The output of the model.
         """
+
         return self.graphs.backward_graph(inputs)
 
     def loss(self, output: Tensor, target: Tensor) -> Tuple[Tensor, Tensor]:
@@ -155,6 +205,7 @@ class Model(Layer):
         Raises:
             ValueError: if loss_function is None.
         """
+
         if self.loss_function is None:
             raise ValueError('loss_function is None')
 
@@ -183,6 +234,7 @@ class Model(Layer):
         Raises:
             RuntimeError: if model is not compiled.
         """
+
         if self._compiled is False:
             raise RuntimeError('Model is not compiled')
 
@@ -209,6 +261,7 @@ class Model(Layer):
         Raises:
             RuntimeError: if model is not compiled.
         """
+
         if self._compiled is False:
             raise RuntimeError('Model is not compiled')
 
@@ -237,6 +290,7 @@ class Model(Layer):
             Tuple[float, float, float, float]: The train loss, the train accuracy, the test loss
             and the test accuracy of the model.
         """
+
         train_loss, train_accuracy = self.train_on(train_loader=train_loader, epoch=epoch)
         test_loss, test_accuracy = self.test_on(test_loader=test_loader, epoch=epoch)
         return train_loss, train_accuracy, test_loss, test_accuracy
@@ -250,6 +304,7 @@ class Model(Layer):
         Raises:
             ImportError: if tensorboard (https://www.tensorflow.org/) is not installed.
         """
+
         try:
             from analogvnn.utils.TensorboardModelLog import TensorboardModelLog
         except ImportError as e:
@@ -268,6 +323,7 @@ class Model(Layer):
         Returns:
             Model: self.
         """
+
         self.tensorboard = tensorboard
         if self._compiled is True:
             self.tensorboard.on_compile()

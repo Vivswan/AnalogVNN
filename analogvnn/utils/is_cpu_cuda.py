@@ -20,18 +20,31 @@ class CPUCuda:
 
     def __init__(self):
         """Initialize the CPUCuda class."""
+
         super(CPUCuda, self).__init__()
         self._device = None
         self.device_name = None
-        self.reset_device()
+        self.use_cpu()
 
-    def reset_device(self):
-        """Reset the device to the default device.
+    def use_cpu(self) -> CPUCuda:
+        """Use cpu.
 
         Returns:
             CPUCuda: self
         """
-        self.set_device(f'cuda:{torch.cuda.current_device()}' if torch.cuda.is_available() else 'cpu')
+
+        self.set_device('cpu')
+        return self
+
+    def use_cuda_if_available(self) -> CPUCuda:
+        """Use cuda if available.
+
+        Returns:
+            CPUCuda: self
+        """
+
+        if torch.cuda.is_available():
+            self.set_device(f'cuda:{torch.cuda.current_device()}')
         return self
 
     def set_device(self, device_name: str) -> CPUCuda:
@@ -43,18 +56,10 @@ class CPUCuda:
         Returns:
             CPUCuda: self
         """
+
         self._device = torch.device(device_name)
         self.device_name = self._device.type
         return self
-
-    @property
-    def is_cuda(self) -> bool:
-        """Check if the device is cuda.
-
-        Returns:
-            bool: True if the device is cuda, False otherwise.
-        """
-        return 'cuda' in self.device_name
 
     @property
     def device(self) -> torch.device:
@@ -63,7 +68,28 @@ class CPUCuda:
         Returns:
             torch.device: the device.
         """
+
         return self._device
+
+    @property
+    def is_cpu(self) -> bool:
+        """Check if the device is cpu.
+
+        Returns:
+            bool: True if the device is cpu, False otherwise.
+        """
+
+        return self.device_name.startswith('cpu')
+
+    @property
+    def is_cuda(self) -> bool:
+        """Check if the device is cuda.
+
+        Returns:
+            bool: True if the device is cuda, False otherwise.
+        """
+
+        return self.device_name.startswith('cuda')
 
     @property
     def is_using_cuda(self) -> Tuple[torch.device, bool]:
@@ -72,6 +98,7 @@ class CPUCuda:
         Returns:
             tuple: the device and True if the device is cuda, False otherwise.
         """
+
         return self.device, self.is_cuda
 
     def get_module_device(self, module) -> torch.device:
@@ -83,6 +110,7 @@ class CPUCuda:
         Returns:
             torch.device: the device of the module.
         """
+
         # noinspection PyBroadException
         try:
             device: torch.device = getattr(module, 'device', None)

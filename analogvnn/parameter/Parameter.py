@@ -21,6 +21,7 @@ class Parameter(nn.Parameter):
         Returns:
             Parameter: the created parameter.
         """
+
         return super(Parameter, cls).__new__(cls, data, requires_grad)
 
     # noinspection PyUnusedLocal
@@ -33,6 +34,7 @@ class Parameter(nn.Parameter):
             *args: additional arguments.
             **kwargs: additional keyword arguments.
         """
+
         super(Parameter, self).__init__()
 
     def __repr__(self, *args, **kwargs):
@@ -45,4 +47,5 @@ class Parameter(nn.Parameter):
         Returns:
             str: the string representation.
         """
+
         return super(Parameter, self).__repr__(*args, **kwargs)

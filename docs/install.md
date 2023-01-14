@@ -34,23 +34,23 @@ OR
 Install the required dependencies:
 
 - PyTorch
-  - Manual installation required: [https://pytorch.org/](https://pytorch.org/)
+    - Manual installation required: [https://pytorch.org/](https://pytorch.org/)
 - dataclasses
 - scipy
 - numpy
 - networkx
 - (optional) tensorboard
-  - For using tensorboard to visualize the network, with class
-    {py:class}`analogvnn.utils.TensorboardModelLog.TensorboardModelLog`
+    - For using tensorboard to visualize the network, with class
+      {py:class}`analogvnn.utils.TensorboardModelLog.TensorboardModelLog`
 - (optional) torchinfo
-  - For adding summary to tensorboard by using
-    {py:func}`analogvnn.utils.TensorboardModelLog.TensorboardModelLog.add_summary`
+    - For adding summary to tensorboard by using
+      {py:func}`analogvnn.utils.TensorboardModelLog.TensorboardModelLog.add_summary`
 - (optional) graphviz
-  - For saving and rendering forward and backward graphs using
-    {py:func}`analogvnn.graph.AcyclicDirectedGraph.AcyclicDirectedGraph.render`
+    - For saving and rendering forward and backward graphs using
+      {py:func}`analogvnn.graph.AcyclicDirectedGraph.AcyclicDirectedGraph.render`
 - (optional) python-graphviz
-  - For saving and rendering forward and backward graphs using
-    {py:func}`analogvnn.graph.AcyclicDirectedGraph.AcyclicDirectedGraph.render`
+    - For saving and rendering forward and backward graphs using
+      {py:func}`analogvnn.graph.AcyclicDirectedGraph.AcyclicDirectedGraph.render`
 
 <br>
 <br>

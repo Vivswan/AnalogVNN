@@ -27,6 +27,7 @@ class SELU(Activation):
             alpha (float): the alpha parameter.
             scale_factor (float): the scale factor parameter.
         """
+
         super(SELU, self).__init__()
         self.alpha = nn.Parameter(torch.tensor(alpha), requires_grad=False)
         self.scale_factor = nn.Parameter(torch.tensor(scale_factor), requires_grad=False)
@@ -40,6 +41,7 @@ class SELU(Activation):
         Returns:
             Tensor: the output tensor.
         """
+
         return self.scale_factor * (
                 (x <= 0).type(torch.float) * self.alpha * (torch.exp(x) - 1) +
                 (x > 0).type(torch.float) * x
@@ -54,6 +56,7 @@ class SELU(Activation):
         Returns:
             Optional[Tensor]: the gradient of the input tensor.
         """
+
         x = self.inputs
         grad = self.scale_factor * ((x < 0).type(torch.float) * self.alpha * torch.exp(x) + (x >= 0).type(torch.float))
         return grad_output * grad
@@ -68,6 +71,7 @@ class SELU(Activation):
         Returns:
             Tensor: the initialized tensor.
         """
+
         return nn.init.xavier_uniform(tensor, gain=nn.init.calculate_gain('selu'))
 
     @staticmethod
@@ -80,6 +84,7 @@ class SELU(Activation):
         Returns:
             Tensor: the initialized tensor.
         """
+
         return nn.init.xavier_uniform_(tensor, gain=nn.init.calculate_gain('selu'))
 
 
@@ -97,4 +102,5 @@ class ELU(SELU):
         Args:
             alpha (float): the alpha parameter.
         """
+
         super(ELU, self).__init__(alpha=alpha, scale_factor=1.)

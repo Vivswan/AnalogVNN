@@ -12,14 +12,18 @@ if __name__ == '__main__':
     l1 = nn.Linear(1, 1, bias=False)
     l1.weight.data = torch.ones_like(l1.weight.data) * 2
 
+
     def l2(*x):
         return torch.add(*x), torch.sub(*x)
+
 
     def l3(x, y):
         return {"a": torch.sub(x, y), "b": torch.add(x, y)}
 
+
     def l4(x, y, z, a, b):
         return ((x + y) + (a + b)) + z
+
 
     def l5(x):
         return {"c": x * 0.5}

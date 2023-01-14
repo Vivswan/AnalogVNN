@@ -22,6 +22,7 @@ class Identity(Activation):
         Args:
             name (str): the name of the activation function.
         """
+
         super(Identity, self).__init__()
         self.name = name
 
@@ -31,6 +32,7 @@ class Identity(Activation):
         Returns:
             str: the extra representation of the identity activation function.
         """
+
         if self.name is not None:
             return f'name={self.name}'
         else:
@@ -46,6 +48,7 @@ class Identity(Activation):
         Returns:
             Tensor: the output tensor same as the input tensor.
         """
+
         return x
 
     def backward(self, grad_output: Optional[Tensor]) -> Optional[Tensor]:
@@ -57,4 +60,5 @@ class Identity(Activation):
         Returns:
             Optional[Tensor]: the gradient of the input tensor same as the gradient of the output tensor.
         """
+
         return grad_output

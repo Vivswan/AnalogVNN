@@ -21,6 +21,7 @@ class BinaryStep(Activation):
         Returns:
             Tensor: the output tensor.
         """
+
         return (x >= 0).type(torch.float)
 
     def backward(self, grad_output: Optional[Tensor]) -> Optional[Tensor]:
@@ -32,4 +33,5 @@ class BinaryStep(Activation):
         Returns:
             Optional[Tensor]: the gradient of the input tensor.
         """
+
         return torch.zeros_like(grad_output)

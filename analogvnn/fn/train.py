@@ -23,6 +23,7 @@ def train(
     Returns:
         tuple: the loss and accuracy of the model on the train set.
     """
+
     model.train()
     total_loss = 0.0
     total_accuracy = 0

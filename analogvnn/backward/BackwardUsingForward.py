@@ -21,4 +21,5 @@ class BackwardUsingForward(BackwardModule, ABC):
         Returns:
             TENSORS: The gradients of the input of the layer.
         """
+
         return self._layer.forward(*grad_output, **grad_output_kwarg)

@@ -21,6 +21,7 @@ class Logistic(Activation):
         Returns:
             Tensor: the output tensor.
         """
+
         return 1 / (1 + torch.exp(-x))
 
     def backward(self, grad_output: Optional[Tensor]) -> Optional[Tensor]:
@@ -32,6 +33,7 @@ class Logistic(Activation):
         Returns:
             Optional[Tensor]: the gradient of the input tensor.
         """
+
         x = self.inputs
         grad = self.forward(x) * (1 - self.forward(x))
         return grad_output * grad
@@ -46,6 +48,7 @@ class Logistic(Activation):
         Returns:
             Tensor: the initialized tensor.
         """
+
         return nn.init.xavier_uniform(tensor, gain=nn.init.calculate_gain('sigmoid'))
 
     @staticmethod
@@ -58,6 +61,7 @@ class Logistic(Activation):
         Returns:
             Tensor: the initialized tensor.
         """
+
         return nn.init.xavier_uniform_(tensor, gain=nn.init.calculate_gain('sigmoid'))
 
 

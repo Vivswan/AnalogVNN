@@ -26,6 +26,7 @@ class ForwardGraph(AcyclicDirectedGraph):
         Returns:
             ArgsKwargsOutput: Output of the graph
         """
+
         self.graph_state.ready_for_forward(exception=True)
         outputs = self.calculate(inputs, is_training)
         return outputs
@@ -42,6 +43,7 @@ class ForwardGraph(AcyclicDirectedGraph):
         Raises:
             ValueError: If no forward pass has been performed yet.
         """
+
         if not self.graph.has_node(self.INPUT):
             raise ValueError("INPUT doesn't exist in the forward graph. Please preform a forward pass first.")
 
@@ -66,6 +68,7 @@ class ForwardGraph(AcyclicDirectedGraph):
         Returns:
             ArgsKwargsOutput: Output of the graph
         """
+
         if not isinstance(inputs, Sequence):
             inputs = (inputs,)
 
@@ -90,6 +93,7 @@ class ForwardGraph(AcyclicDirectedGraph):
         Returns:
             Dict[GraphEnum, InputOutput]: The input and output of each node
         """
+
         static_graph = self._create_static_sub_graph(from_node)
         input_output_graph = {
             from_node: InputOutput(inputs=ArgsKwargs(args=[*inputs]))
@@ -124,6 +128,7 @@ class ForwardGraph(AcyclicDirectedGraph):
         Returns:
             torch.Tensor: Detached tensor
         """
+
         tensor: torch.Tensor = tensor.detach()
         tensor.requires_grad = True
         return tensor

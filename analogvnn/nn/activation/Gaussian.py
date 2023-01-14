@@ -22,6 +22,7 @@ class Gaussian(Activation):
         Returns:
             Tensor: the output tensor.
         """
+
         return torch.exp(-torch.pow(x, 2))
 
     def backward(self, grad_output: Optional[Tensor]) -> Optional[Tensor]:
@@ -33,6 +34,7 @@ class Gaussian(Activation):
         Returns:
             Optional[Tensor]: the gradient of the input tensor.
         """
+
         x = self.inputs
         grad = -2 * x * torch.exp(-torch.pow(x, 2))
         return grad_output * grad
@@ -51,6 +53,7 @@ class GeLU(Activation):
         Returns:
             Tensor: the output tensor.
         """
+
         return (1 / 2) * x * (1 + torch.erf(x / math.sqrt(2)))
 
     def backward(self, grad_output: Optional[Tensor]) -> Optional[Tensor]:
@@ -62,6 +65,7 @@ class GeLU(Activation):
         Returns:
             Optional[Tensor]: the gradient of the input tensor.
         """
+
         x = self.inputs
         grad = (1 / 2) * (
                 (1 + torch.erf(x / math.sqrt(2))) + x * ((2 / math.sqrt(math.pi)) * torch.exp(-torch.pow(x, 2)))

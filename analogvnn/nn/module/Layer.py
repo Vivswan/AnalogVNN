@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import functools
-from typing import Union, Type, Callable, Sequence, Optional, TYPE_CHECKING
+from typing import Union, Type, Callable, Sequence, Optional, TYPE_CHECKING, Set, Iterator, Tuple
 
 from torch import nn, Tensor
 
@@ -26,6 +26,7 @@ def __nn_Module_init_updated__(function: Callable) -> Callable:
     Returns:
         Callable: Wrapped function
     """
+
     # noinspection PyUnusedLocal
     def _temp(*args, **kwargs) -> ...:
         pass
@@ -92,6 +93,7 @@ class Layer(nn.Module):
             *inputs: Inputs of the forward pass.
             **kwargs: Keyword arguments of the forward pass.
         """
+
         self._forward_wrapper(self.forward)
         outputs = super(Layer, self).__call__(*inputs, **kwargs)
         if self.training:
@@ -107,6 +109,7 @@ class Layer(nn.Module):
         Returns:
             bool: use_autograd_graph.
         """
+
         if self.graphs is not None:
             return self.graphs.use_autograd_graph
         return self._use_autograd_graph
@@ -118,6 +121,7 @@ class Layer(nn.Module):
         Args:
             use_autograd_graph (bool): use_autograd_graph.
         """
+
         self._use_autograd_graph = use_autograd_graph
         if self.graphs is not None:
             self.graphs.use_autograd_graph = use_autograd_graph
@@ -129,6 +133,7 @@ class Layer(nn.Module):
         Returns:
             ArgsKwargsOutput: inputs.
         """
+
         return ArgsKwargs.from_args_kwargs_object(self._inputs)
 
     @property
@@ -138,6 +143,7 @@ class Layer(nn.Module):
         Returns:
             Union[None, Tensor, Sequence[Tensor]]: outputs.
         """
+
         return self._outputs
 
     @property
@@ -147,6 +153,7 @@ class Layer(nn.Module):
         Returns:
             Union[None, Callable, BackwardModule]: backward_function.
         """
+
         if self._backward_module is not None:
             return self._backward_module
 
@@ -162,6 +169,7 @@ class Layer(nn.Module):
         Args:
             function (Union[BackwardModule, Type[BackwardModule], Callable]): backward_function.
         """
+
         self.set_backward_function(function)
 
     def set_backward_function(self, backward_class: Union[Callable, BackwardModule, Type[BackwardModule]]) -> Layer:
@@ -176,6 +184,7 @@ class Layer(nn.Module):
         Raises:
             TypeError: If backward_class is not a callable or BackwardModule.
         """
+
         if backward_class == self:
             return self
 
@@ -191,6 +200,50 @@ class Layer(nn.Module):
 
         return self
 
+    def named_registered_children(
+            self,
+            memo: Optional[Set[nn.Module]] = None
+    ) -> Iterator[Tuple[str, nn.Module]]:
+        """Returns an iterator over immediate registered children modules.
+
+        Args:
+            memo: a memo to store the set of modules already added to the result
+
+
+        Yields:
+            (str, Module): Tuple containing a name and child module
+
+        Note:
+            Duplicate modules are returned only once. In the following
+            example, ``l`` will be returned only once.
+        """
+
+        if memo is None:
+            memo = set()
+
+        memo.add(self)
+        memo.add(self.backward_function)
+
+        for name, module in self.named_children():
+            if module in memo:
+                continue
+
+            yield name, module
+
+    def registered_children(self) -> Iterator[nn.Module]:
+        r"""Returns an iterator over immediate registered children modules.
+
+        Yields:
+            nn.Module: a module in the network
+
+        Note:
+            Duplicate modules are returned only once. In the following
+            example, ``l`` will be returned only once.
+        """
+
+        for _, module in self.named_registered_children():
+            yield module
+
     def _forward_wrapper(self, function: Callable) -> Callable:
         """Wrapper for the forward function.
 
@@ -200,6 +253,7 @@ class Layer(nn.Module):
         Returns:
             Callable: Wrapped function.
         """
+
         # noinspection PyUnresolvedReferences
         if hasattr(function, '__wrapper__') and function.__wrapper__ == Layer._forward_wrapper:
             return function
@@ -233,6 +287,7 @@ class Layer(nn.Module):
         Returns:
             TENSORS: Outputs of the forward pass.
         """
+
         if isinstance(self.backward_function, BackwardModule) and self.backward_function.has_forward():
             forward_functions = self.backward_function.forward
         else:

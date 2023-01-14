@@ -42,6 +42,7 @@ class PoissonNoise(Layer, BackwardIdentity):
             max_leakage (Optional[float]): the maximum leakage of the Poisson noise.
             precision (Optional[int]): the precision of the Poisson noise.
         """
+
         super(PoissonNoise, self).__init__()
 
         if (scale is None) + (max_leakage is None) + (precision is None) != 1:
@@ -75,6 +76,7 @@ class PoissonNoise(Layer, BackwardIdentity):
         Returns:
             TENSOR_OPERABLE: the scale of the Poisson noise function.
         """
+
         max_leakage = float(max_leakage)
         precision = float(precision)
         r, _ = toms748(
@@ -97,6 +99,7 @@ class PoissonNoise(Layer, BackwardIdentity):
         Returns:
             TENSOR_OPERABLE: the precision of the Poisson noise.
         """
+
         max_leakage = float(max_leakage)
         scale = float(scale)
         r, _ = toms748(
@@ -118,6 +121,7 @@ class PoissonNoise(Layer, BackwardIdentity):
         Returns:
             TENSOR_OPERABLE: the maximum leakage of the Poisson noise.
         """
+
         return 1 - (
                 PoissonNoise.static_cdf(x=1. + 1 / (2 * precision), rate=1., scale_factor=scale * precision)
                 - PoissonNoise.static_cdf(x=1. - 1 / (2 * precision), rate=1., scale_factor=scale * precision)
@@ -135,6 +139,7 @@ class PoissonNoise(Layer, BackwardIdentity):
         Returns:
             TENSOR_OPERABLE: the cumulative distribution function of the Poisson noise.
         """
+
         if np.isclose(rate, np.zeros_like(rate)):
             return np.ones_like(x)
 
@@ -153,6 +158,7 @@ class PoissonNoise(Layer, BackwardIdentity):
         Returns:
             TENSOR_OPERABLE: the leakage of the Poisson noise.
         """
+
         cdf_domain = np.linspace(-1, 1, int(2 * precision + 1), dtype=float)
         correctness = 0
 
@@ -185,6 +191,7 @@ class PoissonNoise(Layer, BackwardIdentity):
         Returns:
             float: the leakage of the Poisson noise.
         """
+
         return self.staticmethod_leakage(scale=float(self.scale), precision=int(self.precision))
 
     @property
@@ -194,6 +201,7 @@ class PoissonNoise(Layer, BackwardIdentity):
         Returns:
             Tensor: the rate factor of the Poisson noise.
         """
+
         return self.precision * self.scale
 
     def pdf(self, x: Tensor, rate: Tensor) -> Tensor:
@@ -206,6 +214,7 @@ class PoissonNoise(Layer, BackwardIdentity):
         Returns:
             Tensor: the probability density function of the Poisson noise.
         """
+
         x = x if isinstance(x, Tensor) else torch.tensor(x, requires_grad=False)
         rate = rate if isinstance(rate, Tensor) else torch.tensor(rate, requires_grad=False)
 
@@ -224,6 +233,7 @@ class PoissonNoise(Layer, BackwardIdentity):
         Returns:
             Tensor: the log probability of the Poisson noise.
         """
+
         x = x if isinstance(x, Tensor) else torch.tensor(x, requires_grad=False)
         rate = rate if isinstance(rate, Tensor) else torch.tensor(rate, requires_grad=False)
 
@@ -241,6 +251,7 @@ class PoissonNoise(Layer, BackwardIdentity):
         Returns:
             Tensor: the cumulative distribution function of the Poisson noise.
         """
+
         x = x if isinstance(x, Tensor) else torch.tensor(x, requires_grad=False)
         rate = rate if isinstance(rate, Tensor) else torch.tensor(rate, requires_grad=False)
         return self.static_cdf(x, rate, self.rate_factor)
@@ -254,6 +265,7 @@ class PoissonNoise(Layer, BackwardIdentity):
         Returns:
             Tensor: the output of the Poisson noise.
         """
+
         return torch.sign(x) * torch.poisson(torch.abs(x * self.rate_factor)) / self.rate_factor
 
     def extra_repr(self) -> str:
@@ -262,6 +274,7 @@ class PoissonNoise(Layer, BackwardIdentity):
         Returns:
             str: the extra representation of the Poisson noise.
         """
+
         return f'scale={float(self.scale):.4f}' \
                f', max_leakage={float(self.max_leakage):.4f}' \
                f', leakage={float(self.leakage):.4f}' \
