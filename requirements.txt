@@ -11,6 +11,5 @@ importlib-metadata<5.0.0,>=2.0.0; python_version < '3.8'
 tensorflow>=2.0.0
 tensorboard>=2.0.0
 torchinfo
-pillow
 # conda install graphviz
 graphviz
