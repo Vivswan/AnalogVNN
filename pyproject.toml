@@ -60,7 +60,7 @@ dependencies = [
     "scipy",
     "numpy>=1.16.5",
     "networkx",
-    "importlib_metadata",
+    "importlib-metadata<5.0.0,>=2.0.0; python_version < '3.8'",
 ]
 
 # List additional groups of dependencies here (e.g. development
@@ -101,6 +101,9 @@ flake8 = [
     "flake8-comprehensions",
     "flake8-executable",
     "flake8-coding",
+    "flake8-return",
+    "flake8-noreturn",
+    "flake8-deprecated",
 ]
 dev = [
     "setuptools>=61.0.0",

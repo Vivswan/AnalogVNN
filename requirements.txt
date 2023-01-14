@@ -5,7 +5,7 @@ torchaudio
 numpy
 scipy
 networkx
-importlib_metadata
+importlib-metadata<5.0.0,>=2.0.0; python_version < "3.8"
 
 # Full
 tensorflow
