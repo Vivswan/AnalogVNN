@@ -13,8 +13,7 @@ def gaussian_dirac_delta(x: TENSOR_OPERABLE, std: TENSOR_OPERABLE = 0.001) -> TE
         std (TENSOR_OPERABLE): standard deviation.
 
     Returns:
-        TENSOR_OPERABLE: TENSOR_OPERABLE with the same shape as x, but with values equal to the Dirac delta function
-        of x.
+        TENSOR_OPERABLE: TENSOR_OPERABLE with the same shape as x, with values of the Gaussian Dirac Delta function.
     """
 
     return 1 / (np.abs(std) * np.sqrt(np.pi)) * np.exp(-((x / std) ** 2))
