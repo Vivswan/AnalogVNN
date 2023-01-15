@@ -7,7 +7,7 @@ from scipy.optimize import toms748
 from torch import Tensor, nn
 
 from analogvnn.backward.BackwardIdentity import BackwardIdentity
-from analogvnn.fn.dirac_delta import dirac_delta
+from analogvnn.fn.dirac_delta import gaussian_dirac_delta
 from analogvnn.nn.module.Layer import Layer
 from analogvnn.utils.common_types import TENSOR_OPERABLE
 from analogvnn.utils.to_tensor_parameter import to_float_tensor, to_nongrad_parameter
@@ -219,7 +219,7 @@ class PoissonNoise(Layer, BackwardIdentity):
         rate = rate if isinstance(rate, Tensor) else torch.tensor(rate, requires_grad=False)
 
         if torch.isclose(rate, torch.zeros_like(rate)):
-            return dirac_delta(x)
+            return gaussian_dirac_delta(x)
 
         return torch.exp(self.log_prob(x=x, rate=rate))
 
