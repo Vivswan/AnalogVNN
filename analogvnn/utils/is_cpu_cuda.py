@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Tuple
+from typing import Tuple, Union
 
 import torch
 
@@ -47,11 +47,11 @@ class CPUCuda:
             self.set_device(f'cuda:{torch.cuda.current_device()}')
         return self
 
-    def set_device(self, device_name: str) -> CPUCuda:
+    def set_device(self, device_name: Union[str, torch.device]) -> CPUCuda:
         """Set the device to the given device name.
 
         Args:
-            device_name (str): the device name.
+            device_name (Union[str, torch.device]): the device name.
 
         Returns:
             CPUCuda: self
