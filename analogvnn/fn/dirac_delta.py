@@ -6,7 +6,7 @@ __all__ = ['gaussian_dirac_delta']
 
 
 def gaussian_dirac_delta(x: TENSOR_OPERABLE, std: TENSOR_OPERABLE = 0.001) -> TENSOR_OPERABLE:
-    """Gaussian Dirac Delta function with standard deviation `std`
+    """Gaussian Dirac Delta function with standard deviation `std`.
 
     Args:
         x (TENSOR_OPERABLE): Tensor
