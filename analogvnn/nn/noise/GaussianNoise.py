@@ -7,14 +7,14 @@ import torch
 from torch import Tensor, nn
 
 from analogvnn.backward.BackwardIdentity import BackwardIdentity
-from analogvnn.nn.module.Layer import Layer
+from analogvnn.nn.noise.Noise import Noise
 from analogvnn.utils.common_types import TENSOR_OPERABLE
 from analogvnn.utils.to_tensor_parameter import to_nongrad_parameter, to_float_tensor
 
 __all__ = ['GaussianNoise']
 
 
-class GaussianNoise(Layer, BackwardIdentity):
+class GaussianNoise(Noise, BackwardIdentity):
     """Implements the Gaussian noise function.
 
     Attributes:

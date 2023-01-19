@@ -1,12 +1,13 @@
 import torch
 from torch import nn, Tensor
 
+from analogvnn.backward.BackwardIdentity import BackwardIdentity
 from analogvnn.nn.normalize.Normalize import Normalize
 
 __all__ = ['LPNorm', 'LPNormW', 'L1Norm', 'L2Norm', 'L1NormW', 'L2NormW', 'L1NormM', 'L2NormM', 'L1NormWM', 'L2NormWM']
 
 
-class LPNorm(Normalize):
+class LPNorm(Normalize, BackwardIdentity):
     """Implements the row-wise Lp normalization function.
 
     Attributes:

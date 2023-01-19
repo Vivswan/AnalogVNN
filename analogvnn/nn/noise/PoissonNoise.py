@@ -8,14 +8,14 @@ from torch import Tensor, nn
 
 from analogvnn.backward.BackwardIdentity import BackwardIdentity
 from analogvnn.fn.dirac_delta import gaussian_dirac_delta
-from analogvnn.nn.module.Layer import Layer
+from analogvnn.nn.noise.Noise import Noise
 from analogvnn.utils.common_types import TENSOR_OPERABLE
 from analogvnn.utils.to_tensor_parameter import to_float_tensor, to_nongrad_parameter
 
 __all__ = ['PoissonNoise']
 
 
-class PoissonNoise(Layer, BackwardIdentity):
+class PoissonNoise(Noise, BackwardIdentity):
     """Implements the Poisson noise function.
 
     Attributes:

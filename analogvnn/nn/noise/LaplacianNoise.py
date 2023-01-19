@@ -6,14 +6,14 @@ import torch
 from torch import Tensor, nn
 
 from analogvnn.backward.BackwardIdentity import BackwardIdentity
-from analogvnn.nn.module.Layer import Layer
+from analogvnn.nn.noise.Noise import Noise
 from analogvnn.utils.common_types import TENSOR_OPERABLE
 from analogvnn.utils.to_tensor_parameter import to_float_tensor, to_nongrad_parameter
 
 __all__ = ['LaplacianNoise']
 
 
-class LaplacianNoise(Layer, BackwardIdentity):
+class LaplacianNoise(Noise, BackwardIdentity):
     """Implements the Laplacian noise function.
 
     Attributes:
