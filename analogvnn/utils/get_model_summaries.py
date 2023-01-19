@@ -7,9 +7,9 @@ from analogvnn.nn.module.Layer import Layer
 
 
 def get_model_summaries(
-        train_loader: DataLoader,
-        model: Optional[nn.Module] = None,
+        model: Optional[nn.Module],
         input_size: Optional[Sequence[int]] = None,
+        train_loader: DataLoader = None,
 ) -> Tuple[str, str]:
     """Creates the model summaries.
 
@@ -23,12 +23,16 @@ def get_model_summaries(
 
     Raises:
         ImportError: if torchinfo (https://github.com/tyleryep/torchinfo) is not installed.
+        ValueError: if the input_size and train_loader are None.
     """
 
     try:
         import torchinfo
     except ImportError as e:
         raise ImportError('requires torchinfo: https://github.com/tyleryep/torchinfo') from e
+
+    if input_size is None and train_loader is None:
+        raise ValueError('input_size or train_loader must be provided')
 
     if input_size is None:
         data_shape = next(iter(train_loader))[0].shape
