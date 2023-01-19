@@ -154,6 +154,8 @@ class TensorboardModelLog:
             model: Optional[nn.Module],
             input_size: Optional[Sequence[int]] = None,
             train_loader: Optional[DataLoader] = None,
+            *args,
+            **kwargs
     ) -> Tuple[str, str]:
         """Add the model summary to the tensorboard.
 
@@ -161,6 +163,8 @@ class TensorboardModelLog:
             model (nn.Module): the model to log.
             input_size (Optional[Sequence[int]]): the input size.
             train_loader (Optional[DataLoader]): the train loader.
+            *args: the arguments to torchinfo.summary.
+            **kwargs: the keyword arguments to torchinfo.summary.
 
         Returns:
             Tuple[str, str]: the model __repr__ and the model summary.
@@ -174,7 +178,9 @@ class TensorboardModelLog:
         model_str, nn_model_summary = get_model_summaries(
             model=model,
             input_size=input_size,
-            train_loader=train_loader
+            train_loader=train_loader,
+            *args,
+            **kwargs
         )
 
         if log_id in self._log_record:

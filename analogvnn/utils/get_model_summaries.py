@@ -10,6 +10,8 @@ def get_model_summaries(
         model: Optional[nn.Module],
         input_size: Optional[Sequence[int]] = None,
         train_loader: DataLoader = None,
+        *args,
+        **kwargs
 ) -> Tuple[str, str]:
     """Creates the model summaries.
 
@@ -17,6 +19,8 @@ def get_model_summaries(
         train_loader (DataLoader): the train loader.
         model (nn.Module): the model to log.
         input_size (Optional[Sequence[int]]): the input size.
+        *args: the arguments to torchinfo.summary.
+        **kwargs: the keyword arguments to torchinfo.summary.
 
     Returns:
         Tuple[str, str]: the model __repr__ and the model summary.
@@ -43,12 +47,18 @@ def get_model_summaries(
         use_autograd_graph = model.use_autograd_graph
         model.use_autograd_graph = True
 
+    if 'depth' not in kwargs:
+        kwargs['depth'] = 10
+    if 'col_names' not in kwargs:
+        kwargs['col_names'] = (e.value for e in torchinfo.ColumnSettings)
+    if 'verbose' not in kwargs:
+        kwargs['verbose'] = torchinfo.Verbosity.QUIET
+
     model_summary = torchinfo.summary(
         model,
         input_size=input_size,
-        verbose=torchinfo.Verbosity.QUIET,
-        col_names=[e.value for e in torchinfo.ColumnSettings],
-        depth=10,
+        *args,
+        **kwargs,
     )
 
     if isinstance(model, Layer):
