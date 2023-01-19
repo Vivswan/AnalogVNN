@@ -1,4 +1,4 @@
-""" AnalogVNN: A fully modular framework for modeling and optimizing analog/photonic neural networks."""
+"""AnalogVNN: A fully modular framework for modeling and optimizing analog/photonic neural networks."""
 
 import sys
 
