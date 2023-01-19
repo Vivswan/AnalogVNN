@@ -35,12 +35,18 @@ def get_model_summaries(
     except ImportError as e:
         raise ImportError('requires torchinfo: https://github.com/tyleryep/torchinfo') from e
 
-    if input_size is None and train_loader is None:
+    if input_size is None and train_loader is None and 'input_size' not in kwargs:
         raise ValueError('input_size or train_loader must be provided')
 
-    if input_size is None:
-        data_shape = next(iter(train_loader))[0].shape
-        input_size = tuple(list(data_shape)[1:])
+    if 'input_size' not in kwargs:
+        if input_size is None:
+            data_shape = list(next(iter(train_loader))[0].shape)
+            if train_loader.batch_size > 0:
+                data_shape[0] = 1
+
+            input_size = data_shape
+
+        kwargs['input_size'] = input_size
 
     use_autograd_graph = False
     if isinstance(model, Layer):
@@ -50,13 +56,12 @@ def get_model_summaries(
     if 'depth' not in kwargs:
         kwargs['depth'] = 10
     if 'col_names' not in kwargs:
-        kwargs['col_names'] = (e.value for e in torchinfo.ColumnSettings)
+        kwargs['col_names'] = tuple(e.value for e in torchinfo.ColumnSettings)
     if 'verbose' not in kwargs:
         kwargs['verbose'] = torchinfo.Verbosity.QUIET
 
     model_summary = torchinfo.summary(
         model,
-        input_size=input_size,
         *args,
         **kwargs,
     )
