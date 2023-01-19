@@ -75,7 +75,7 @@ class StochasticReducePrecision(Precision, BackwardIdentity):
             str: string
         """
 
-        return f'precision={self.precision}'
+        return f'precision={int(self.precision)}'
 
     def forward(self, x: Tensor) -> Tensor:
         """Forward function of the StochasticReducePrecision module.
