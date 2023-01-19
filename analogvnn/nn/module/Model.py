@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import typing
-from typing import Callable, Optional, Tuple, Set, Iterator
+from typing import Optional, Tuple, Set, Iterator
 
 import torch
 from torch import optim, Tensor, nn
@@ -13,7 +13,7 @@ from analogvnn.graph.BackwardGraph import BackwardGraph
 from analogvnn.graph.ForwardGraph import ForwardGraph
 from analogvnn.graph.ModelGraph import ModelGraph
 from analogvnn.nn.module.Layer import Layer
-from analogvnn.utils.common_types import TENSORS
+from analogvnn.utils.common_types import TENSORS, TENSOR_CALLABLE
 from analogvnn.utils.is_cpu_cuda import is_cpu_cuda
 
 if typing.TYPE_CHECKING:
@@ -32,8 +32,8 @@ class Model(Layer):
         forward_graph (ForwardGraph): The forward graph of the model.
         backward_graph (BackwardGraph): The backward graph of the model.
         optimizer (optim.Optimizer): The optimizer of the model.
-        loss_function (Callable): The loss function of the model.
-        accuracy_function (Callable): The accuracy function of the model.
+        loss_function (Optional[TENSOR_CALLABLE]): The loss function of the model.
+        accuracy_function (Optional[TENSOR_CALLABLE]): The accuracy function of the model.
         device (torch.device): The device of the model.
     """
 
@@ -48,8 +48,8 @@ class Model(Layer):
     backward_graph: BackwardGraph
 
     optimizer: Optional[optim.Optimizer]
-    loss_function: Optional[Callable]
-    accuracy_function: Optional[Callable]
+    loss_function: Optional[TENSOR_CALLABLE]
+    accuracy_function: Optional[TENSOR_CALLABLE]
     device: torch.device
 
     def __init__(self, tensorboard_log_dir=None, device=is_cpu_cuda.device):
