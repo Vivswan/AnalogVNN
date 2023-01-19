@@ -448,3 +448,6 @@ class AcyclicDirectedGraph(abc.ABC):
         """
 
         return to_graphviz_digraph(self.graph, real_label=real_label).render(*args, **kwargs)
+
+    save = render
+    """Alias for render."""
