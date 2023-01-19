@@ -23,15 +23,9 @@ def to_graphviz_digraph(from_graph: networkx.DiGraph, real_label: bool = False) 
         graphviz.Digraph: the converted graph.
 
     Raises:
-        ImportError: if pygraphviz (https://pygraphviz.github.io/) is not available.
         ImportError: if graphviz (https://pygraphviz.github.io/) is not available.
     """
 
-    try:
-        # noinspection PyPackageRequirements
-        import pygraphviz  # noqa: F401
-    except ImportError as e:
-        raise ImportError('requires pygraphviz: https://pygraphviz.github.io/') from e
     try:
         from graphviz import Digraph
     except ImportError as e:
