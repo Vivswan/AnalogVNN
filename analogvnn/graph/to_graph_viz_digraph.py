@@ -30,6 +30,7 @@ def to_graphviz_digraph(from_graph: networkx.DiGraph, real_label: bool = False) 
         from graphviz import Digraph
     except ImportError as e:
         raise ImportError('requires graphviz: https://pygraphviz.github.io/') from e
+
     strict = networkx.number_of_selfloops(from_graph) == 0 and not from_graph.is_multigraph()
     node_attr = {
         'style': 'filled',
@@ -44,7 +45,6 @@ def to_graphviz_digraph(from_graph: networkx.DiGraph, real_label: bool = False) 
         name=from_graph.name,
         strict=strict,
         node_attr=node_attr,
-        graph_attr={'size': '12,12'},
         format='svg'
     )
 
