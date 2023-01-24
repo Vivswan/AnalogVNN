@@ -31,12 +31,11 @@ class LinearBackpropagation(BackwardModule):
 
         return y
 
-    def backward(self, grad_output: Optional[Tensor], weight: Optional[Tensor] = None) -> Optional[Tensor]:
+    def backward(self, grad_output: Optional[Tensor]) -> Optional[Tensor]:
         """Backward pass of the linear layer.
 
         Args:
             grad_output (Optional[Tensor]): The gradient of the output.
-            weight (Optional[Tensor]): The weight of the layer.
 
         Returns:
             Optional[Tensor]: The gradient of the input.
@@ -44,7 +43,7 @@ class LinearBackpropagation(BackwardModule):
 
         grad_output = to_matrix(grad_output)
 
-        weight = to_matrix(self.weight if weight is None else weight)
+        weight = to_matrix(self.weight)
         grad_input = grad_output @ weight
 
         self.set_grad_of(self.weight, torch.mm(grad_output.t(), self.inputs))
