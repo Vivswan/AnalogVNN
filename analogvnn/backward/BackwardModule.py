@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import abc
-from typing import Callable, Any, Optional, Sequence, Tuple, Type
+from typing import Callable, Any, Optional, Tuple, Type
 
 import torch
 from torch import nn, Tensor, autograd
@@ -69,7 +69,7 @@ class BackwardModule(abc.ABC):
             backward_module: BackwardModule = ctx.backward_module
             results = backward_module._call_impl_backward(*grad_outputs)
 
-            if isinstance(results, Sequence):
+            if isinstance(results, (tuple, list)):
                 return (None, None, *results)
 
             return None, None, results

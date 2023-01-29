@@ -102,7 +102,7 @@ def get_fn_name(fn: Callable, show_attrs: bool, max_attr_chars: int) -> str:
         attr = attr[len(SAVED_PREFIX):]
         if torch.is_tensor(val):
             attrs[attr] = '[saved tensor]'
-        elif isinstance(val, Sequence) and any(torch.is_tensor(t) for t in val):
+        elif isinstance(val, (tuple, list)) and any(torch.is_tensor(t) for t in val):
             attrs[attr] = '[saved tensors]'
         else:
             attrs[attr] = str(val)
@@ -205,7 +205,7 @@ class AutoGradDot:
         if not inputs:
             return
 
-        if not isinstance(inputs, Sequence):
+        if not isinstance(inputs, (tuple, list)):
             inputs = (inputs,)
 
         for i, v in enumerate(inputs):
@@ -253,7 +253,7 @@ class AutoGradDot:
     @outputs.setter
     def outputs(self, outputs):
         self._called = True
-        if outputs is not None and not isinstance(outputs, Sequence):
+        if outputs is not None and not isinstance(outputs, (tuple, list)):
             outputs = (outputs,)
 
         self._outputs = outputs
@@ -504,7 +504,7 @@ def _add_grad_fn(link: Union[Tensor, Callable], autograd_dot: AutoGradDot) -> Op
                 autograd_dot.add_tensor(val, name=attr, fillcolor='orange')
                 continue
 
-            if isinstance(val, Sequence):
+            if isinstance(val, (tuple, list)):
                 for i, t in enumerate(val):
                     if not torch.is_tensor(t):
                         continue
