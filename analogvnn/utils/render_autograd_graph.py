@@ -1,3 +1,7 @@
+# The original snippet is licensed under the MIT License.
+# The following code is modified snippet from https://github.com/szagoruyko/pytorchviz/blob/master/torchviz/dot.py
+# to render the autograd graph of a module or a tensor for analogvnn.
+
 from __future__ import annotations
 
 import dataclasses
