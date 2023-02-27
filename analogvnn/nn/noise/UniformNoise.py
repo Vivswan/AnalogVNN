@@ -43,7 +43,7 @@ class UniformNoise(Noise, BackwardIdentity):
             precision (int): the precision of the uniform noise.
         """
 
-        super(UniformNoise, self).__init__()
+        super().__init__()
 
         if (low is None or high is None) + (leakage is None) + (precision is None) != 1:
             raise ValueError('only 2 out of 3 arguments are needed (scale, leakage, precision)')

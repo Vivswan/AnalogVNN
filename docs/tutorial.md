@@ -16,7 +16,7 @@ To convert a digital model to its analog counterpart the following steps needs t
         ```python
         class LinearModel(FullSequential):
             def __init__(self, activation_class, norm_class, precision_class, precision, noise_class, leakage):
-                super(LinearModel, self).__init__()
+                super().__init__()
 
                 self.activation_class = activation_class
                 self.norm_class = norm_class
@@ -55,7 +55,7 @@ To convert a digital model to its analog counterpart the following steps needs t
     ```python
     class WeightModel(FullSequential):
         def __init__(self, norm_class, precision_class, precision, noise_class, leakage):
-            super(WeightModel, self).__init__()
+            super().__init__()
             self.all_layers = []
 
             self.all_layers.append(norm_class())

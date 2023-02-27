@@ -41,7 +41,7 @@ class LaplacianNoise(Noise, BackwardIdentity):
             precision (int): the precision of the Laplacian noise.
         """
 
-        super(LaplacianNoise, self).__init__()
+        super().__init__()
 
         if (scale is None) + (leakage is None) + (precision is None) != 1:
             raise ValueError('only 2 out of 3 arguments are needed (scale, leakage, precision)')

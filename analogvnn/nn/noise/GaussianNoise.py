@@ -42,7 +42,7 @@ class GaussianNoise(Noise, BackwardIdentity):
             precision (int): the precision of the Gaussian noise.
         """
 
-        super(GaussianNoise, self).__init__()
+        super().__init__()
 
         if (std is None) + (leakage is None) + (precision is None) != 1:
             raise ValueError('only 2 out of 3 arguments are needed (std, leakage, precision)')

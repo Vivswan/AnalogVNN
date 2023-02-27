@@ -27,7 +27,7 @@ class BackwardFunction(BackwardModule, ABC):
             layer (nn.Module): The layer that this backward module is associated with.
         """
 
-        super(BackwardFunction, self).__init__(layer)
+        super().__init__(layer)
         self._backward_function = backward_function
 
     @property

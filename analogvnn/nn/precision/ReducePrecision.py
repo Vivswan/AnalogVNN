@@ -31,7 +31,7 @@ class ReducePrecision(Precision, BackwardIdentity):
              then 0.6 will be rounded to 1.0 and 0.4 will be rounded to 0.0.
         """
 
-        super(ReducePrecision, self).__init__()
+        super().__init__()
         if precision < 1:
             raise ValueError(f'precision has to be more than 0, but got {precision}')
 

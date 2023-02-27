@@ -43,7 +43,7 @@ class PoissonNoise(Noise, BackwardIdentity):
             precision (Optional[int]): the precision of the Poisson noise.
         """
 
-        super(PoissonNoise, self).__init__()
+        super().__init__()
 
         if (scale is None) + (max_leakage is None) + (precision is None) != 1:
             raise ValueError('only 2 out of 3 arguments are needed (scale, max_leakage, precision)')

@@ -60,7 +60,7 @@ class Model(Layer):
             device (torch.device): The device to run the model on.
         """
 
-        super(Model, self).__init__()
+        super().__init__()
 
         self._compiled = False
 
@@ -94,7 +94,7 @@ class Model(Layer):
         if not self._compiled:
             raise RuntimeError('Model is not compiled yet.')
 
-        return super(Model, self).__call__(*args, **kwargs)
+        return super().__call__(*args, **kwargs)
 
     @property
     def use_autograd_graph(self):
@@ -139,7 +139,7 @@ class Model(Layer):
         memo.add(self.optimizer)
         memo.add(self.loss_function)
         memo.add(self.accuracy_function)
-        return super(Model, self).named_registered_children(memo=memo)
+        return super().named_registered_children(memo=memo)
 
     def compile(self, device: Optional[torch.device] = None, layer_data: bool = True):
         """Compile the model.

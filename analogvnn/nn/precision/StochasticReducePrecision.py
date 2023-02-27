@@ -26,7 +26,7 @@ class StochasticReducePrecision(Precision, BackwardIdentity):
             precision (int): the precision of the output tensor.
         """
 
-        super(StochasticReducePrecision, self).__init__()
+        super().__init__()
         if precision < 1:
             raise ValueError('precision has to be more than 0, but got {}'.format(precision))
 

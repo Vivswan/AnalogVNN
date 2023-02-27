@@ -81,7 +81,7 @@ class BackwardModule(abc.ABC):
             layer (nn.Module): The layer for which the backward gradient is computed.
         """
 
-        super(BackwardModule, self).__init__()
+        super().__init__()
         self._layer = None
         self._set_autograd_backward()
         if not isinstance(self, nn.Module):
@@ -282,7 +282,7 @@ class BackwardModule(abc.ABC):
         """
 
         if isinstance(self, nn.Module) or self == self._layer:
-            return super(BackwardModule, self).__getattr__(name)
+            return super().__getattr__(name)
         if not str(name).startswith('__') and self._layer is not None and hasattr(self._layer, name):
             return getattr(self._layer, name)
         raise AttributeError("'{}' object has no attribute '{}'".format(type(self).__name__, name))

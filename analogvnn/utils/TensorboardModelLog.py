@@ -41,7 +41,7 @@ class TensorboardModelLog:
             log_dir (str): the directory to log to.
         """
 
-        super(TensorboardModelLog, self).__init__()
+        super().__init__()
         self.model = model
         self.tensorboard = None
         self.layer_data = True

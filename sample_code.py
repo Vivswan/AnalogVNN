@@ -93,7 +93,7 @@ class LinearModel(FullSequential):
             the analog channel).
         """
 
-        super(LinearModel, self).__init__()
+        super().__init__()
 
         self.activation_class = activation_class
         self.norm_class = norm_class
@@ -143,7 +143,7 @@ class WeightModel(FullSequential):
             the analog channel).
         """
 
-        super(WeightModel, self).__init__()
+        super().__init__()
         self.all_layers = []
 
         self.all_layers.append(norm_class())

@@ -76,7 +76,7 @@ class Linear(Layer):
             bias (bool): True if the layer has a bias.
         """
 
-        super(Linear, self).__init__()
+        super().__init__()
         self.in_features = in_features
         self.out_features = out_features
 
