@@ -282,7 +282,7 @@ class BackwardModule(abc.ABC):
         """
 
         if isinstance(self, nn.Module) or self == self._layer:
-            return super().__getattr__(name)
+            return super(BackwardModule, self).__getattr__(name)
         if not str(name).startswith('__') and self._layer is not None and hasattr(self._layer, name):
             return getattr(self._layer, name)
         raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
