@@ -285,4 +285,4 @@ class BackwardModule(abc.ABC):
             return super().__getattr__(name)
         if not str(name).startswith('__') and self._layer is not None and hasattr(self._layer, name):
             return getattr(self._layer, name)
-        raise AttributeError("'{}' object has no attribute '{}'".format(type(self).__name__, name))
+        raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")

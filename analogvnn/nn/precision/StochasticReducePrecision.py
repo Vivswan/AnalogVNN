@@ -28,10 +28,10 @@ class StochasticReducePrecision(Precision, BackwardIdentity):
 
         super().__init__()
         if precision < 1:
-            raise ValueError('precision has to be more than 0, but got {}'.format(precision))
+            raise ValueError(f'precision has to be more than 0, but got {precision}')
 
         if precision != int(precision):
-            raise ValueError('precision must be int, but got {}'.format(precision))
+            raise ValueError(f'precision must be int, but got {precision}')
 
         self.precision = nn.Parameter(torch.tensor(precision), requires_grad=False)
 

@@ -755,7 +755,7 @@ def parse_trace_graph(graph) -> List[Node]:
             scope[inputs[i]] = n.scopeName()
 
         uname = next(n.outputs()).uniqueName()
-        assert n.scopeName() != '', '{} has empty scope name'.format(n)
+        assert n.scopeName() != '', f'{n} has empty scope name'
         scope[uname] = n.scopeName()
 
     scope['0'] = 'input'
