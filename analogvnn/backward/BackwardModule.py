@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import abc
-from typing import Callable, Any, Optional, Sequence, Tuple, Type
+from typing import Callable, Any, Optional, Tuple, Type
 
 import torch
 from torch import nn, Tensor, autograd
@@ -69,7 +69,7 @@ class BackwardModule(abc.ABC):
             backward_module: BackwardModule = ctx.backward_module
             results = backward_module._call_impl_backward(*grad_outputs)
 
-            if isinstance(results, Sequence):
+            if isinstance(results, (tuple, list)):
                 return (None, None, *results)
 
             return None, None, results
@@ -81,7 +81,7 @@ class BackwardModule(abc.ABC):
             layer (nn.Module): The layer for which the backward gradient is computed.
         """
 
-        super(BackwardModule, self).__init__()
+        super().__init__()
         self._layer = None
         self._set_autograd_backward()
         if not isinstance(self, nn.Module):
@@ -285,4 +285,4 @@ class BackwardModule(abc.ABC):
             return super(BackwardModule, self).__getattr__(name)
         if not str(name).startswith('__') and self._layer is not None and hasattr(self._layer, name):
             return getattr(self._layer, name)
-        raise AttributeError("'{}' object has no attribute '{}'".format(type(self).__name__, name))
+        raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")

@@ -15,6 +15,8 @@ from analogvnn.nn.module.Model import Model
 
 __all__ = ['TensorboardModelLog']
 
+from analogvnn.utils.get_model_summaries import get_model_summaries
+
 
 class TensorboardModelLog:
     """Tensorboard model log.
@@ -39,7 +41,7 @@ class TensorboardModelLog:
             log_dir (str): the directory to log to.
         """
 
-        super(TensorboardModelLog, self).__init__()
+        super().__init__()
         self.model = model
         self.tensorboard = None
         self.layer_data = True
@@ -149,57 +151,37 @@ class TensorboardModelLog:
 
     def add_summary(
             self,
-            train_loader: DataLoader,
-            model: Optional[nn.Module] = None,
             input_size: Optional[Sequence[int]] = None,
+            train_loader: Optional[DataLoader] = None,
+            model: Optional[nn.Module] = None,
+            *args,
+            **kwargs
     ) -> Tuple[str, str]:
         """Add the model summary to the tensorboard.
 
         Args:
-            train_loader (DataLoader): the train loader.
-            model (nn.Module): the model to log.
             input_size (Optional[Sequence[int]]): the input size.
+            train_loader (Optional[DataLoader]): the train loader.
+            model (nn.Module): the model to log.
+            *args: the arguments to torchinfo.summary.
+            **kwargs: the keyword arguments to torchinfo.summary.
 
         Returns:
             Tuple[str, str]: the model __repr__ and the model summary.
-
-        Raises:
-            ImportError: if torchinfo (https://github.com/tyleryep/torchinfo) is not installed.
         """
-
-        try:
-            import torchinfo
-        except ImportError as e:
-            raise ImportError('requires torchinfo: https://github.com/tyleryep/torchinfo') from e
 
         if model is None:
             model = self.model
 
         log_id = f'{self.tensorboard.log_dir}_{TensorboardModelLog.add_summary.__name__}_{id(model)}'
 
-        if input_size is None:
-            data_shape = next(iter(train_loader))[0].shape
-            input_size = tuple(list(data_shape)[1:])
-
-        use_autograd_graph = False
-        if isinstance(model, Layer):
-            use_autograd_graph = model.use_autograd_graph
-            model.use_autograd_graph = True
-
-        nn_model_summary = torchinfo.summary(
-            model,
+        model_str, nn_model_summary = get_model_summaries(
+            model=model,
             input_size=input_size,
-            verbose=torchinfo.Verbosity.QUIET,
-            col_names=[e.value for e in torchinfo.ColumnSettings],
-            depth=10,
+            train_loader=train_loader,
+            *args,
+            **kwargs
         )
-
-        if isinstance(model, Layer):
-            model.use_autograd_graph = use_autograd_graph
-
-        nn_model_summary.formatting.verbose = torchinfo.Verbosity.VERBOSE
-        model_str = str(model)
-        nn_model_summary = f'{nn_model_summary}'
 
         if log_id in self._log_record:
             return model_str, nn_model_summary

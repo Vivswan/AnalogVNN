@@ -79,7 +79,7 @@ class Layer(nn.Module):
 
     def __init__(self):
         """Initializes the layer."""
-        super(Layer, self).__init__()
+        super().__init__()
         self._inputs = None
         self._outputs = None
         self._backward_module = None
@@ -95,7 +95,7 @@ class Layer(nn.Module):
         """
 
         self._forward_wrapper(self.forward)
-        outputs = super(Layer, self).__call__(*inputs, **kwargs)
+        outputs = super().__call__(*inputs, **kwargs)
         if self.training:
             self._inputs = ArgsKwargs(args=inputs, kwargs=kwargs)
             self._outputs = outputs

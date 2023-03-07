@@ -23,7 +23,7 @@ class Identity(Activation):
             name (str): the name of the activation function.
         """
 
-        super(Identity, self).__init__()
+        super().__init__()
         self.name = name
 
     def extra_repr(self) -> str:

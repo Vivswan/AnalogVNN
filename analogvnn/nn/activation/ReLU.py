@@ -28,7 +28,7 @@ class PReLU(Activation):
             alpha (float): the slope of the negative part of the activation function.
         """
 
-        super(PReLU, self).__init__()
+        super().__init__()
         self.alpha = nn.Parameter(torch.tensor(alpha), requires_grad=False)
         self._zero = nn.Parameter(torch.tensor(0), requires_grad=False)
 
@@ -95,7 +95,7 @@ class ReLU(PReLU):
     def __init__(self):
         """Initialize the rectified linear unit (ReLU) activation function."""
 
-        super(ReLU, self).__init__(alpha=0)
+        super().__init__(alpha=0)
 
     @staticmethod
     def initialise(tensor: Tensor) -> Tensor:
@@ -134,4 +134,4 @@ class LeakyReLU(PReLU):
     def __init__(self):
         """Initialize the leaky rectified linear unit (LeakyReLU) activation function."""
 
-        super(LeakyReLU, self).__init__(alpha=0.01)
+        super().__init__(alpha=0.01)

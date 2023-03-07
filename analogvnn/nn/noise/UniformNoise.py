@@ -4,14 +4,14 @@ import torch
 from torch import Tensor, nn
 
 from analogvnn.backward.BackwardIdentity import BackwardIdentity
-from analogvnn.nn.module.Layer import Layer
+from analogvnn.nn.noise.Noise import Noise
 from analogvnn.utils.common_types import TENSOR_OPERABLE
 from analogvnn.utils.to_tensor_parameter import to_float_tensor, to_nongrad_parameter
 
 __all__ = ['UniformNoise']
 
 
-class UniformNoise(Layer, BackwardIdentity):
+class UniformNoise(Noise, BackwardIdentity):
     """Implements the uniform noise function.
 
     Attributes:
@@ -43,7 +43,7 @@ class UniformNoise(Layer, BackwardIdentity):
             precision (int): the precision of the uniform noise.
         """
 
-        super(UniformNoise, self).__init__()
+        super().__init__()
 
         if (low is None or high is None) + (leakage is None) + (precision is None) != 1:
             raise ValueError('only 2 out of 3 arguments are needed (scale, leakage, precision)')

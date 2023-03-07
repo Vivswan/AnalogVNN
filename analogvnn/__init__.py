@@ -1,10 +1,11 @@
+"""AnalogVNN: A fully modular framework for modeling and optimizing analog/photonic neural networks."""
+
 import sys
 
 if sys.version_info[:2] >= (3, 8):
     from importlib import metadata
 else:
     import importlib_metadata as metadata  # pragma: no cover
-
 
 __package__ = 'analogvnn'
 __author__ = 'Vivswan Shah (vivswanshah@pitt.edu)'

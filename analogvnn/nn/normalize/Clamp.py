@@ -3,12 +3,13 @@ from typing import Optional
 import torch
 from torch import Tensor
 
+from analogvnn.backward.BackwardIdentity import BackwardIdentity
 from analogvnn.nn.normalize.Normalize import Normalize
 
 __all__ = ['Clamp', 'Clamp01']
 
 
-class Clamp(Normalize):
+class Clamp(Normalize, BackwardIdentity):
     """Implements the clamp normalization function with range [-1, 1]."""
 
     @staticmethod
@@ -39,7 +40,7 @@ class Clamp(Normalize):
         return grad_output * grad
 
 
-class Clamp01(Normalize):
+class Clamp01(Normalize, BackwardIdentity):
     """Implements the clamp normalization function with range [0, 1]."""
 
     @staticmethod

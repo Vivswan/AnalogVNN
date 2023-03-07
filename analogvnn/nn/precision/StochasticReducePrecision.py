@@ -3,13 +3,13 @@ from torch import nn, Tensor
 
 from analogvnn.backward.BackwardIdentity import BackwardIdentity
 from analogvnn.fn.reduce_precision import stochastic_reduce_precision
-from analogvnn.nn.module.Layer import Layer
+from analogvnn.nn.precision.Precision import Precision
 from analogvnn.utils.common_types import TENSOR_OPERABLE
 
 __all__ = ['StochasticReducePrecision']
 
 
-class StochasticReducePrecision(Layer, BackwardIdentity):
+class StochasticReducePrecision(Precision, BackwardIdentity):
     """Implements the stochastic reduce precision function.
 
     Attributes:
@@ -26,12 +26,12 @@ class StochasticReducePrecision(Layer, BackwardIdentity):
             precision (int): the precision of the output tensor.
         """
 
-        super(StochasticReducePrecision, self).__init__()
+        super().__init__()
         if precision < 1:
-            raise ValueError('precision has to be more than 0, but got {}'.format(precision))
+            raise ValueError(f'precision has to be more than 0, but got {precision}')
 
         if precision != int(precision):
-            raise ValueError('precision must be int, but got {}'.format(precision))
+            raise ValueError(f'precision must be int, but got {precision}')
 
         self.precision = nn.Parameter(torch.tensor(precision), requires_grad=False)
 
@@ -75,7 +75,7 @@ class StochasticReducePrecision(Layer, BackwardIdentity):
             str: string
         """
 
-        return f'precision={self.precision}'
+        return f'precision={int(self.precision)}'
 
     def forward(self, x: Tensor) -> Tensor:
         """Forward function of the StochasticReducePrecision module.

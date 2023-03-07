@@ -28,7 +28,7 @@ class SELU(Activation):
             scale_factor (float): the scale factor parameter.
         """
 
-        super(SELU, self).__init__()
+        super().__init__()
         self.alpha = nn.Parameter(torch.tensor(alpha), requires_grad=False)
         self.scale_factor = nn.Parameter(torch.tensor(scale_factor), requires_grad=False)
 
@@ -103,4 +103,4 @@ class ELU(SELU):
             alpha (float): the alpha parameter.
         """
 
-        super(ELU, self).__init__(alpha=alpha, scale_factor=1.)
+        super().__init__(alpha=alpha, scale_factor=1.)
