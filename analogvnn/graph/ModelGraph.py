@@ -26,7 +26,7 @@ class ModelGraph(ModelGraphState):
             allow_loops: If True, the graph is allowed to contain loops.
         """
 
-        super(ModelGraph, self).__init__(use_autograd_graph, allow_loops)
+        super().__init__(use_autograd_graph, allow_loops)
         self.forward_graph = ForwardGraph(self)
         self.backward_graph = BackwardGraph(self)
 

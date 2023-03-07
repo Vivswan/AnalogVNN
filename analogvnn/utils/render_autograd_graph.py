@@ -1,3 +1,7 @@
+# The original snippet is licensed under the MIT License.
+# The following code is modified snippet from https://github.com/szagoruyko/pytorchviz/blob/master/torchviz/dot.py
+# to render the autograd graph of a module or a tensor for analogvnn.
+
 from __future__ import annotations
 
 import dataclasses
@@ -102,7 +106,7 @@ def get_fn_name(fn: Callable, show_attrs: bool, max_attr_chars: int) -> str:
         attr = attr[len(SAVED_PREFIX):]
         if torch.is_tensor(val):
             attrs[attr] = '[saved tensor]'
-        elif isinstance(val, Sequence) and any(torch.is_tensor(t) for t in val):
+        elif isinstance(val, (tuple, list)) and any(torch.is_tensor(t) for t in val):
             attrs[attr] = '[saved tensors]'
         else:
             attrs[attr] = str(val)
@@ -205,7 +209,7 @@ class AutoGradDot:
         if not inputs:
             return
 
-        if not isinstance(inputs, Sequence):
+        if not isinstance(inputs, (tuple, list)):
             inputs = (inputs,)
 
         for i, v in enumerate(inputs):
@@ -253,7 +257,7 @@ class AutoGradDot:
     @outputs.setter
     def outputs(self, outputs):
         self._called = True
-        if outputs is not None and not isinstance(outputs, Sequence):
+        if outputs is not None and not isinstance(outputs, (tuple, list)):
             outputs = (outputs,)
 
         self._outputs = outputs
@@ -504,7 +508,7 @@ def _add_grad_fn(link: Union[Tensor, Callable], autograd_dot: AutoGradDot) -> Op
                 autograd_dot.add_tensor(val, name=attr, fillcolor='orange')
                 continue
 
-            if isinstance(val, Sequence):
+            if isinstance(val, (tuple, list)):
                 for i, t in enumerate(val):
                     if not torch.is_tensor(t):
                         continue
@@ -751,7 +755,7 @@ def parse_trace_graph(graph) -> List[Node]:
             scope[inputs[i]] = n.scopeName()
 
         uname = next(n.outputs()).uniqueName()
-        assert n.scopeName() != '', '{} has empty scope name'.format(n)
+        assert n.scopeName() != '', f'{n} has empty scope name'
         scope[uname] = n.scopeName()
 
     scope['0'] = 'input'

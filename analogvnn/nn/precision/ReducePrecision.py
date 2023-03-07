@@ -3,13 +3,13 @@ from torch import nn, Tensor
 
 from analogvnn.backward.BackwardIdentity import BackwardIdentity
 from analogvnn.fn.reduce_precision import reduce_precision
-from analogvnn.nn.module.Layer import Layer
+from analogvnn.nn.precision.Precision import Precision
 from analogvnn.utils.common_types import TENSOR_OPERABLE
 
 __all__ = ['ReducePrecision']
 
 
-class ReducePrecision(Layer, BackwardIdentity):
+class ReducePrecision(Precision, BackwardIdentity):
     """Implements the reduce precision function.
 
     Attributes:
@@ -31,7 +31,7 @@ class ReducePrecision(Layer, BackwardIdentity):
              then 0.6 will be rounded to 1.0 and 0.4 will be rounded to 0.0.
         """
 
-        super(ReducePrecision, self).__init__()
+        super().__init__()
         if precision < 1:
             raise ValueError(f'precision has to be more than 0, but got {precision}')
 

@@ -8,10 +8,13 @@ build-backend = "flit_core.buildapi"
 [tool.flit.module]
 name = "analogvnn"
 
+[tool.setuptools]
+py-modules = ['analogvnn']
+
 [project]
 # $ pip install analogvnn
 name = "analogvnn"
-version = "1.0.0rc6"
+version = "1.0.0"
 description = "A fully modular framework for modeling and optimizing analog/photonic neural networks"  # Optional
 readme = "README.md"
 requires-python = ">=3.7"
@@ -106,6 +109,7 @@ flake8 = [
     "flake8-deprecated",
 ]
 dev = [
+    "flit", # for building {flit build}
     "setuptools>=61.0.0",
     "build", # building the package {pyproject-build}
     "twine", # to publish on pypi {twine upload --repository-url=https://test.pypi.org/legacy/ dist/*} {twine upload dist/*}
@@ -113,6 +117,7 @@ dev = [
 ]
 test = ["analogvnn[flake8]"]
 all = ["analogvnn[full,dev,doc,test]"]
+
 [project.urls]
 "Author" = "https://vivswan.github.io/"
 "Bug Reports" = "https://github.com/Vivswan/AnalogVNN/issues"
@@ -125,8 +130,3 @@ all = ["analogvnn[full,dev,doc,test]"]
 # which executes the function `main` from this package when invoked.
 #[project.scripts]  # Optional
 #sample = "sample:main"
-
-# This is configuration specific to the `setuptools` build backend.
-# If you are using a different build backend, you will need to change this.
-[tool.setuptools]
-py-modules = ['analogvnn']

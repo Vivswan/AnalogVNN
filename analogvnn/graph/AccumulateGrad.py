@@ -30,7 +30,7 @@ class AccumulateGrad:
             module (Union[nn.Module, Callable]): Module from which to accumulate gradients.
         """
 
-        super(AccumulateGrad, self).__init__()
+        super().__init__()
         self.input_output_connections = {}
         self.module = module
 

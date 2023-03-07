@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, Sequence
+from typing import Dict
 
 import torch
 from torch import Tensor
@@ -69,7 +69,7 @@ class ForwardGraph(AcyclicDirectedGraph):
             ArgsKwargsOutput: Output of the graph
         """
 
-        if not isinstance(inputs, Sequence):
+        if not isinstance(inputs, (tuple, list)):
             inputs = (inputs,)
 
         if not self.graph_state.use_autograd_graph and is_training:

@@ -39,7 +39,7 @@ class ArgsKwargs:
             kwargs: The keyword arguments.
         """
 
-        super(ArgsKwargs, self).__init__()
+        super().__init__()
         if args is None:
             args = []
         if kwargs is None:
@@ -48,7 +48,7 @@ class ArgsKwargs:
         if isinstance(args, tuple):
             args = list(args)
 
-        if not isinstance(args, List):
+        if not isinstance(args, list):
             args = [args]
 
         self.args = args
@@ -79,7 +79,7 @@ class ArgsKwargs:
             pass
         elif isinstance(outputs, dict):
             outputs = cls(kwargs=outputs)
-        elif isinstance(outputs, tuple) and len(outputs) == 2 and isinstance(outputs[1], dict):
+        elif isinstance(outputs, (tuple, list)) and len(outputs) == 2 and isinstance(outputs[1], dict):
             outputs = cls(args=outputs[0], kwargs=outputs[1])
         else:
             outputs = cls(args=outputs)

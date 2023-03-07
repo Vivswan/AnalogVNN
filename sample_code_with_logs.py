@@ -96,7 +96,7 @@ class LinearModel(FullSequential):
             the analog channel).
         """
 
-        super(LinearModel, self).__init__()
+        super().__init__()
 
         self.activation_class = activation_class
         self.norm_class = norm_class
@@ -146,7 +146,7 @@ class WeightModel(FullSequential):
             the analog channel).
         """
 
-        super(WeightModel, self).__init__()
+        super().__init__()
         self.all_layers = []
 
         self.all_layers.append(norm_class())
@@ -214,8 +214,8 @@ def run_linear3_model():
     nn_model.create_tensorboard(str(data_path.joinpath('tensorboard')))
 
     print('Saving Summary and Graphs...')
-    _, nn_model_summary = nn_model.tensorboard.add_summary(train_loader)
-    _, weight_model_summary = nn_model.tensorboard.add_summary(train_loader, model=weight_model)
+    _, nn_model_summary = nn_model.tensorboard.add_summary(train_loader=train_loader)
+    _, weight_model_summary = nn_model.tensorboard.add_summary(train_loader=train_loader, model=weight_model)
     save_autograd_graph_from_module(data_path.joinpath('nn_model'), nn_model, next(iter(train_loader))[0])
     save_autograd_graph_from_module(data_path.joinpath('weight_model'), weight_model, torch.ones((1, 1)))
     save_autograd_graph_from_module(

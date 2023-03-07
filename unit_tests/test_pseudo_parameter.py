@@ -9,19 +9,19 @@ from analogvnn.utils.render_autograd_graph import save_autograd_graph_from_modul
 
 # def __getattribute__(self, item):
 #     print(f"__getattribute__:: {item!r}")
-#     return super(PseudoParameter, self).__getattribute__(item)
+#     return super().__getattribute__(item)
 #
 # def __setattr__(self, key, value):
 #     print(f"__setattr__:: {key!r} -> {value!r}")
-#     super(PseudoParameter, self).__setattr__(key, value)
+#     super().__setattr__(key, value)
 #
 # # def __set__(self, instance, value):
 # #     print(f"__set__:: {instance!r} -> {value!r}")
-# #     super(PseudoParameter, self).__set__(instance, value)
+# #     super().__set__(instance, value)
 #
 # def __get__(self, instance, owner):
 #     print(f"__get__:: {instance!r} -> {owner!r}")
-#     return super(PseudoParameter, self).__get__(instance, owner)
+#     return super().__get__(instance, owner)
 #
 # @classmethod
 # def __torch_function__(cls, func, types, args=(), kwargs=None):

@@ -46,7 +46,7 @@ class ModelGraphState:
             allow_loops: If True, the graph is allowed to contain loops.
         """
 
-        super(ModelGraphState, self).__init__()
+        super().__init__()
         self.allow_loops = allow_loops
         self.use_autograd_graph = use_autograd_graph
 

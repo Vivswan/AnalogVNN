@@ -7,15 +7,15 @@ from scipy.optimize import toms748
 from torch import Tensor, nn
 
 from analogvnn.backward.BackwardIdentity import BackwardIdentity
-from analogvnn.fn.dirac_delta import dirac_delta
-from analogvnn.nn.module.Layer import Layer
+from analogvnn.fn.dirac_delta import gaussian_dirac_delta
+from analogvnn.nn.noise.Noise import Noise
 from analogvnn.utils.common_types import TENSOR_OPERABLE
 from analogvnn.utils.to_tensor_parameter import to_float_tensor, to_nongrad_parameter
 
 __all__ = ['PoissonNoise']
 
 
-class PoissonNoise(Layer, BackwardIdentity):
+class PoissonNoise(Noise, BackwardIdentity):
     """Implements the Poisson noise function.
 
     Attributes:
@@ -43,7 +43,7 @@ class PoissonNoise(Layer, BackwardIdentity):
             precision (Optional[int]): the precision of the Poisson noise.
         """
 
-        super(PoissonNoise, self).__init__()
+        super().__init__()
 
         if (scale is None) + (max_leakage is None) + (precision is None) != 1:
             raise ValueError('only 2 out of 3 arguments are needed (scale, max_leakage, precision)')
@@ -219,7 +219,7 @@ class PoissonNoise(Layer, BackwardIdentity):
         rate = rate if isinstance(rate, Tensor) else torch.tensor(rate, requires_grad=False)
 
         if torch.isclose(rate, torch.zeros_like(rate)):
-            return dirac_delta(x)
+            return gaussian_dirac_delta(x)
 
         return torch.exp(self.log_prob(x=x, rate=rate))
 
