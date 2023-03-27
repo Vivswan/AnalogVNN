@@ -21,7 +21,7 @@ pip install analogvnn
 
 ![3 Layered Linear Photonic Analog Neural Network](docs/_static/analogvnn_model.png)
 
-[//]: # (![3 Layered Linear Photonic Analog Neural Network]&#40;https://github.com/Vivswan/AnalogVNN/raw/v1.0.0/docs/_static/analogvnn_model.png&#41;)
+[//]: # (![3 Layered Linear Photonic Analog Neural Network]&#40;https://github.com/Vivswan/AnalogVNN/raw/release/docs/_static/analogvnn_model.png&#41;)
 
 ## Abstract
 
