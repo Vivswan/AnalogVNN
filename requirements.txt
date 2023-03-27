@@ -1,6 +1,6 @@
---extra-index-url https://download.pytorch.org/whl/cu116
+--extra-index-url https://download.pytorch.org/whl/cu118
 torch
-torchvision~=0.14.0
+torchvision
 torchaudio
 numpy
 scipy
@@ -11,5 +11,6 @@ importlib-metadata; python_version < '3.8'
 tensorflow>=2.0.0
 tensorboard>=2.0.0
 torchinfo
-# conda install graphviz
+# conda install graphviz python-graphviz pydot pydotplus python-dotenv
+# conda install --channel conda-forge pygraphviz
 graphviz

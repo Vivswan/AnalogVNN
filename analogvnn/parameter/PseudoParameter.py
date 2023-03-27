@@ -178,6 +178,16 @@ class PseudoParameter(Parameter):
 
         return self._transformed.grad
 
+    @grad.setter
+    def grad(self, grad: Tensor):
+        """Sets the gradient of the parameter.
+
+        Args:
+            grad (Tensor): the gradient.
+        """
+
+        self._transformed.grad = grad
+
     @property
     def module(self):
         """Returns the module.
