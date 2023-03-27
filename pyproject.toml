@@ -14,7 +14,7 @@ py-modules = ['analogvnn']
 [project]
 # $ pip install analogvnn
 name = "analogvnn"
-version = "1.0.0"
+version = "1.0.1"
 description = "A fully modular framework for modeling and optimizing analog/photonic neural networks"  # Optional
 readme = "README.md"
 requires-python = ">=3.7"
