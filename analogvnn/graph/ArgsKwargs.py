@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, Dict, Any, Union, Optional
+from typing import List, Dict, Any, Union, Optional, Tuple
 
 __all__ = ['InputOutput', 'ArgsKwargs', 'ArgsKwargsInput', 'ArgsKwargsOutput']
 
@@ -109,5 +109,5 @@ class ArgsKwargs:
 ArgsKwargsInput = Union[ArgsKwargs, Dict, List, Any, None]
 """ArgsKwargsInput is the input type for ArgsKwargs"""
 
-ArgsKwargsOutput = Union[ArgsKwargs, List, Any, None]
+ArgsKwargsOutput = Union[ArgsKwargs, List, Tuple, Any, None]
 """ArgsKwargsOutput is the output type for ArgsKwargs"""

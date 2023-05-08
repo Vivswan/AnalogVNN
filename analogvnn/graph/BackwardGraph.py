@@ -33,23 +33,28 @@ class BackwardGraph(AcyclicDirectedGraph):
 
         self.graph_state.ready_for_backward(exception=True)
 
+        loss = self.graph_state.loss
+        self.graph_state.set_loss(None)
+
+        if loss is None:
+            loss = self.graph_state.outputs.args
+
+        if not isinstance(loss, (tuple, list)):
+            loss = [loss]
+
         if len(gradient) == 0:
-            gradient = None
-        elif len(gradient) == 1:
-            gradient = gradient[0]
+            gradient = (None,) * len(loss)
 
         if self.graph_state.use_autograd_graph:
-            result = self.graph_state.loss.backward(gradient=gradient)
+            result = tuple(v.backward(gradient=gradient[i]) for i, v in enumerate(loss))
         else:
             grad_outputs = torch.autograd.grad(
-                outputs=self.graph_state.loss,
+                outputs=loss,
                 inputs=self.graph_state.outputs.args,
                 grad_outputs=gradient,
                 retain_graph=True
             )
             result = self.calculate(*grad_outputs)
-
-        self.graph_state.set_loss(None)
 
         return result
 
