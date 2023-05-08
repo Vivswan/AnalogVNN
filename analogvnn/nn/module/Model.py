@@ -158,7 +158,7 @@ class Model(Layer):
         self.graphs.compile()
         for i in self.modules():
             if isinstance(i, Layer) and i != self:
-                i.graphs = self.graphs
+                i.use_autograd_graph = self.use_autograd_graph
 
         self.to(device=self.device)
 
