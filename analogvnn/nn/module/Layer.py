@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import functools
-from typing import Union, Type, Callable, Sequence, Optional, TYPE_CHECKING, Set, Iterator, Tuple
+from typing import Union, Type, Callable, Sequence, Optional, Set, Iterator, Tuple
 
 from torch import nn, Tensor
 
@@ -9,9 +9,6 @@ from analogvnn.backward.BackwardFunction import BackwardFunction
 from analogvnn.backward.BackwardModule import BackwardModule
 from analogvnn.graph.ArgsKwargs import ArgsKwargs, ArgsKwargsOutput
 from analogvnn.utils.common_types import TENSORS
-
-if TYPE_CHECKING:
-    from analogvnn.graph.ModelGraph import ModelGraph
 
 __all__ = ['Layer']
 
@@ -63,7 +60,6 @@ class Layer(nn.Module):
         _outputs (Union[None, Tensor, Sequence[Tensor]]): Outputs of the layer.
         _backward_module (Optional[BackwardModule]): Backward module of the layer.
         _use_autograd_graph (bool): If True, the autograd graph is used to calculate the gradients.
-        graphs (Optional[ModelGraph]): Contains Forward and Backward Graphs of the layer.
         call_super_init (bool): If True, the super class __init__ of nn.Module is called
         https://github.com/pytorch/pytorch/pull/91819
     """
@@ -72,7 +68,6 @@ class Layer(nn.Module):
     _outputs: Union[None, Tensor, Sequence[Tensor]]
     _backward_module: Optional[BackwardModule]
     _use_autograd_graph: bool
-    graphs: Optional[ModelGraph]
 
     # https://github.com/pytorch/pytorch/pull/91819
     call_super_init: bool = True
@@ -84,7 +79,6 @@ class Layer(nn.Module):
         self._outputs = None
         self._backward_module = None
         self._use_autograd_graph = False
-        self.graphs = None
 
     def __call__(self, *inputs, **kwargs):
         """Calls the forward pass of neural network layer.
@@ -110,8 +104,6 @@ class Layer(nn.Module):
             bool: use_autograd_graph.
         """
 
-        if self.graphs is not None:
-            return self.graphs.use_autograd_graph
         return self._use_autograd_graph
 
     @use_autograd_graph.setter
@@ -123,8 +115,6 @@ class Layer(nn.Module):
         """
 
         self._use_autograd_graph = use_autograd_graph
-        if self.graphs is not None:
-            self.graphs.use_autograd_graph = use_autograd_graph
 
     @property
     def inputs(self) -> ArgsKwargsOutput:
