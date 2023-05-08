@@ -86,9 +86,6 @@ class ModelGraphState:
             if self.outputs is None:
                 raise RuntimeError('output is not set.')
 
-            if self._loss is None:
-                raise RuntimeError('loss is not set.')
-
         return not (self.outputs is None or self._loss is None)
 
     @property
