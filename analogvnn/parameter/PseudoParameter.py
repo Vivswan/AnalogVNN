@@ -8,71 +8,10 @@ from torch import Tensor
 from torch.nn import ModuleDict
 from torch.nn.utils import parametrize
 
-from analogvnn.parameter.Parameter import Parameter
-
 __all__ = ['PseudoParameter']
 
 
-class PseudoParameterModule(nn.Module):
-    """A module that wraps a parameter and a function to transform it.
-
-    Attributes:
-        original (PseudoParameter): the original parameters.
-        _transformed (nn.Parameter): the transformed parameters.
-    """
-
-    original: PseudoParameter
-    _transformed: nn.Parameter
-
-    def __init__(self, original, transformed):
-        """Creates a new pseudo parameter module.
-
-        Args:
-            original (PseudoParameter): the original parameters.
-            transformed (nn.Parameter): the transformed parameters.
-        """
-
-        super().__init__()
-        self.original = original
-        self._transformed = transformed
-
-    def __call__(self, *args, **kwargs) -> nn.Parameter:
-        """Transforms the parameter by calling the __call__ method of the PseudoParameter.
-
-        Args:
-            *args: additional arguments.
-            **kwargs: additional keyword arguments.
-
-        Returns:
-            nn.Parameter: The transformed parameter.
-        """
-
-        return self.original()
-
-    forward = __call__
-    """Alias for __call__"""
-
-    _call_impl = __call__
-    """Alias for __call__"""
-
-    def set_original_data(self, data: Tensor) -> PseudoParameterModule:
-        """Set data to the original parameter.
-
-        Args:
-            data (Tensor): the data to set.
-
-        Returns:
-            PseudoParameterModule: self.
-        """
-
-        self.original.data = data
-        return self
-
-    right_inverse = set_original_data
-    """Alias for set_original_data."""
-
-
-class PseudoParameter(Parameter):
+class PseudoParameter(nn.Module):
     """A parameterized parameter which acts like a normal parameter during gradient updates.
 
     PyTorch's ParameterizedParameters vs AnalogVNN's PseudoParameters:
@@ -89,7 +28,6 @@ class PseudoParameter(Parameter):
     Attributes:
         _transformation (Callable): the transformation.
         _transformed (nn.Parameter): the transformed parameter.
-        _module (PseudoParameterModule): the module that wraps the parameter and the transformation.
 
     Properties:
         grad (Tensor): the gradient of the parameter.
@@ -99,7 +37,6 @@ class PseudoParameter(Parameter):
 
     _transformation: Callable
     _transformed: nn.Parameter
-    _module: PseudoParameterModule
 
     @staticmethod
     def identity(x: Any) -> Any:
@@ -114,27 +51,22 @@ class PseudoParameter(Parameter):
 
         return x
 
-    def __init__(self, data=None, requires_grad=True, transformation=None, *args, **kwargs):
+    def __init__(self, data=None, requires_grad=True, transformation=None):
         """Initializes the parameter.
 
         Args:
             data: the data for the parameter.
             requires_grad (bool): whether the parameter requires gradient.
             transformation (Callable): the transformation.
-            *args: additional arguments.
-            **kwargs: additional keyword arguments.
         """
 
-        super().__init__(data, requires_grad, *args, **kwargs)
+        super().__init__()
+        self.original = nn.Parameter(data=data, requires_grad=requires_grad)
         self._transformed = nn.Parameter(data=data, requires_grad=requires_grad)
         self._transformed.original = self
         self._transformation = self.identity
         self.set_transformation(transformation)
-
-        self._module = PseudoParameterModule(
-            original=self,
-            transformed=self._transformed
-        )
+        self.substitute_member(self.original, self._transformed, "grad")
 
     def __call__(self, *args, **kwargs):
         """Transforms the parameter.
@@ -151,10 +83,32 @@ class PseudoParameter(Parameter):
         """
 
         try:
-            self._transformed.data = self._transformation(self)
+            self._transformed.data = self._transformation(self.original)
         except Exception as e:
             raise RuntimeError(f'here: {e.args}') from e
         return self._transformed
+
+    def set_original_data(self, data: Tensor) -> PseudoParameter:
+        """Set data to the original parameter.
+
+        Args:
+            data (Tensor): the data to set.
+
+        Returns:
+            PseudoParameter: self.
+        """
+
+        self.original.data = data
+        return self
+
+    forward = __call__
+    """Alias for __call__"""
+
+    _call_impl = __call__
+    """Alias for __call__"""
+
+    right_inverse = set_original_data
+    """Alias for set_original_data."""
 
     def __repr__(self):
         """Returns a string representation of the parameter.
@@ -165,7 +119,7 @@ class PseudoParameter(Parameter):
 
         return f'{PseudoParameter.__name__}(' \
                f'transform={self.transformation}' \
-               f', data={self.data}' \
+               f', original={self.original}' \
                f')'
 
     @property
@@ -187,16 +141,6 @@ class PseudoParameter(Parameter):
         """
 
         self._transformed.grad = grad
-
-    @property
-    def module(self):
-        """Returns the module.
-
-        Returns:
-            PseudoParameterModule: the module.
-        """
-
-        return self._module
 
     @property
     def transformation(self):
@@ -233,6 +177,37 @@ class PseudoParameter(Parameter):
             self._transformation.eval()
         return self
 
+    @staticmethod
+    def substitute_member(
+            tensor_from: Any,
+            tensor_to: Any,
+            property_name: str,
+            setter: bool = True
+    ):
+        """Substitutes a member of a tensor as property of another tensor.
+
+        Args:
+            tensor_from (Any): the tensor to substitute from.
+            tensor_to (Any): the tensor to substitute to.
+            property_name (str): the name of the property.
+            setter (bool): whether to substitute the setter.
+        """
+
+        def getter_fn(self):
+            return getattr(tensor_to, property_name)
+
+        def setter_fn(self, value):
+            setattr(tensor_to, property_name, value)
+
+        new_class = type(tensor_from.__class__.__name__, (tensor_from.__class__,), {})
+
+        if not setter:
+            setattr(new_class, property_name, property(getter_fn))
+        else:
+            setattr(new_class, property_name, property(getter_fn, setter_fn))
+
+        tensor_from.__class__ = new_class
+
     @classmethod
     def parameterize(cls, module: nn.Module, param_name: str, transformation: Callable) -> PseudoParameter:
         """Parameterizes a parameter.
@@ -259,7 +234,7 @@ class PseudoParameter(Parameter):
             # Inject a ``ModuleDict`` into the instance under module.parametrizations
             module.parametrizations = ModuleDict()
 
-        module.parametrizations[param_name] = new_param.module
+        module.parametrizations[param_name] = new_param
         parametrize._inject_property(module, param_name)
         return new_param
 
