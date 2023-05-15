@@ -267,7 +267,6 @@ class BackwardGraph(AcyclicDirectedGraph):
             grad_inputs = module._call_impl_backward(*grad_outputs.inputs.args, **grad_outputs.inputs.kwargs)
             return ArgsKwargs.to_args_kwargs_object(grad_inputs)
 
-        grad_dict = {}
         inputs = module_inputs_outputs.inputs.args + list(module_inputs_outputs.inputs.kwargs.values())
         outputs = []
         outputs_grads = []
@@ -291,26 +290,28 @@ class BackwardGraph(AcyclicDirectedGraph):
             module_parameters = list(module.parameters())
             inputs += module_parameters
 
+        grad_dict = {id(i): None for i in inputs}
+        filtered_inputs = [i for i in inputs if i is not None and i.requires_grad]
         out_grads = torch.autograd.grad(
             outputs=outputs,
-            inputs=inputs,
+            inputs=filtered_inputs,
             grad_outputs=outputs_grads,
             retain_graph=True,
             allow_unused=True
         )
         for i, v in enumerate(out_grads):
-            grad_dict[inputs[i]] = v
+            grad_dict[id(filtered_inputs[i])] = v
 
         for i in module_parameters:
-            if grad_dict[i] is None:
+            if grad_dict[id(i)] is None:
                 continue
 
             if i.grad is None:
-                i.grad = grad_dict[i]
+                i.grad = grad_dict[id(i)]
             else:
-                i.grad += grad_dict[i]
+                i.grad += grad_dict[id(i)]
 
         return ArgsKwargs(
-            args=[grad_dict[i] for i in module_inputs_outputs.inputs.args],
-            kwargs={key: grad_dict[value] for key, value in module_inputs_outputs.inputs.kwargs.items()}
+            args=[grad_dict[id(i)] for i in module_inputs_outputs.inputs.args],
+            kwargs={key: grad_dict[id(value)] for key, value in module_inputs_outputs.inputs.kwargs.items()}
         )
