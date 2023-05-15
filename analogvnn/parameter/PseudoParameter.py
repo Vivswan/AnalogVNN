@@ -123,26 +123,6 @@ class PseudoParameter(nn.Module):
                f')'
 
     @property
-    def grad(self):
-        """Returns the gradient of the parameter.
-
-        Returns:
-            Tensor: the gradient.
-        """
-
-        return self._transformed.grad
-
-    @grad.setter
-    def grad(self, grad: Tensor):
-        """Sets the gradient of the parameter.
-
-        Args:
-            grad (Tensor): the gradient.
-        """
-
-        self._transformed.grad = grad
-
-    @property
     def transformation(self):
         """Returns the transformation.
 
@@ -187,8 +167,8 @@ class PseudoParameter(nn.Module):
         """Substitutes a member of a tensor as property of another tensor.
 
         Args:
-            tensor_from (Any): the tensor to substitute from.
-            tensor_to (Any): the tensor to substitute to.
+            tensor_from (Any): the tensor property to substitute.
+            tensor_to (Any): the tensor property to substitute to.
             property_name (str): the name of the property.
             setter (bool): whether to substitute the setter.
         """
