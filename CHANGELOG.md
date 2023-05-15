@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.5 (Patches for Pytorch 2.0.1)
+
+* Removed unnecessary `PseudoParameter.grad` property.
+* Patch for Pytorch 2.0.1, add filtering inputs in `BackwardGraph._calculate_gradients`.
+
 ## 1.0.4
 
 * Combined `PseudoParameter` and `PseudoParameterModule` for better visibility
