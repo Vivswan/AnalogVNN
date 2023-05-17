@@ -2,17 +2,36 @@
 max-line-length = 120
 
 extend-ignore =
-    C101, # Coding magic comment
-    D100, # Missing docstring in public module
-    D104, # Missing docstring in public package
-    D202, # No blank lines allowed after function docstring
-    D210, # No whitespaces allowed surrounding docstring text
-    D401, # First line should be in imperative mood
-    R504, # unnecessary variable assignment before return statement
-    R505, # unnecessary else after return statement
+    # No explicit stacklevel argument found
+    B028,
+
+    # Coding magic comment
+    C101,
+
+    # Missing docstring in public module
+    D100,
+
+    # Missing docstring in public package
+    D104,
+
+    # No blank lines allowed after function docstring
+    D202,
+
+    # No whitespaces allowed surrounding docstring text
+    D210,
+
+    # First line should be in imperative mood
+    D401,
+
+    # unnecessary variable assignment before return statement
+    R504,
+
+    # unnecessary else after return statement
+    R505,
 
 per-file-ignores =
     sample_code.py: D100, D101, D102, D103, D104
+    sample_code_non_analog.py: D100, D101, D102, D103, D104
     sample_code_with_logs.py: D100, D101, D102, D103, D104
 
 exclude =

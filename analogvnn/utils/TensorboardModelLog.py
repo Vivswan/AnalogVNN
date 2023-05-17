@@ -179,7 +179,7 @@ class TensorboardModelLog:
             model=model,
             input_size=input_size,
             train_loader=train_loader,
-            *args,
+            *args,  # noqa: B026
             **kwargs
         )
 

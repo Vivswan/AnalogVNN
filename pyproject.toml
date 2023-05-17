@@ -82,9 +82,9 @@ full = [
     "graphviz",
     #"python-graphviz",
 ]
-doc = [
+doc = [# https://www.youtube.com/watch?v=qRSb299awB0&t=2418s
     "sphinx>=4.2.0",
-    "sphinx-autobuild",
+    "sphinx-autobuild", # for live reloading {sphinx-autobuild .\docs .\docs\_build\html}
     "rst-to-myst[sphinx]",
     "furo",
     "myst_parser",
@@ -97,7 +97,7 @@ doc = [
     "sphinxcontrib-katex", # for math
 ]
 flake8 = [
-    "flake8",
+    "flake8", # for style checks {flake8 .\analogvnn\}
     "flake8-docstrings",
     "flake8-quotes",
     "flake8-bugbear",
@@ -105,12 +105,12 @@ flake8 = [
     "flake8-executable",
     "flake8-coding",
     "flake8-return",
-#    "flake8-noreturn; python_version >= '3.8'",
+    #    "flake8-noreturn; python_version >= '3.8'",
     "flake8-deprecated",
 ]
 dev = [
-    "flit", # for building {flit build}
     "setuptools>=61.0.0",
+    "flit", # for building {flit build}
     "build", # building the package {pyproject-build}
     "twine", # to publish on pypi {twine upload --repository-url=https://test.pypi.org/legacy/ dist/*} {twine upload dist/*}
     "johnnydep", # to see dependencies {johnnydep <package>}
