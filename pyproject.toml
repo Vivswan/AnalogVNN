@@ -11,6 +11,12 @@ name = "analogvnn"
 [tool.setuptools]
 py-modules = ['analogvnn']
 
+[tool.setuptools.package-data]
+"analogvnn" = ["py.typed"]
+
+[tool.setuptools.packages.find]
+where = ["analogvnn"]
+
 [project]
 # $ pip install analogvnn
 name = "analogvnn"
