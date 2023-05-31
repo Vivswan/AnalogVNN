@@ -2,7 +2,8 @@
 
 ## 1.0.6
 
-* `Model` is subclass of `BackwardModule` for additional functionality
+* `Model` is subclass of `BackwardModule` for additional functionality.
+* Using `inspect.isclass` to check if `backward_class` is a class in `Linear.set_backward_function`.
 
 ## 1.0.5 (Patches for Pytorch 2.0.1)
 
@@ -11,9 +12,9 @@
 
 ## 1.0.4
 
-* Combined `PseudoParameter` and `PseudoParameterModule` for better visibility
-  * BugFix: fixed save and load of state_dict of `PseudoParameter` and transformation module
-* Removed redundant class `analogvnn.parameter.Parameter`
+* Combined `PseudoParameter` and `PseudoParameterModule` for better visibility.
+  * BugFix: fixed save and load of state_dict of `PseudoParameter` and transformation module.
+* Removed redundant class `analogvnn.parameter.Parameter`.
 
 ## 1.0.3
 

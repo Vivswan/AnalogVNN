@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import functools
+import inspect
 from typing import Union, Type, Callable, Sequence, Optional, Set, Iterator, Tuple
 
 from torch import nn, Tensor
@@ -178,7 +179,7 @@ class Layer(nn.Module):
         if backward_class == self:
             return self
 
-        if issubclass(backward_class, BackwardModule):
+        if inspect.isclass(backward_class) and issubclass(backward_class, BackwardModule):
             self._backward_module = backward_class(self)
         elif isinstance(backward_class, BackwardModule):
             backward_class.set_layer(self)
