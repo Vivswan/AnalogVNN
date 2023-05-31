@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.6
+
+* `Model` is subclass of `BackwardModule` for additional functionality
+
 ## 1.0.5 (Patches for Pytorch 2.0.1)
 
 * Removed unnecessary `PseudoParameter.grad` property.

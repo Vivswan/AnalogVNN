@@ -7,6 +7,7 @@ import torch
 from torch import optim, Tensor, nn
 from torch.utils.data import DataLoader
 
+from analogvnn.backward.BackwardModule import BackwardModule
 from analogvnn.fn.test import test
 from analogvnn.fn.train import train
 from analogvnn.graph.BackwardGraph import BackwardGraph
@@ -22,7 +23,7 @@ if typing.TYPE_CHECKING:
 __all__ = ['Model']
 
 
-class Model(Layer):
+class Model(Layer, BackwardModule):
     """Base class for analog neural network models.
 
     Attributes:
