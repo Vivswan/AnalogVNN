@@ -118,7 +118,7 @@ dev = [
     "setuptools>=61.0.0",
     "flit", # for building {flit build}
     "build", # building the package {pyproject-build}
-    "twine", # to publish on pypi {twine upload --repository-url=https://test.pypi.org/legacy/ dist/*} {twine upload dist/*}
+    "twine", # to publish on pypi {twine upload -r testpypi dist/*} {twine upload -r pypi dist/*}
     "johnnydep", # to see dependencies {johnnydep <package>}
 ]
 test = ["analogvnn[flake8]"]
