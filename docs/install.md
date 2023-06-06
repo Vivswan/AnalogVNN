@@ -2,7 +2,7 @@
 
 AnalogVNN is tested and supported on the following 64-bit systems:
 
-- Python 3.7, 3.8, 3.9, 3.10
+- Python 3.7, 3.8, 3.9, 3.10, 3.11
 - Windows 7 and later
 - Ubuntu 16.04 and later, including WSL
 - Red Hat Enterprise Linux 7 and later

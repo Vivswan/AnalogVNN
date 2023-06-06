@@ -5,7 +5,7 @@
 
 [![PyPI version](https://badge.fury.io/py/analogvnn.svg)](https://badge.fury.io/py/analogvnn)
 [![Documentation Status](https://readthedocs.org/projects/analogvnn/badge/?version=stable)](https://analogvnn.readthedocs.io/en/stable/?badge=stable)
-[![Python](https://img.shields.io/badge/python-3.7--3.10-blue)](https://badge.fury.io/py/analogvnn)
+[![Python](https://img.shields.io/badge/python-3.7--3.11-blue)](https://badge.fury.io/py/analogvnn)
 [![License: MPL 2.0](https://img.shields.io/badge/License-MPL_2.0-blue.svg)](https://opensource.org/licenses/MPL-2.0)
 
 Documentation: [https://analogvnn.readthedocs.io/](https://analogvnn.readthedocs.io/)
@@ -16,7 +16,11 @@ Documentation: [https://analogvnn.readthedocs.io/](https://analogvnn.readthedocs
 - Install AnalogVNN using [pip](https://pypi.org/project/analogvnn/)
 
 ```bash
-pip install analogvnn
+  # Current stable release for CPU and GPU
+  pip install analogvnn
+  
+  # For additional optional features
+  pip install analogvnn[full]
 ```
 
 ## Usage:
