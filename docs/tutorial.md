@@ -1,6 +1,6 @@
 # Tutorial
 
-<a href="https://colab.research.google.com/github/Vivswan/AnalogVNN/blob/v1.0.0/docs/_static/AnalogVNN_Demo.ipynb" style="font-size:24px;">
+<a href="https://colab.research.google.com/github/Vivswan/AnalogVNN/blob/release/docs/_static/AnalogVNN_Demo.ipynb" style="font-size:24px;">
 Run in Google Colab:
 <img alt="Google Colab" src="https://www.tensorflow.org/images/colab_logo_32px.png" style="vertical-align: bottom;">
 </a>
