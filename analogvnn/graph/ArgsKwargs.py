@@ -62,7 +62,7 @@ class ArgsKwargs:
     def __repr__(self):
         """Returns a string representation of the parameter."""
 
-        return f'ArgsKwargs(args={self.args}, kwargs={self.kwargs})'
+        return f'{self.__class__.__name__}(args={self.args}, kwargs={self.kwargs})'
 
     @classmethod
     def to_args_kwargs_object(cls, outputs: ArgsKwargsInput) -> ArgsKwargs:

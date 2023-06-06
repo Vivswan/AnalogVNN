@@ -41,7 +41,7 @@ class AccumulateGrad:
             str: String representation of the module.
         """
 
-        return f'AccumulateGrad({self.module})'
+        return f'{self.__class__.__name__}({self.module})'
 
     def __call__(  # noqa: C901
             self,

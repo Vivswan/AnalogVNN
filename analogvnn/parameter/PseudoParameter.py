@@ -117,7 +117,7 @@ class PseudoParameter(nn.Module):
             str: the string representation.
         """
 
-        return f'{PseudoParameter.__name__}(' \
+        return f'{self.__class__.__name__}(' \
                f'transform={self.transformation}' \
                f', original={self.original}' \
                f')'

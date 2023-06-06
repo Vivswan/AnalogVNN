@@ -4,6 +4,7 @@
 
 * `Model` is subclass of `BackwardModule` for additional functionality.
 * Using `inspect.isclass` to check if `backward_class` is a class in `Linear.set_backward_function`.
+* Repr using `self.__class__.__name__` in all classes.
 
 ## 1.0.5 (Patches for Pytorch 2.0.1)
 
