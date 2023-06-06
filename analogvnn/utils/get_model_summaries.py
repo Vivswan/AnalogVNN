@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 from analogvnn.nn.module.Layer import Layer
 
 
-def get_model_summaries(
+def get_model_summaries(  # noqa: C901
         model: Optional[nn.Module],
         input_size: Optional[Sequence[int]] = None,
         train_loader: DataLoader = None,

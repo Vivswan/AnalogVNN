@@ -2,7 +2,6 @@
 
 [build-system]
 requires = ["wheel", "setuptools>=61.0.0", "flit_core >=3.2,<4"]
-#build-backend = "setuptools.build_meta"
 build-backend = "flit_core.buildapi"
 
 [tool.flit.module]
@@ -11,11 +10,17 @@ name = "analogvnn"
 [tool.setuptools]
 py-modules = ['analogvnn']
 
+[tool.setuptools.package-data]
+"analogvnn" = ["py.typed"]
+
+[tool.setuptools.packages.find]
+where = ["analogvnn"]
+
 [project]
 # $ pip install analogvnn
 name = "analogvnn"
-version = "1.0.5"
-description = "A fully modular framework for modeling and optimizing analog/photonic neural networks"  # Optional
+version = "1.0.6"
+description = "A fully modular framework for modeling and optimizing analog/photonic neural networks"
 readme = "README.md"
 requires-python = ">=3.7"
 license = { file = "LICENSE" }
@@ -27,23 +32,14 @@ maintainers = [
     { name = "Vivswan Shah", email = "vivswanshah@pitt.edu" }
 ]
 # For a list of valid classifiers, see https://pypi.org/classifiers/
-classifiers = [# Optional
-    # How mature is this project? Common values are
-    #   3 - Alpha
-    #   4 - Beta
-    #   5 - Production/Stable
+classifiers = [
     "Development Status :: 5 - Production/Stable",
-    # Indicate who your project is intended for
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "Topic :: Software Development :: Build Tools",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Software Development :: Libraries :: Python Modules",
-    # Pick your license as you wish
-    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
-    # Specify the Python versions you support here. In particular, ensure
-    # that you indicate you support Python 3. These classifiers are *not*
-    # checked by "pip install". See instead "python_requires" below.
+    "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
@@ -52,12 +48,6 @@ classifiers = [# Optional
     "Programming Language :: Python :: 3 :: Only",
 ]
 
-# This field lists other packages that your project depends on to run.
-# Any package you put here will be installed by pip when your project is
-# installed, so they must be valid existing projects.
-#
-# For an analysis of this field vs pip's requirements files see:
-# https://packaging.python.org/discussions/install-requires-vs-requirements/
 dependencies = [
     "dataclasses",
     "scipy",
@@ -66,14 +56,6 @@ dependencies = [
     "importlib-metadata<5.0.0,>=2.0.0; python_version < '3.8'",
 ]
 
-# List additional groups of dependencies here (e.g. development
-# dependencies). Users will be able to install these using the "extras"
-# syntax, for example:
-#
-#   $ pip install analogvnn[dev]
-#
-# Similar to `dependencies` above, these must be valid existing
-# projects.
 [project.optional-dependencies]
 full = [
     "tensorflow",
@@ -82,9 +64,9 @@ full = [
     "graphviz",
     #"python-graphviz",
 ]
-doc = [
+doc = [# https://www.youtube.com/watch?v=qRSb299awB0&t=2418s
     "sphinx>=4.2.0",
-    "sphinx-autobuild",
+    "sphinx-autobuild", # for live reloading {sphinx-autobuild .\docs .\docs\_build\html}
     "rst-to-myst[sphinx]",
     "furo",
     "myst_parser",
@@ -97,7 +79,7 @@ doc = [
     "sphinxcontrib-katex", # for math
 ]
 flake8 = [
-    "flake8",
+    "flake8", # for style checks {flake8 .\analogvnn\}
     "flake8-docstrings",
     "flake8-quotes",
     "flake8-bugbear",
@@ -105,14 +87,14 @@ flake8 = [
     "flake8-executable",
     "flake8-coding",
     "flake8-return",
-#    "flake8-noreturn; python_version >= '3.8'",
+    #    "flake8-noreturn; python_version >= '3.8'",
     "flake8-deprecated",
 ]
 dev = [
-    "flit", # for building {flit build}
     "setuptools>=61.0.0",
+    "flit", # for building {flit build}
     "build", # building the package {pyproject-build}
-    "twine", # to publish on pypi {twine upload --repository-url=https://test.pypi.org/legacy/ dist/*} {twine upload dist/*}
+    "twine", # to publish on pypi {twine upload -r testpypi dist/*} {twine upload -r pypi dist/*}
     "johnnydep", # to see dependencies {johnnydep <package>}
 ]
 test = ["analogvnn[flake8]"]
@@ -125,8 +107,3 @@ all = ["analogvnn[full,dev,doc,test]"]
 "Homepage" = "https://github.com/Vivswan/AnalogVNN"
 "Say Thanks!" = "https://vivswan.github.io/"
 "Source" = "https://github.com/Vivswan/AnalogVNN"
-
-# The following would provide a command line executable called `sample`
-# which executes the function `main` from this package when invoked.
-#[project.scripts]  # Optional
-#sample = "sample:main"

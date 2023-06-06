@@ -1,11 +1,11 @@
 # AnalogVNN
 
 [![arXiv](https://img.shields.io/badge/arXiv-2210.10048-orange.svg)](https://arxiv.org/abs/2210.10048)
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Vivswan/AnalogVNN/blob/v1.0.0/docs/_static/AnalogVNN_Demo.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Vivswan/AnalogVNN/blob/release/docs/_static/AnalogVNN_Demo.ipynb)
 
 [![PyPI version](https://badge.fury.io/py/analogvnn.svg)](https://badge.fury.io/py/analogvnn)
 [![Documentation Status](https://readthedocs.org/projects/analogvnn/badge/?version=stable)](https://analogvnn.readthedocs.io/en/stable/?badge=stable)
-[![Python](https://img.shields.io/badge/python-3.7--3.10-blue)](https://badge.fury.io/py/analogvnn)
+[![Python](https://img.shields.io/badge/python-3.7--3.11-blue)](https://badge.fury.io/py/analogvnn)
 [![License: MPL 2.0](https://img.shields.io/badge/License-MPL_2.0-blue.svg)](https://opensource.org/licenses/MPL-2.0)
 
 Documentation: [https://analogvnn.readthedocs.io/](https://analogvnn.readthedocs.io/)
@@ -16,14 +16,28 @@ Documentation: [https://analogvnn.readthedocs.io/](https://analogvnn.readthedocs
 - Install AnalogVNN using [pip](https://pypi.org/project/analogvnn/)
 
 ```bash
-pip install analogvnn
+  # Current stable release for CPU and GPU
+  pip install analogvnn
+  
+  # For additional optional features
+  pip install analogvnn[full]
 ```
 
-![3 Layered Linear Photonic Analog Neural Network](docs/_static/analogvnn_model.png)
+## Usage:
 
-[//]: # (![3 Layered Linear Photonic Analog Neural Network]&#40;https://github.com/Vivswan/AnalogVNN/raw/release/docs/_static/analogvnn_model.png&#41;)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Vivswan/AnalogVNN/blob/release/docs/_static/AnalogVNN_Demo.ipynb)
+
+- Sample code with AnalogVNN: [sample_code.py](https://github.com/Vivswan/AnalogVNN/blob/release/sample_code.py)
+- Sample code without
+  AnalogVNN: [sample_code_non_analog.py](https://github.com/Vivswan/AnalogVNN/blob/release/sample_code_non_analog.py)
+- Sample code with AnalogVNN and
+  Logs: [sample_code_with_logs.py](https://github.com/Vivswan/AnalogVNN/blob/release/sample_code_with_logs.py)
+- Jupyter
+  Notebook: [AnalogVNN_Demo.ipynb](https://github.com/Vivswan/AnalogVNN/blob/release/docs/_static/AnalogVNN_Demo.ipynb)
 
 ## Abstract
+
+![3 Layered Linear Photonic Analog Neural Network](https://github.com/Vivswan/AnalogVNN/raw/release/docs/_static/analogvnn_model.png)
 
 **AnalogVNN** is a simulation framework built on PyTorch which can simulate the effects of
 optoelectronic noise, limited precision, and signal normalization present in photonic

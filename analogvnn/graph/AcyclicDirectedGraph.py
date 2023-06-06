@@ -131,8 +131,8 @@ class AcyclicDirectedGraph(abc.ABC):
         self.graph.nodes[v_of_edge]['fillcolor'] = 'lightblue'
         return self
 
-    @staticmethod  # noqa: C901
-    def check_edge_parameters(
+    @staticmethod
+    def check_edge_parameters(  # noqa: C901
             in_arg: Union[None, int, bool],
             in_kwarg: Union[None, str, bool],
             out_arg: Union[None, int, bool],

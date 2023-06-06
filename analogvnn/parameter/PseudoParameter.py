@@ -66,7 +66,7 @@ class PseudoParameter(nn.Module):
         self._transformed.original = self
         self._transformation = self.identity
         self.set_transformation(transformation)
-        self.substitute_member(self.original, self._transformed, "grad")
+        self.substitute_member(self.original, self._transformed, 'grad')
 
     def __call__(self, *args, **kwargs):
         """Transforms the parameter.
@@ -117,7 +117,7 @@ class PseudoParameter(nn.Module):
             str: the string representation.
         """
 
-        return f'{PseudoParameter.__name__}(' \
+        return f'{self.__class__.__name__}(' \
                f'transform={self.transformation}' \
                f', original={self.original}' \
                f')'
