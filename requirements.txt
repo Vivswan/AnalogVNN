@@ -2,7 +2,7 @@
 torch
 torchvision
 torchaudio
-numpy
+numpy>=1.22.2
 scipy
 networkx
 importlib-metadata; python_version < '3.8'
