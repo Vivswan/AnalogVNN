@@ -8,6 +8,7 @@ networkx
 importlib-metadata; python_version < '3.8'
 
 # Full
+wheel>=0.38.0
 tensorflow>=2.0.0
 tensorboard>=2.0.0
 torchinfo
