@@ -15,3 +15,4 @@ torchinfo
 # conda install graphviz python-graphviz pydot pydotplus python-dotenv
 # conda install --channel conda-forge pygraphviz
 graphviz
+pillow>=10.0.1 # not directly required, pinned by Snyk to avoid a vulnerability
