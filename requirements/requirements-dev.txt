@@ -1,6 +1,6 @@
 # Development
 flit
-setuptools>=61.0.0
+setuptools>=65.5.1
 build # building the package {pyproject-build}
 twine # to publish on pypi {twine upload --repository-url=https://test.pypi.org/legacy/ dist/*} {twine upload dist/*}
 johnnydep # to see dependencies {johnnydep <package>}

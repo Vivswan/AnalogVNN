@@ -11,3 +11,5 @@ sphinx-notfound-page
 sphinx-inline-tabs
 sphinxext-opengraph
 sphinxcontrib-katex  # math
+tornado>=6.3.3 # not directly required, pinned by Snyk to avoid a vulnerability
+pillow>=10.0.1 # not directly required, pinned by Snyk to avoid a vulnerability
