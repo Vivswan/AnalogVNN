@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.7
+* Fixed `GeLU` backward function equation.
+
 ## 1.0.6
 
 * `Model` is subclass of `BackwardModule` for additional functionality.
