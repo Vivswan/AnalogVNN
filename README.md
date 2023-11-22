@@ -37,7 +37,9 @@ Documentation: [https://analogvnn.readthedocs.io/](https://analogvnn.readthedocs
 
 ## Abstract
 
-![3 Layered Linear Photonic Analog Neural Network](https://github.com/Vivswan/AnalogVNN/raw/release/docs/_static/analogvnn_model.png)
+![3 Layered Linear Photonic Analog Neural Network](docs/_static/analogvnn_model.png)
+
+[//]: # (![3 Layered Linear Photonic Analog Neural Network]&#40;https://github.com/Vivswan/AnalogVNN/raw/release/docs/_static/analogvnn_model.png&#41;)
 
 **AnalogVNN** is a simulation framework built on PyTorch which can simulate the effects of
 optoelectronic noise, limited precision, and signal normalization present in photonic

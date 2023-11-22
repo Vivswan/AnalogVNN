@@ -1,4 +1,4 @@
-from typing import Dict, Union, Callable
+from typing import Dict, Union, Callable, List
 
 import torch
 from torch import nn
@@ -7,6 +7,10 @@ from analogvnn.graph.ArgsKwargs import ArgsKwargs, InputOutput
 from analogvnn.graph.GraphEnum import GRAPH_NODE_TYPE
 
 __all__ = ['AccumulateGrad']
+
+
+def _get_index(tensor: torch.Tensor, tensor_list: List[torch.Tensor]) -> int:
+    return [(i.shape == tensor.shape and torch.all(torch.eq(i, tensor))) for i in tensor_list].index(True)
 
 
 class AccumulateGrad:
@@ -74,14 +78,14 @@ class AccumulateGrad:
             if forward_out_arg is True and isinstance(forward_in_arg, int) and not isinstance(forward_in_arg, bool):
                 forward_inputs = forward_input_output_graph[predecessor].inputs.args
                 forward_outputs = forward_input_output_graph[self.module].outputs.args
-                forward_out_arg = forward_inputs.index(forward_outputs[forward_in_arg])
+                forward_out_arg = _get_index(forward_outputs[forward_in_arg], forward_inputs)
                 grad_output = grad_output[forward_out_arg]
 
             # 7
             if forward_out_arg is True and isinstance(forward_in_kwarg, str):
                 forward_inputs = forward_input_output_graph[predecessor].inputs.args
                 forward_outputs = forward_input_output_graph[self.module].outputs.kwargs
-                forward_out_arg = forward_inputs.index(forward_outputs[forward_in_kwarg])
+                forward_out_arg = _get_index(forward_outputs[forward_in_kwarg], forward_inputs)
                 grad_output = grad_output[forward_out_arg]
 
             # 1
@@ -92,7 +96,7 @@ class AccumulateGrad:
                     if forward_inputs[i] not in forward_outputs:
                         continue
 
-                    value_index = forward_outputs.index(forward_inputs[i])
+                    value_index = _get_index(forward_inputs[i], forward_outputs)
                     if value_index not in grad_inputs_args:
                         grad_inputs_args[value_index] = torch.zeros_like(grad_output[i])
                     grad_inputs_args[value_index] += grad_output[i]
@@ -103,7 +107,7 @@ class AccumulateGrad:
                 forward_inputs = forward_input_output_graph[predecessor].inputs.args
                 forward_outputs = forward_input_output_graph[self.module].outputs.kwargs
                 for i in forward_outputs:
-                    value_index = forward_inputs.index(forward_outputs[i])
+                    value_index = _get_index(forward_outputs[i], forward_inputs)
 
                     if i not in grad_inputs_kwargs:
                         grad_inputs_kwargs[i] = torch.zeros_like(grad_output[value_index])
