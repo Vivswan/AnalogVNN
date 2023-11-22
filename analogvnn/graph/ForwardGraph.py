@@ -73,8 +73,15 @@ class ForwardGraph(AcyclicDirectedGraph):
             inputs = (inputs,)
 
         if not self.graph_state.use_autograd_graph and is_training:
+            value_tensor = False
             for i in inputs:
+                if not isinstance(i, torch.Tensor):
+                    continue
                 i.requires_grad = True
+                value_tensor = True
+
+            if not value_tensor:
+                raise ValueError('At least one input must be a tensor.')
 
         input_output_graph = self._pass(self.INPUT, *inputs)
         if is_training:
@@ -102,8 +109,14 @@ class ForwardGraph(AcyclicDirectedGraph):
             if module != from_node:
                 inputs = self.parse_args_kwargs(input_output_graph, module, predecessors)
                 if not self.graph_state.use_autograd_graph:
-                    inputs.args = [self._detach_tensor(i) for i in inputs.args]
-                    inputs.kwargs = {k: self._detach_tensor(v) for k, v in inputs.kwargs.items()}
+                    inputs.args = [
+                        self._detach_tensor(i) if isinstance(i, torch.Tensor) else i
+                        for i in inputs.args
+                    ]
+                    inputs.kwargs = {
+                        k: self._detach_tensor(v) if isinstance(v, torch.Tensor) else v
+                        for k, v in inputs.kwargs.items()
+                    }
                 input_output_graph[module] = InputOutput(inputs=inputs)
 
             if isinstance(module, GraphEnum):

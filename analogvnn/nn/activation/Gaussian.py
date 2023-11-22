@@ -68,6 +68,6 @@ class GeLU(Activation):
 
         x = self.inputs
         grad = (1 / 2) * (
-                (1 + torch.erf(x / math.sqrt(2))) + x * ((2 / math.sqrt(math.pi)) * torch.exp(-torch.pow(x, 2)))
+                (1 + torch.erf(x / math.sqrt(2))) + x * (math.sqrt(2 * math.pi) * torch.exp(-torch.pow(x, 2) / 2))
         )
         return grad_output * grad
