@@ -1,5 +1,9 @@
 # Changelog
 
+## ---
+
+* Removed redundant code from `reduce_precision`.
+
 ## 1.0.7
 * Fixed `GeLU` backward function equation.
 
