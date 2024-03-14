@@ -4,3 +4,4 @@ setuptools>=65.5.1
 build # building the package {pyproject-build}
 twine # to publish on pypi {twine upload --repository-url=https://test.pypi.org/legacy/ dist/*} {twine upload dist/*}
 johnnydep # to see dependencies {johnnydep <package>}
+wheel>=0.38.0 # not directly required, pinned by Snyk to avoid a vulnerability
