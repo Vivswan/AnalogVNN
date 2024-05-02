@@ -11,10 +11,10 @@ preferred-citation:
     - family-names: Youngblood
       given-names: Nathan
       affiliation: University of Pittsburgh
-  doi: "10.48550/arXiv.2210.10048"
-  journal: "arXiv preprint arXiv:2210.10048"
+  doi: "10.1063/5.0134156"
+  journal: "APL Machine Learning"
   title: 'AnalogVNN: A fully modular framework for modeling and optimizing photonic neural networks'
-  year: 2022
+  year: 2023
 authors:
   - given-names: Vivswan
     family-names: Shah
@@ -25,7 +25,7 @@ authors:
     affiliation: University of Pittsburgh
 identifiers:
   - type: doi
-    value: 10.48550/arXiv.2210.10048
+    value: 10.1063/5.0134156
     description: >-
       The concept DOI for the collection containing
       all versions of the Citation File Format.

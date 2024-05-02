@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Callable, Any
+from typing import Callable, Any, Optional, Union, Tuple
 
 import torch
 import torch.nn as nn
@@ -219,13 +219,20 @@ class PseudoParameter(nn.Module):
         return new_param
 
     @classmethod
-    def parametrize_module(cls, module: nn.Module, transformation: Callable, requires_grad: bool = True):
+    def parametrize_module(
+            cls,
+            module: nn.Module,
+            transformation: Callable,
+            requires_grad: bool = True,
+            types: Optional[Union[type, Tuple[type]]] = None,
+    ):
         """Parametrize all parameters of a module.
 
         Args:
             module (nn.Module): the module parameters to parametrize.
             transformation (Callable): the transformation.
             requires_grad (bool): if True, only parametrized parameters that require gradients.
+            types (Union[type, Tuple[type]]): the type or tuple of types to parametrize.
         """
 
         with torch.no_grad():
@@ -234,6 +241,9 @@ class PseudoParameter(nn.Module):
                     continue
 
                 if requires_grad and not parameter.requires_grad:
+                    continue
+
+                if types is not None and not isinstance(parameter, types):
                     continue
 
                 cls.parameterize(module=module, param_name=name, transformation=transformation)

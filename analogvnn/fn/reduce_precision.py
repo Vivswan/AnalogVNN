@@ -12,7 +12,8 @@ def reduce_precision(x: TENSOR_OPERABLE, precision: TENSOR_OPERABLE, divide: TEN
     Args:
       x (TENSOR_OPERABLE): Tensor
       precision (TENSOR_OPERABLE): the precision of the quantization.
-      divide (TENSOR_OPERABLE): the number of bits to be reduced
+      divide (TENSOR_OPERABLE): the rounding value that is if divide is 0.5,
+         then 0.6 will be rounded to 1.0 and 0.4 will be rounded to 0.0.
 
     Returns:
       TENSOR_OPERABLE: TENSOR_OPERABLE with the same shape as x, but with values rounded to the nearest
@@ -20,11 +21,7 @@ def reduce_precision(x: TENSOR_OPERABLE, precision: TENSOR_OPERABLE, divide: TEN
     """
 
     x = x if isinstance(x, Tensor) else torch.tensor(x, requires_grad=False)
-    g: Tensor = x * precision
-    f = torch.sign(g) * torch.maximum(
-        torch.floor(torch.abs(g)),
-        torch.ceil(torch.abs(g) - divide)
-    ) * (1 / precision)
+    f = torch.sign(x) * torch.ceil(torch.abs(x * precision) - divide) * (1 / precision)
     return f
 
 
