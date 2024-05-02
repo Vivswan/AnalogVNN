@@ -2,6 +2,7 @@
 torch
 torchvision
 torchaudio
+dataclasses
 numpy>=1.22.2
 scipy
 networkx
