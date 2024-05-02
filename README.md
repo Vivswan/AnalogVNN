@@ -1,6 +1,7 @@
 # AnalogVNN
 
 [![arXiv](https://img.shields.io/badge/arXiv-2210.10048-orange.svg)](https://arxiv.org/abs/2210.10048)
+[![AML](https://img.shields.io/badge/AML-10.1063/5.0134156-orange.svg)](https://doi.org/10.1063/5.0134156)
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Vivswan/AnalogVNN/blob/release/docs/_static/AnalogVNN_Demo.ipynb)
 
 [![PyPI version](https://badge.fury.io/py/analogvnn.svg)](https://badge.fury.io/py/analogvnn)
@@ -52,18 +53,21 @@ digital neural network models to their analog counterparts with just a few lines
 taking full advantage of the open-source optimization, deep learning, and GPU acceleration
 libraries available through PyTorch.
 
-AnalogVNN Paper: [https://arxiv.org/abs/2210.10048](https://arxiv.org/abs/2210.10048)
+AnalogVNN Paper: [https://doi.org/10.1063/5.0134156](https://doi.org/10.1063/5.0134156)
 
 ## Citing AnalogVNN
 
 We would appreciate if you cite the following paper in your publications for which you used AnalogVNN:
 
 ```bibtex
-@article{shah2022analogvnn,
+@article{shah2023analogvnn,
   title={AnalogVNN: A fully modular framework for modeling and optimizing photonic neural networks},
   author={Shah, Vivswan and Youngblood, Nathan},
-  journal={arXiv preprint arXiv:2210.10048},
-  year={2022}
+  journal={APL Machine Learning},
+  volume={1},
+  number={2},
+  year={2023},
+  publisher={AIP Publishing}
 }
 ```
 
@@ -71,5 +75,6 @@ Or in textual form:
 
 ```text
 Vivswan Shah, and Nathan Youngblood. "AnalogVNN: A fully modular framework for modeling 
-and optimizing photonic neural networks." arXiv preprint arXiv:2210.10048 (2022).
+and optimizing photonic neural networks." APL Machine Learning 1.2 (2023).
+DOI: 10.1063/5.0134156
 ```
